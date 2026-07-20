@@ -1,0 +1,370 @@
+{
+  "date": "2026-07-15",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-16T09:57:26.640820+08:00",
+  "commits": [
+    {
+      "sha": "77baade98ded755b3e5ea30091bcf40a30ae0335",
+      "comment": "【变更概述】[Refactor] 更新：移除 multistream overlap gate\n【PR号】#11956\n【变更类型】此提交为代码重构类型\n【变更文件】修改 .github/CODEOWNERS (+0/-1); 修改 .github/workflows/scripts/test_config.yaml (+0/-2); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/configuration/additional_config.po (+0/-8); 修改 docs/source/user_guide/configuration/additional_config.md (+0/-1); 修改 tests/ut/ops/test_fused_moe.py (+0/-3); ... 及其他 16 个文件\n【统计数据】共修改 21 个文件，新增 59 行，删除 354 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】distributed, ops, quantization, tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "distributed",
+        "ops",
+        "quantization",
+        "ci",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11956",
+      "title_en": "[Refactor] Remove multistream overlap gate",
+      "title_zh": "[Refactor] 更新：移除 multistream overlap gate",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/ops/test_fused_moe.py",
+          "tests/ut/ops/test_prepare_finalize.py",
+          "tests/ut/quantization/conftest_quantization.py",
+          "tests/ut/quantization/methods/a2/test_w8a8_dynamic.py",
+          "tests/ut/quantization/methods/test_w8a8fp8_dynamic.py",
+          "tests/ut/test_flash_common3_context.py"
+        ]
+      }
+    },
+    {
+      "sha": "90b2cdb522f9df7e3b0558f8ef038d569122082d",
+      "comment": "【变更概述】[Misc] 新增：功能 adapt vLLM main 85c09e98\n【PR号】#12020\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .github/vllm-main-verified.commit (+1/-1); 修改 vllm_ascend/ops/gdn.py (+7/-2); 修改 vllm_ascend/patch/worker/patch_qwen3_5.py (+40/-25)\n【统计数据】共修改 3 个文件，新增 48 行，删除 28 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, patch",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ops",
+        "patch",
+        "ci"
+      ],
+      "pr_number": "12020",
+      "title_en": "[Misc]feat: adapt to vLLM main (85c09e98)",
+      "title_zh": "[Misc] 新增：功能 adapt vLLM main 85c09e98",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/ops/gdn.py"
+        ]
+      }
+    },
+    {
+      "sha": "6e784075dcc36b603296f03a50cdc005cffe5c61",
+      "comment": "【变更概述】【MRV2】[BugFix] 【MRV2】[MRV2] 【MRV2】修复：修复 quant DP full graph mode mrv2\n【PR号】#11727\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 .github/workflows/scripts/test_config.yaml (+2/-0); 新增 tests/e2e/pull_request/two_card/model_runner_v2/test_data_parallel.py (+95/-0); 修改 tests/ut/worker/a2/test_worker_v1.py (+2/-4); 修改 vllm_ascend/quantization/method_adapters.py (+9/-0); 修改 vllm_ascend/worker/v2/aclgraph_utils.py (+1/-1); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 113 行，删除 8 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】model-runner, spec-decode, quantization, tests",
+      "tags": [
+        "bugfix",
+        "mrv2",
+        "mrv2",
+        "low-risk",
+        "model-runner",
+        "spec-decode",
+        "quantization",
+        "ci",
+        "tests"
+      ],
+      "pr_number": "11727",
+      "title_en": "[BugFix][MRV2] Fix quant and DP full graph mode for mrv2",
+      "title_zh": "【MRV2】[BugFix] 【MRV2】[MRV2] 【MRV2】修复：修复 quant DP full graph mode mrv2",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/two_card/model_runner_v2/test_data_parallel.py",
+          "tests/ut/worker/a2/test_worker_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "e1086bb0f1d4194c8d7fd0cf39cbb1c668213487",
+      "comment": "【变更概述】[Doc] [Misc] 新增：添加 privileged flag Docker run command DeepSeek-V3.2 tutorial\n【PR号】#12048\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 docs/source/tutorials/models/DeepSeek-V3.2.md (+2/-0)\n【统计数据】共修改 1 个文件，新增 2 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12048",
+      "title_en": "[Doc][Misc] Add privileged flag to docker run command in DeepSeek-V3.2 tutorial",
+      "title_zh": "[Doc] [Misc] 新增：添加 privileged flag Docker run command DeepSeek-V3.2 tutorial",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b5630f15877c7df0ab92ad40d71ffcbd5aa02f2b",
+      "comment": "【变更概述】[BugFix] 修复：修复 fused_infer_attention ops contiguous err GQA\n【PR号】#12025\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/attention/context_parallel/attention_cp.py (+8/-8); 修改 vllm_ascend/device/device_op.py (+8/-8)\n【统计数据】共修改 2 个文件，新增 16 行，删除 16 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "attention"
+      ],
+      "pr_number": "12025",
+      "title_en": "[BugFix]Fix fused_infer_attention ops contiguous err in GQA",
+      "title_zh": "[BugFix] 修复：修复 fused_infer_attention ops contiguous err GQA",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/attention/context_parallel/attention_cp.py"
+        ]
+      }
+    },
+    {
+      "sha": "774c67eb7aac452c402a494ecdecf6cc46c0e6e6",
+      "comment": "【变更概述】[Refactor] 更新：移除 KV offload kv_pool\n【PR号】#11904\n【变更类型】此提交为代码重构类型\n【变更文件】删除 vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/__init__.py (+0/-0); 删除 vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/cpu_kv_cache_manager.py (+0/-203); 删除 vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/cpu_offload_connector.py (+0/-448); 删除 vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/metadata.py (+0/-258)\n【统计数据】共修改 4 个文件，新增 0 行，删除 909 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】distributed, kv-cache",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "distributed",
+        "kv-cache"
+      ],
+      "pr_number": "11904",
+      "title_en": "[Refactor] Remove kv offload in kv_pool.",
+      "title_zh": "[Refactor] 更新：移除 KV offload kv_pool",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/__init__.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/cpu_kv_cache_manager.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/cpu_offload_connector.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/cpu_offload/metadata.py"
+        ]
+      }
+    },
+    {
+      "sha": "731436a13884ed949f5b985b6a59196159f356c7",
+      "comment": "【变更概述】[Doc] [Misc] 修复：修复 python version\n【PR号】#12043\n【变更类型】此提交为问题修复类型\n【变更文件】修改 README.md (+1/-1); 修改 README.zh.md (+1/-1)\n【统计数据】共修改 2 个文件，新增 2 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12043",
+      "title_en": "[Doc][Misc] Fix python version",
+      "title_zh": "[Doc] [Misc] 修复：修复 python version",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c43bc7fa4091b6236410a87ea61103da15d71a8a",
+      "comment": "【变更概述】【MRV2】[Feature] 【MRV2】[Refator] 【MRV2】更新：Decouple allocation SFA KV indexer 缓存\n【PR号】#11647\n【变更类型】此提交为新功能开发类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 .github/workflows/scripts/test_config.yaml (+2/-0); 新增 tests/ut/attention/test_indexer.py (+55/-0); 修改 tests/ut/ops/test_mla.py (+1/-1); 修改 tests/ut/worker/a2/test_model_runner_v1.py (+265/-7); 新增 vllm_ascend/attention/indexer.py (+85/-0); ... 及其他 5 个文件\n【统计数据】共修改 10 个文件，新增 708 行，删除 360 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】model-runner, attention, ops, kv-cache, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "model-runner",
+        "attention",
+        "ops",
+        "kv-cache",
+        "ci",
+        "tests"
+      ],
+      "pr_number": "11647",
+      "title_en": "[Feature][Refator] Decouple the allocation of SFA kv and indexer cache",
+      "title_zh": "【MRV2】[Feature] 【MRV2】[Refator] 【MRV2】更新：Decouple allocation SFA KV indexer 缓存",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/ut/attention/test_indexer.py",
+          "tests/ut/ops/test_mla.py",
+          "tests/ut/worker/a2/test_model_runner_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "de7c89c7223e81e1a403f59e5b8808a637fecd5f",
+      "comment": "【变更概述】[Feature] 更新：Gemma4 E2B E4B\n【PR号】#11791\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 tests/ut/attention/a2/test_attention_v1.py (+77/-0); 修改 vllm_ascend/attention/attention_v1.py (+11/-0)\n【统计数据】共修改 2 个文件，新增 88 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "attention",
+        "tests"
+      ],
+      "pr_number": "11791",
+      "title_en": "[Feature]  Gemma4  E2B and E4B",
+      "title_zh": "[Feature] 更新：Gemma4 E2B E4B",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/attention/a2/test_attention_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "d20690d02935b947bf349646931229c6e0c91b12",
+      "comment": "【变更概述】[Bugfix] [310p] 修复：修复 crash 问题 310p 修复 precision 问题 caused by q.copy synchronize\n【PR号】#11973\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/_310p/sample/test_sampler_310.py (+46/-0); 修改 vllm_ascend/_310p/sample/sampler.py (+10/-6)\n【统计数据】共修改 2 个文件，新增 56 行，删除 6 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】sample, tests",
+      "tags": [
+        "bugfix",
+        "high-risk",
+        "sample",
+        "tests"
+      ],
+      "pr_number": "11973",
+      "title_en": "[Bugfix][310p]Fix crash bug on 310p and fix precision bug caused by q.copy() synchronize",
+      "title_zh": "[Bugfix] [310p] 修复：修复 crash 问题 310p 修复 precision 问题 caused by q.copy synchronize",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/_310p/sample/test_sampler_310.py"
+        ]
+      }
+    },
+    {
+      "sha": "d6513201f9b806b4484c4f04a2d5873b93fbd4b6",
+      "comment": "【变更概述】[Revert] 修复：Revert \"[BugFix][Worker 修复 padded sequence length handling ViT encoder ACL graph\"\n【PR号】#10824\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/conftest.py (+0/-2); 删除 tests/ut/ops/test_mm_encoder_attention.py (+0/-181); 删除 tests/ut/worker/test_encoder_acl_graph.py (+0/-156); 修改 vllm_ascend/ops/mm_encoder_attention.py (+81/-35); 修改 vllm_ascend/worker/encoder_acl_graph.py (+66/-31)\n【统计数据】共修改 5 个文件，新增 147 行，删除 405 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】compilation, mm-encoder, ops, tests",
+      "tags": [
+        "bugfix",
+        "high-risk",
+        "compilation",
+        "mm-encoder",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "10824",
+      "title_en": "[Revert] Revert \"[BugFix][Worker] Fix padded sequence length handling for ViT encoder ACL graph\" (#10824) (#11994)",
+      "title_zh": "[Revert] 修复：Revert \"[BugFix][Worker 修复 padded sequence length handling ViT encoder ACL graph\"",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/conftest.py",
+          "tests/ut/ops/test_mm_encoder_attention.py",
+          "tests/ut/worker/test_encoder_acl_graph.py"
+        ]
+      }
+    },
+    {
+      "sha": "896012151dbaaa444e940f19106fde877d616dc9",
+      "comment": "【变更概述】[Refactor] 更新：移除 layer sharding\n【PR号】#11953\n【变更类型】此提交为代码重构类型\n【变更文件】修改 .agents/skills/vllm-ascend-release/references/ref-past-release-notes-highlight.md (+0/-1); 修改 .github/workflows/scripts/test_config.yaml (+0/-12); 修改 docs/hooks/nav_titles.py (+0/-1); 修改 docs/source/locale/zh_CN/LC_MESSAGES/tutorials/models/GLM5.2.po (+4/-8); 修改 docs/source/locale/zh_CN/LC_MESSAGES/tutorials/models/GLM5.po (+4/-8); ... 及其他 46 个文件\n【统计数据】共修改 51 个文件，新增 499 行，删除 2562 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】attention, distributed, ops, quantization, tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "attention",
+        "distributed",
+        "ops",
+        "quantization",
+        "ci",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11953",
+      "title_en": "[Refactor] remove layer sharding",
+      "title_zh": "[Refactor] 更新：移除 layer sharding",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/coverage.html",
+          "tests/e2e/nightly/multi_node/internal_dp/config/DeepSeek-V3_2-W8A8-EP.yaml",
+          "tests/e2e/pull_request/two_card/test_flashcomm_distributed.py",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.2T_MTP2_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.2T_MTP3_PD.yaml",
+          "tests/e2e/weekly/multi_node/internal_dp/config/DeepSeek-V3_2-W8A8-EP_weekly.yaml",
+          "tests/ut/attention/a2/test_mla_v1.py",
+          "tests/ut/attention/a2/test_sfa_v1.py",
+          "tests/ut/attention/test_sfa_cp.py",
+          "tests/ut/model_loader/rfork/test_rfork_loader.py",
+          "tests/ut/ops/test_flashcomm2_oshard_manager.py",
+          "tests/ut/ops/test_layer_shard_linear.py",
+          "tests/ut/ops/test_linear.py",
+          "tests/ut/quantization/test_method_adapters.py",
+          "tests/ut/test_ascend_config.py",
+          "tests/ut/test_platform.py",
+          "tests/ut/test_utils.py"
+        ]
+      }
+    },
+    {
+      "sha": "2b115d02dd219d1278ffea1b5dc67ae61bba422f",
+      "comment": "【变更概述】[Refactor] 更新：移除 dynamic batch slo\n【PR号】#11933\n【变更类型】此提交为代码重构类型\n【变更文件】修改 docs/hooks/nav_titles.py (+0/-1); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/configuration/additional_config.po (+0/-8); 删除 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/feature_guide/dynamic_batch.po (+0/-99); 修改 docs/source/user_guide/configuration/additional_config.md (+1/-1); 删除 docs/source/user_guide/feature_guide/dynamic_batch.md (+0/-51); ... 及其他 5 个文件\n【统计数据】共修改 10 个文件，新增 1 行，删除 771 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11933",
+      "title_en": "[Refactor] Remove dynamic batch slo",
+      "title_zh": "[Refactor] 更新：移除 dynamic batch slo",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/test_platform.py"
+        ]
+      }
+    },
+    {
+      "sha": "0970066fb4208aaf77f2506776b0fe7a3fccfa40",
+      "comment": "【变更概述】[BugFix] [310P] 修复：修复 内存 calculation 310P RC\n【PR号】#11959\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/_310p/worker_310p.py (+2/-1)\n【统计数据】共修改 1 个文件，新增 2 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "11959",
+      "title_en": "[BugFix][310P] Fix memory calculation for 310P RC",
+      "title_zh": "[BugFix] [310P] 修复：修复 内存 calculation 310P RC",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "80e612e3de76cab06969d1ab11c9aab2923d9941",
+      "comment": "【变更概述】[BugFix] 修复：修复 block 尺寸 resolution AscendSpecDecodeBaseProposer\n【PR号】#12000\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/spec_decode/a2/test_eagle_proposer.py (+1/-0); 修改 vllm_ascend/spec_decode/llm_base_proposer.py (+7/-11)\n【统计数据】共修改 2 个文件，新增 8 行，删除 11 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】spec-decode, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "12000",
+      "title_en": "[BugFix]Fix block size resolution in AscendSpecDecodeBaseProposer",
+      "title_zh": "[BugFix] 修复：修复 block 尺寸 resolution AscendSpecDecodeBaseProposer",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/spec_decode/a2/test_eagle_proposer.py"
+        ]
+      }
+    },
+    {
+      "sha": "db96910eaf9f681efbe6b5b78fb598f1bdc5f77b",
+      "comment": "【变更概述】[BugFix] 更新：Initialize AscendStore after first real decode request\n【PR号】#11672\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py (+9/-3); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/memcache_backend.py (+3/-3); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py (+3/-3); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py (+5/-0)\n【统计数据】共修改 4 个文件，新增 20 行，删除 9 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "distributed"
+      ],
+      "pr_number": "11672",
+      "title_en": "[BugFix] Initialize AscendStore after first real decode request",
+      "title_zh": "[BugFix] 更新：Initialize AscendStore after first real decode request",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/memcache_backend.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/mooncake_backend.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py"
+        ]
+      }
+    }
+  ],
+  "test_impact_summary": "修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例",
+  "daily_summary": "有 4 个 commit 需要更新测试；发现 2 个 MRV2 相关变更；发现 6 个中高风险变更"
+}

@@ -1,0 +1,374 @@
+{
+  "date": "2026-07-14",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-15T14:27:12.023940+08:00",
+  "commits": [
+    {
+      "sha": "d4d32d725d7614bedf06b09d848e60c24e0c66c2",
+      "comment": "【变更概述】[BugFix] 修复：修复 fused_infer_attention ops contiguous err mla_cp\n【PR号】#11986\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/attention/context_parallel/mla_cp.py (+3/-3)\n【统计数据】共修改 1 个文件，新增 3 行，删除 3 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "attention"
+      ],
+      "pr_number": "11986",
+      "title_en": "[BugFix]Fix fused_infer_attention ops contiguous err in mla_cp",
+      "title_zh": "[BugFix] 修复：修复 fused_infer_attention ops contiguous err mla_cp",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/attention/context_parallel/mla_cp.py"
+        ]
+      }
+    },
+    {
+      "sha": "d1763ed356a561b9eeb7905a6896adf51c243c89",
+      "comment": "【变更概述】【MRV2】[Performance] 【MRV2】[SpecDecode] 【MRV2】更新：Avoid H2D sync CP proposer metadata\n【PR号】#11496\n【变更类型】此提交为性能优化类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 tests/ut/spec_decode/a2/test_eagle_proposer.py (+71/-21); 修改 vllm_ascend/_310p/model_runner_310p.py (+10/-4); 修改 vllm_ascend/spec_decode/llm_base_proposer.py (+104/-331); 修改 vllm_ascend/worker/block_table.py (+27/-6); 修改 vllm_ascend/worker/model_runner_v1.py (+64/-141); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 1063 行，删除 521 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner, spec-decode, tests",
+      "tags": [
+        "performance",
+        "high-risk",
+        "model-runner",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "11496",
+      "title_en": "[Performance][SpecDecode] Avoid H2D sync in CP proposer metadata",
+      "title_zh": "【MRV2】[Performance] 【MRV2】[SpecDecode] 【MRV2】更新：Avoid H2D sync CP proposer metadata",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/spec_decode/a2/test_eagle_proposer.py"
+        ]
+      }
+    },
+    {
+      "sha": "8b069151f6a7cd59eaa2475c358f1afd75a9f4af",
+      "comment": "【变更概述】[Misc] 更新：更新 torch_npu 2.10.0.post2\n【PR号】#11914\n【变更类型】此提交为文档更新类型\n【变更文件】修改 README.md (+1/-1); 修改 README.zh.md (+1/-1); 修改 docs/hooks/macros_main.py (+1/-1); 修改 docs/source/installation.md (+1/-1); 修改 docs/source/quick_start.md (+1/-1); ... 及其他 3 个文件\n【统计数据】共修改 8 个文件，新增 8 行，删除 8 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "medium-risk",
+        "docs"
+      ],
+      "pr_number": "11914",
+      "title_en": "[Misc]Update torch_npu to 2.10.0.post2.",
+      "title_zh": "[Misc] 更新：更新 torch_npu 2.10.0.post2",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6556ad5af1baaf481e996fc2788e233ce672f98e",
+      "comment": "【变更概述】[CI] 新增：添加 options releases/v0.23.0\n【PR号】#12014\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .github/workflows/nightly_image_build.yaml (+1/-0); 修改 .github/workflows/schedule_image_build_and_push.yaml (+1/-0)\n【统计数据】共修改 2 个文件，新增 2 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12014",
+      "title_en": "[CI] add options for releases/v0.23.0",
+      "title_zh": "[CI] 新增：添加 options releases/v0.23.0",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6e52ce3e79f78a788dc154761880e94639e46267",
+      "comment": "【变更概述】[BugFix] 修复：修复 AllGather MoE finalize order DP PCP\n【PR号】#11921\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/ops/fused_moe/prepare_finalize.py (+4/-4)\n【统计数据】共修改 1 个文件，新增 4 行，删除 4 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ops"
+      ],
+      "pr_number": "11921",
+      "title_en": "[BugFix] Fix AllGather MoE finalize order with DP and PCP",
+      "title_zh": "[BugFix] 修复：修复 AllGather MoE finalize order DP PCP",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/ops/fused_moe/prepare_finalize.py"
+        ]
+      }
+    },
+    {
+      "sha": "0d090671c71d3611affd07581b9f926a8a28f81b",
+      "comment": "【变更概述】【MRV2】[Bugfix] 【MRV2】修复：修复 msprobe dump lifecycle build instructions\n【PR号】#11237\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 docs/source/developer_guide/performance_and_debug/msprobe_guide.md (+3/-2); 修改 tests/ut/worker/a2/test_model_runner_v1.py (+76/-0); 修改 vllm_ascend/worker/model_runner_v1.py (+2/-1)\n【统计数据】共修改 3 个文件，新增 81 行，删除 3 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】model-runner, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "model-runner",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11237",
+      "title_en": "[Bugfix] Fix msprobe dump lifecycle and build instructions",
+      "title_zh": "【MRV2】[Bugfix] 【MRV2】修复：修复 msprobe dump lifecycle build instructions",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/worker/a2/test_model_runner_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "9258966e63663e622cdda78bb6f2881fc1f39958",
+      "comment": "【变更概述】[Doc] 修复：修复 Recompute_cpu_offload 文档\n【PR号】#11982\n【变更类型】此提交为问题修复类型\n【变更文件】修改 docs/source/user_guide/feature_guide/recompute_cpu_offload.md (+1/-2); 修改 mkdocs.yml (+1/-0)\n【统计数据】共修改 2 个文件，新增 2 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "11982",
+      "title_en": "[Doc] Fix Recompute_cpu_offload Doc",
+      "title_zh": "[Doc] 修复：修复 Recompute_cpu_offload 文档",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "64c6aea0dced2ee6282ffe598c672837a9a6d342",
+      "comment": "【变更概述】[Doc] [Misc] 文档：Format modification GLM-4.x documentation 更新 template\n【PR号】#11840\n【变更类型】此提交为文档更新类型\n【变更文件】修改 docs/source/_templates/Model-Deployment-Tutorial-Template.md (+12/-22); 修改 docs/source/_templates/Model-Deployment-Tutorial-Template.zh.md (+12/-22); 修改 docs/source/tutorials/models/GLM4.x.md (+130/-116)\n【统计数据】共修改 3 个文件，新增 154 行，删除 160 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "docs",
+        "medium-risk",
+        "docs"
+      ],
+      "pr_number": "11840",
+      "title_en": "[Doc][Misc] Format modification for GLM-4.x documentation and update template",
+      "title_zh": "[Doc] [Misc] 文档：Format modification GLM-4.x documentation 更新 template",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "93baddb4c1f12cd1085898bc3504f5fc4113589c",
+      "comment": "【变更概述】[CI] 维护：Auto-update estimated 测试 times test_config.yaml\n【PR号】#11957\n【变更类型】此提交为日常维护类型\n【变更文件】修改 .github/workflows/scripts/test_config.yaml (+72/-71)\n【统计数据】共修改 1 个文件，新增 72 行，删除 71 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "chore",
+        "medium-risk",
+        "ci"
+      ],
+      "pr_number": "11957",
+      "title_en": "[CI] Auto-update estimated test times in test_config.yaml",
+      "title_zh": "[CI] 维护：Auto-update estimated 测试 times test_config.yaml",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2beb9c0b101d5ebc9c90e25e807019ac53e85198",
+      "comment": "【变更概述】[Doc] 文档：Translated 文档 files 2026-07-13\n【PR号】#11903\n【变更类型】此提交为文档更新类型\n【变更文件】修改 docs/source/locale/zh_CN/LC_MESSAGES/developer_guide/Design_Documents/balance_schedule_refactor.po (+19/-2); 修改 docs/source/locale/zh_CN/LC_MESSAGES/developer_guide/Design_Documents/cpu_binding.po (+144/-92); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/feature_guide/cpu_binding.po (+70/-37); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/feature_guide/dynamic_chunk_pipeline_parallel.po (+123/-25); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/feature_guide/speculative_decoding.po (+3/-3)\n【统计数据】共修改 5 个文件，新增 359 行，删除 159 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "11903",
+      "title_en": "[Doc] Translated Doc files 2026-07-13",
+      "title_zh": "[Doc] 文档：Translated 文档 files 2026-07-13",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "49db848116629c96ddd78ab290eaa02cac8f922b",
+      "comment": "【变更概述】[Doc] [Misc] 新增：添加 支持 matrix link README\n【PR号】#11223\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 README.md (+2/-2)\n【统计数据】共修改 1 个文件，新增 2 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "11223",
+      "title_en": "[Doc][Misc] Add support matrix link to README",
+      "title_zh": "[Doc] [Misc] 新增：添加 支持 matrix link README",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "1a1392bf0adc0630bc7f4b3f2a385ed46b272c5a",
+      "comment": "【变更概述】[BugFix] [Attention] 修复：修复 stale KV lengths hamming sparse 注意力 under ACL graph replay\n【PR号】#10895\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/attention/a2/test_attention_v1.py (+44/-1); 修改 vllm_ascend/attention/attention_v1.py (+11/-2); 修改 vllm_ascend/attention/kvcomp_attn/attention_utils.py (+3/-1)\n【统计数据】共修改 3 个文件，新增 58 行，删除 4 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "attention",
+        "tests"
+      ],
+      "pr_number": "10895",
+      "title_en": "[BugFix][Attention] Fix stale KV lengths in hamming sparse attention under ACL graph replay",
+      "title_zh": "[BugFix] [Attention] 修复：修复 stale KV lengths hamming sparse 注意力 under ACL graph replay",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/attention/a2/test_attention_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "bbabae3fd23ab36321df7a16db37e3aeefd4ca94",
+      "comment": "【变更概述】[Feature] [KV Pool] 新增：支持 TP-mismatch PD disaggregated KV pooling GQA\n【PR号】#11582\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 tests/ut/distributed/ascend_store/test_kv_transfer.py (+111/-0); 修改 tests/ut/distributed/ascend_store/test_pool_worker.py (+353/-0); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/config_data.py (+55/-1); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py (+129/-92); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py (+21/-5); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 932 行，删除 130 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "distributed",
+        "tests"
+      ],
+      "pr_number": "11582",
+      "title_en": "[Feature][KV Pool] Support TP-mismatch PD disaggregated KV pooling for GQA",
+      "title_zh": "[Feature] [KV Pool] 新增：支持 TP-mismatch PD disaggregated KV pooling GQA",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/distributed/ascend_store/test_kv_transfer.py",
+          "tests/ut/distributed/ascend_store/test_pool_worker.py"
+        ]
+      }
+    },
+    {
+      "sha": "58bed4041347723c0a34ef239e847768c7df0dc8",
+      "comment": "【变更概述】[BugFix] 更新：Exclude MTP draft from FlashComm2 o_proj align all-to-all buffer shape\n【PR号】#11433\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/ops/test_linear.py (+17/-4); 修改 vllm_ascend/ops/linear_op.py (+2/-2)\n【统计数据】共修改 2 个文件，新增 19 行，删除 6 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "11433",
+      "title_en": "[BugFix] Exclude MTP draft from FlashComm2 o_proj and align all-to-all buffer shape",
+      "title_zh": "[BugFix] 更新：Exclude MTP draft from FlashComm2 o_proj align all-to-all buffer shape",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/ops/test_linear.py"
+        ]
+      }
+    },
+    {
+      "sha": "ab5dcdb1c38bd8f7cd2e3f5c862dd64d7eba6b4e",
+      "comment": "【变更概述】[Ascend950] [Bugfix] 修复：修复 allgatherEP MXFPW4A4 without sp\n【PR号】#11924\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/ut/ops/a2/test_token_dispatcher.py (+59/-10); 修改 vllm_ascend/ops/fused_moe/token_dispatcher.py (+10/-8)\n【统计数据】共修改 2 个文件，新增 69 行，删除 18 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "11924",
+      "title_en": "[Ascend950][Bugfix]Fix allgatherEP MXFPW4A4 without sp",
+      "title_zh": "[Ascend950] [Bugfix] 修复：修复 allgatherEP MXFPW4A4 without sp",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/ops/a2/test_token_dispatcher.py"
+        ]
+      }
+    },
+    {
+      "sha": "f6b33f49cd732733769374c19b68d26a5c210ec0",
+      "comment": "【变更概述】【MRV2】[Refactor] 【MRV2】[Attention] 【MRV2】更新：移除 paged 注意力\n【PR号】#11899\n【变更类型】此提交为代码重构类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 csrc/attention/kv_quant_sparse_flash_attention/op_host/kv_quant_sparse_flash_attention_tiling.cpp (+0/-1); 修改 docs/source/faqs.md (+0/-4); 修改 docs/source/locale/zh_CN/LC_MESSAGES/faqs.po (+0/-18); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/configuration/additional_config.po (+0/-9); 修改 docs/source/tutorials/features/suffix_speculative_decoding.md (+1/-1); ... 及其他 10 个文件\n【统计数据】共修改 15 个文件，新增 19 行，删除 412 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner, attention, tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "model-runner",
+        "attention",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11899",
+      "title_en": "[Refactor][Attention] Remove paged attention",
+      "title_zh": "【MRV2】[Refactor] 【MRV2】[Attention] 【MRV2】更新：移除 paged 注意力",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/two_card/test_qwen3_performance.py",
+          "tests/e2e/weekly/single_node/configs/Qwen3-32B.yaml",
+          "tests/ut/_310p/attention/test_attention_v1_310.py",
+          "tests/ut/attention/a2/test_attention_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "5083d8844310831258f085ea6dfcac4a2f76ef58",
+      "comment": "【变更概述】【MRV2】[CI] 【MRV2】更新：main2main 0710\n【PR号】#11709\n【变更类型】此提交为日常维护类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 .github/vllm-main-verified.commit (+1/-1); 修改 pyproject.toml (+1/-1); 修改 requirements.txt (+1/-1); 修改 tests/e2e/pull_request/one_card/spec_decode/test_extract_hidden_states.py (+5/-25); 修改 tests/ut/patch/platform/test_patch_deepseek_v4_tool_call_parser.py (+11/-1); ... 及其他 14 个文件\n【统计数据】共修改 19 个文件，新增 780 行，删除 92 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner, sample, distributed, spec-decode, kv-cache, patch, tests",
+      "tags": [
+        "chore",
+        "mrv2",
+        "high-risk",
+        "model-runner",
+        "sample",
+        "distributed",
+        "spec-decode",
+        "kv-cache",
+        "patch",
+        "ci",
+        "tests"
+      ],
+      "pr_number": "11709",
+      "title_en": "[CI]main2main 0710",
+      "title_zh": "【MRV2】[CI] 【MRV2】更新：main2main 0710",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/one_card/spec_decode/test_extract_hidden_states.py",
+          "tests/ut/patch/platform/test_patch_deepseek_v4_tool_call_parser.py",
+          "tests/ut/patch/test_hunyuan_vl_processor_compat.py"
+        ]
+      }
+    },
+    {
+      "sha": "185462da5b8773b403b981a9849f433963ce4b11",
+      "comment": "【变更概述】[TEST] 新增：添加 A3 multi-machine PD separation 测试 case\n【PR号】#11855\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .github/workflows/configs/weekly_config.yaml (+27/-0); 修改 .github/workflows/misc/model_dataset_list.json (+11/-7); 新增 tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_128K_1K_PD.yaml (+264/-0); 新增 tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_3_5K_1_5K_PD.yaml (+254/-0); 新增 tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_PD.yaml (+256/-0); ... 及其他 9 个文件\n【统计数据】共修改 14 个文件，新增 2307 行，删除 10 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】quantization, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "quantization",
+        "ci",
+        "tests"
+      ],
+      "pr_number": "11855",
+      "title_en": "[TEST]Add A3 multi-machine PD separation test case",
+      "title_zh": "[TEST] 新增：添加 A3 multi-machine PD separation 测试 case",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_128K_1K_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_3_5K_1_5K_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP1_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_MTP3_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.1T_layerwise_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.2T_MTP2_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/DeepSeek_V3.2T_MTP3_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/QWEN3_235B_PD.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/QWEN3_235B_PD_3_5K_1_5k.yaml",
+          "tests/e2e/weekly/single_node/configs/Qwen3-14B-w8a8sc-310p.yaml",
+          "tests/e2e/weekly/single_node/configs/Qwen3-32B-w8a8sc-310p.yaml",
+          "tests/e2e/weekly/single_node/configs/Qwen3-8B-w8a8sc-310p.yaml"
+        ]
+      }
+    }
+  ],
+  "test_impact_summary": "修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例",
+  "daily_summary": "有 2 个 commit 需要更新测试；发现 4 个 MRV2 相关变更；发现 6 个中高风险变更"
+}

@@ -1,0 +1,390 @@
+=== Commit 2/8 ===
+Repo: vllm
+SHA: ac5f38a0f7af29cb5bc15a1e73623922d9832500
+Author: yzong-rh
+Date: 2026-07-19T20:18:00+08:00
+
+--- Message ---
+[Refactor] Extract StructuredOutputsParams creation logic from Request.to_sampling_params (#49003)
+
+Signed-off-by: Yifan Zong <yzong@redhat.com>
+---
+ .../openai/responses/test_sampling_params.py       | 15 +++++++
+ .../entrypoints/openai/chat_completion/protocol.py | 46 ++++-----------------
+ vllm/entrypoints/openai/completion/protocol.py     | 46 ++++-----------------
+ vllm/entrypoints/openai/engine/protocol.py         | 38 ++++++++++++++++-
+ vllm/entrypoints/openai/responses/protocol.py      | 48 ++++++++++++----------
+ 5 files changed, 95 insertions(+), 98 deletions(-)
+
+--- Stats ---
+Files changed: 5
+Additions: 95
+Deletions: 98
+
+--- Files ---
+
+[File 1] tests/entrypoints/openai/responses/test_sampling_params.py
+  status: modified
+  additions: 15, deletions: 0
+  patch:
+@@ -132,6 +132,21 @@ class TestResponsesRequestSamplingParams:
+         assert sampling_params.structured_outputs is not None
+         assert sampling_params.structured_outputs.grammar == "root ::= 'hello'"
+ 
++    def test_text_format_json_object_enables_structured_outputs(self):
++        """text.format json_object enables structured outputs for sampling."""
++        request = ResponsesRequest(
++            model="test-model",
++            input="test input",
++            text=ResponseTextConfig.model_validate({"format": {"type": "json_object"}}),
++        )
++
++        sampling_params = request.to_sampling_params(default_max_tokens=1000)
++
++        assert sampling_params.structured_outputs is not None
++        assert sampling_params.structured_outputs.json_object is True
++        assert sampling_params.structured_outputs.json is None
++        assert request.structured_outputs is None
++
+     def test_structured_outputs_and_json_schema_conflict(self):
+         """Test that specifying both structured_outputs and json_schema raises."""
+         structured_outputs = StructuredOutputsParams(grammar="root ::= 'hello'")
+
+[File 2] vllm/entrypoints/openai/chat_completion/protocol.py
+  status: modified
+  additions: 9, deletions: 37
+  patch:
+@@ -3,7 +3,6 @@
+ 
+ # Adapted from
+ # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/protocol/openai_api_protocol.py
+-import json
+ import time
+ from typing import Annotated, Any, ClassVar, Literal
+ 
+@@ -14,7 +13,6 @@ from openai.types.chat.chat_completion_message import Annotation as OpenAIAnnota
+ from pydantic import Field, PrivateAttr, model_serializer, model_validator
+ 
+ from vllm.config import ModelConfig
+-from vllm.config.utils import replace
+ from vllm.entrypoints.chat_utils import (
+     ChatCompletionMessageParam,
+     ChatTemplateContentFormatOption,
+@@ -24,13 +22,12 @@ from vllm.entrypoints.openai.engine.protocol import (
+     DeltaMessage,
+     FunctionCall,
+     FunctionDefinition,
+-    LegacyStructuralTagResponseFormat,
+     OpenAIBaseModel,
+     PerRequestTimingMetrics,
+     StreamOptions,
+-    StructuralTagResponseFormat,
+     ToolCall,
+     UsageInfo,
++    structured_outputs_from_response_format,
+     validate_structural_tag_response_format,
+     validate_structured_outputs_structural_tag,
+ )
+@@ -607,6 +604,13 @@ class ChatCompletionRequest(OpenAIBaseModel):
+             include_stop_str_in_output=self.include_stop_str_in_output,
+         )
+ 
++    def extract_structured_outputs(self) -> StructuredOutputsParams | None:
++        """Normalize request constraints into ``StructuredOutputsParams``."""
++        return structured_outputs_from_response_format(
++            self.structured_outputs,
++            self.response_format,
++        )
++
+     def to_sampling_params(
+         self,
+         max_tokens: int,
+@@ -651,38 +655,6 @@ class ChatCompletionRequest(OpenAIBaseModel):
+         if prompt_logprobs is None and self.echo:
+             prompt_logprobs = self.top_logprobs
+ 
+-        response_format = self.response_format
+-        if response_format is not None:
+-            structured_outputs_kwargs = dict[str, Any]()
+-
+-            # Set structured output params for response format
+-            if response_format.type == "json_object":
+-                structured_outputs_kwargs["json_object"] = True
+-            elif response_format.type == "json_schema":
+-                json_schema = response_format.json_schema
+-                assert json_schema is not None
+-                structured_outputs_kwargs["json"] = json_schema.json_schema
+-            elif response_format.type == "structural_tag":
+-                structural_tag = response_format
+-                assert structural_tag is not None and isinstance(
+-                    structural_tag,
+-                    (
+-                        LegacyStructuralTagResponseFormat,
+-                        StructuralTagResponseFormat,
+-                    ),
+-                )
+-                s_tag_obj = structural_tag.model_dump(by_alias=True)
+-                structured_outputs_kwargs["structural_tag"] = json.dumps(s_tag_obj)
+-
+-            # If structured outputs wasn't already enabled,
+-            # we must enable it for these features to work
+-            if len(structured_outputs_kwargs) > 0:
+-                self.structured_outputs = (
+-                    StructuredOutputsParams(**structured_outputs_kwargs)
+-                    if self.structured_outputs is None
+-                    else replace(self.structured_outputs, **structured_outputs_kwargs)
+-                )
+-
+         extra_args: dict[str, Any] = self.vllm_xargs if self.vllm_xargs else {}
+         if self.kv_transfer_params:
+             # Pass in kv_transfer_params via extra_args
+@@ -718,7 +690,7 @@ class ChatCompletionRequest(OpenAIBaseModel):
+             output_kind=RequestOutputKind.DELTA
+             if self.stream
+             else RequestOutputKind.FINAL_ONLY,
+-            structured_outputs=self.structured_outputs,
++            structured_outputs=self.extract_structured_outputs(),
+             logit_bias=self.logit_bias,
+             bad_words=self.bad_words,
+             thinking_token_budget=self.thinking_token_budget,
+
+[File 3] vllm/entrypoints/openai/completion/protocol.py
+  status: modified
+  additions: 9, deletions: 37
+  patch:
+@@ -3,7 +3,6 @@
+ 
+ # Adapted from
+ # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/protocol/openai_api_protocol.py
+-import json
+ import time
+ from typing import Annotated, Any, Literal
+ 
+@@ -11,15 +10,13 @@ from pydantic import Field, model_validator
+ 
+ import vllm.envs as envs
+ from vllm.config import ModelConfig
+-from vllm.config.utils import replace
+ from vllm.entrypoints.openai.engine.protocol import (
+     AnyResponseFormat,
+-    LegacyStructuralTagResponseFormat,
+     OpenAIBaseModel,
+     PerRequestTimingMetrics,
+     StreamOptions,
+-    StructuralTagResponseFormat,
+     UsageInfo,
++    structured_outputs_from_response_format,
+     validate_structural_tag_response_format,
+     validate_structured_outputs_structural_tag,
+ )
+@@ -281,6 +278,13 @@ class CompletionRequest(OpenAIBaseModel):
+             include_stop_str_in_output=self.include_stop_str_in_output,
+         )
+ 
++    def extract_structured_outputs(self) -> StructuredOutputsParams | None:
++        """Normalize request constraints into ``StructuredOutputsParams``."""
++        return structured_outputs_from_response_format(
++            self.structured_outputs,
++            self.response_format,
++        )
++
+     def to_sampling_params(
+         self,
+         max_tokens: int,
+@@ -330,38 +334,6 @@ class CompletionRequest(OpenAIBaseModel):
+ 
+         echo_without_generation = self.echo and self.max_tokens == 0
+ 
+-        response_format = self.response_format
+-        if response_format is not None:
+-            structured_outputs_kwargs = dict[str, Any]()
+-
+-            # Set structured output params for response format
+-            if response_format.type == "json_object":
+-                structured_outputs_kwargs["json_object"] = True
+-            elif response_format.type == "json_schema":
+-                json_schema = response_format.json_schema
+-                assert json_schema is not None
+-                structured_outputs_kwargs["json"] = json_schema.json_schema
+-            elif response_format.type == "structural_tag":
+-                structural_tag = response_format
+-                assert isinstance(
+-                    structural_tag,
+-                    (
+-                        LegacyStructuralTagResponseFormat,
+-                        StructuralTagResponseFormat,
+-                    ),
+-                )
+-                s_tag_obj = structural_tag.model_dump(by_alias=True)
+-                structured_outputs_kwargs["structural_tag"] = json.dumps(s_tag_obj)
+-
+-            # If structured outputs wasn't already enabled,
+-            # we must enable it for these features to work
+-            if len(structured_outputs_kwargs) > 0:
+-                self.structured_outputs = (
+-                    StructuredOutputsParams(**structured_outputs_kwargs)
+-                    if self.structured_outputs is None
+-                    else replace(self.structured_outputs, **structured_outputs_kwargs)
+-                )
+-
+         extra_args: dict[str, Any] = self.vllm_xargs if self.vllm_xargs else {}
+         if self.kv_transfer_params:
+             # Pass in kv_transfer_params via extra_args
+@@ -393,7 +365,7 @@ class CompletionRequest(OpenAIBaseModel):
+             output_kind=RequestOutputKind.DELTA
+             if self.stream
+             else RequestOutputKind.FINAL_ONLY,
+-            structured_outputs=self.structured_outputs,
++            structured_outputs=self.extract_structured_outputs(),
+             logit_bias=self.logit_bias,
+             allowed_token_ids=self.allowed_token_ids,
+             bad_words=self.bad_words,
+
+[File 4] vllm/entrypoints/openai/engine/protocol.py
+  status: modified
+  additions: 36, deletions: 2
+  patch:
+@@ -3,6 +3,7 @@
+ 
+ # Adapted from
+ # https://github.com/lm-sys/FastChat/blob/168ccc29d3f7edc50823016105c024fe2282732a/fastchat/protocol/openai_api_protocol.py
++import json
+ import time
+ from http import HTTPStatus
+ from typing import Any, ClassVar, Literal, TypeAlias
+@@ -16,9 +17,11 @@ from pydantic import (
+     model_validator,
+ )
+ 
++from vllm.config.utils import replace
+ from vllm.entrypoints.chat_utils import make_tool_call_id
+ from vllm.exceptions import VLLMValidationError
+ from vllm.logger import init_logger
++from vllm.sampling_params import StructuredOutputsParams
+ from vllm.utils import random_uuid
+ from vllm.utils.import_utils import resolve_obj_by_qualname
+ 
+@@ -173,6 +176,39 @@ AnyResponseFormat: TypeAlias = (
+ )
+ 
+ 
++def structured_outputs_from_response_format(
++    structured_outputs: StructuredOutputsParams | None,
++    response_format: AnyResponseFormat | None,
++) -> StructuredOutputsParams | None:
++    """Apply ``response_format`` overrides to ``structured_outputs``."""
++    if response_format is None or response_format.type == "text":
++        return structured_outputs
++
++    overrides: dict[str, Any]
++    if response_format.type == "json_object":
++        overrides = {"json_object": True}
++    elif response_format.type == "json_schema":
++        json_schema = response_format.json_schema
++        assert json_schema is not None
++        overrides = {"json": json_schema.json_schema}
++    else:
++        assert isinstance(
++            response_format,
++            (
++                LegacyStructuralTagResponseFormat,
++                StructuralTagResponseFormat,
++            ),
++        )
++        overrides = {
++            "structural_tag": json.dumps(response_format.model_dump(by_alias=True))
++        }
++
++    if structured_outputs is None:
++        return StructuredOutputsParams(**overrides)
++
++    return replace(structured_outputs, **overrides)
++
++
+ def validate_structural_tag_response_format(
+     response_format: AnyStructuralTagResponseFormat | dict[str, Any],
+ ) -> None:
+@@ -181,8 +217,6 @@ def validate_structural_tag_response_format(
+     Engine-side validation reports malformed structural tags as generation
+     failures. OpenAI request parsing should classify them as bad requests.
+     """
+-    import json
+-
+     from pydantic import TypeAdapter, ValidationError
+ 
+     if isinstance(response_format, dict):
+
+[File 5] vllm/entrypoints/openai/responses/protocol.py
+  status: modified
+  additions: 26, deletions: 22
+  patch:
+@@ -354,6 +354,31 @@ class ResponsesRequest(OpenAIBaseModel):
+         "top_k": 0,
+     }
+ 
++    def extract_structured_outputs(self) -> StructuredOutputsParams | None:
++        """Normalize request constraints into ``StructuredOutputsParams``."""
++        if self.text is None or self.text.format is None:
++            return self.structured_outputs
++
++        if self.structured_outputs is not None:
++            raise VLLMValidationError(
++                "Cannot specify both structured_outputs and text.format",
++                parameter="structured_outputs",
++            )
++
++        response_format = self.text.format
++        if response_format.type == "json_object":
++            return StructuredOutputsParams(json_object=True)
++        if (
++            response_format.type == "json_schema"
++            and response_format.schema_ is not None
++        ):
++            return StructuredOutputsParams(
++                json=response_format.schema_  # type: ignore[call-arg]
++                # --follow-imports skip hides the class definition but also hides
++                # multiple third party conflicts, so best of both evils
++            )
++        return None
++
+     def to_sampling_params(
+         self,
+         default_max_tokens: int,
+@@ -387,27 +412,6 @@ class ResponsesRequest(OpenAIBaseModel):
+         if (frequency_penalty := self.frequency_penalty) is None:
+             frequency_penalty = default_sampling_params.get("frequency_penalty", 0.0)
+ 
+-        # Structured output
+-        structured_outputs = self.structured_outputs
+-
+-        # Also check text.format for OpenAI-style json_schema
+-        if self.text is not None and self.text.format is not None:
+-            if structured_outputs is not None:
+-                raise VLLMValidationError(
+-                    "Cannot specify both structured_outputs and text.format",
+-                    parameter="structured_outputs",
+-                )
+-            response_format = self.text.format
+-            if (
+-                response_format.type == "json_schema"
+-                and response_format.schema_ is not None
+-            ):
+-                structured_outputs = StructuredOutputsParams(
+-                    json=response_format.schema_  # type: ignore[call-arg]
+-                    # --follow-imports skip hides the class definition but also hides
+-                    # multiple third party conflicts, so best of both evils
+-                )
+-
+         stop = self.stop if self.stop else []
+         if isinstance(stop, str):
+             stop = [stop]
+@@ -433,7 +437,7 @@ class ResponsesRequest(OpenAIBaseModel):
+             output_kind=(
+                 RequestOutputKind.DELTA if self.stream else RequestOutputKind.FINAL_ONLY
+             ),
+-            structured_outputs=structured_outputs,
++            structured_outputs=self.extract_structured_outputs(),
+             logit_bias=self.logit_bias,
+             extra_args=extra_args,
+             skip_clone=True,  # Created fresh per request, safe to skip clone
+

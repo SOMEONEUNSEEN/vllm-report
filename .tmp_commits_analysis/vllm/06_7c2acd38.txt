@@ -1,0 +1,74 @@
+=== Commit 6/8 ===
+Repo: vllm
+SHA: 7c2acd38b72de4a4177f2a4c2b80b216da7d55b0
+Author: SYLAR
+Date: 2026-07-19T01:29:11+08:00
+
+--- Message ---
+[Bugfix] Qwen3-VL/Qwen-Omni: honor max_pixels/min_pixels for video prompts (#49015)
+---
+ vllm/model_executor/models/qwen2_5_omni_thinker.py | 17 +++++++++++++++++
+ vllm/model_executor/models/qwen3_vl.py             | 13 +++++++++++++
+ 2 files changed, 30 insertions(+)
+
+--- Stats ---
+Files changed: 2
+Additions: 30
+Deletions: 0
+
+--- Files ---
+
+[File 1] vllm/model_executor/models/qwen2_5_omni_thinker.py
+  status: modified
+  additions: 17, deletions: 0
+  patch:
+@@ -509,6 +509,23 @@ class Qwen2_5OmniThinkerMultiModalProcessor(
+                 **mm_kwargs,
+             )
+ 
++        merged = self.info.ctx.get_merged_mm_kwargs(mm_kwargs)
++        if mm_data.get("videos") and (
++            merged.keys() & {"size", "min_pixels", "max_pixels"}
++        ):
++            mm_kwargs = dict(mm_kwargs)
++            video_size = dict(self.info.get_hf_processor().video_processor.size)
++            size_override = merged.get("size")
++            if size_override is not None:
++                video_size = video_size | size_override
++            min_pixels = merged.get("min_pixels")
++            if min_pixels is not None:
++                video_size["shortest_edge"] = min_pixels
++            max_pixels = merged.get("max_pixels")
++            if max_pixels is not None:
++                video_size["longest_edge"] = max_pixels
++            mm_kwargs["size"] = video_size
++
+         hf_inputs = super()._call_hf_processor(
+             prompt=prompt,
+             mm_data=mm_data,
+
+[File 2] vllm/model_executor/models/qwen3_vl.py
+  status: modified
+  additions: 13, deletions: 0
+  patch:
+@@ -1272,6 +1272,19 @@ class Qwen3VLMultiModalProcessor(BaseMultiModalProcessor[Qwen3VLProcessingInfo])
+                 # NOTE: a copy of is created to update do_sample_frames,
+                 # otherwise mm_hash for the object will be incorrect.
+                 video_mm_kwargs = dict(**mm_kwargs)
++                merged = self.info.ctx.get_merged_mm_kwargs(mm_kwargs)
++                if merged.keys() & {"size", "min_pixels", "max_pixels"}:
++                    video_size = dict(self.info.get_video_processor().size)
++                    size_override = merged.get("size")
++                    if size_override is not None:
++                        video_size = video_size | size_override
++                    min_pixels = merged.get("min_pixels")
++                    if min_pixels is not None:
++                        video_size["shortest_edge"] = min_pixels
++                    max_pixels = merged.get("max_pixels")
++                    if max_pixels is not None:
++                        video_size["longest_edge"] = max_pixels
++                    video_mm_kwargs["size"] = video_size
+                 sampled_fps = video_mm_kwargs.get("fps")
+                 if is_list_of(sampled_fps, float):
+                     video_mm_kwargs["fps"] = sampled_fps[item_idx]
+

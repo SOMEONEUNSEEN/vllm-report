@@ -1,0 +1,64 @@
+=== Commit 1/4 ===
+Repo: vllm-ascend
+SHA: acdaf7698e399fdc9b0eab115ae59d37cd8e44f4
+Author: wjunLu
+Date: 2026-07-19T22:57:40+08:00
+
+--- Message ---
+[CI] Main2main fall back to fresh mode when target commit is behind baseline (#12376)
+
+### What this PR does / why we need it?
+A manual workflow_dispatch specifies a TARGET_COMMIT that is older than
+the baseline's already-verified VLLM commit, the baseline's adapted code
+(which targets a newer VLLM) would produce incorrect version guards for
+the older target.
+Detect this with merge-base --is-ancestor and force a fresh start from
+upstream/main instead.
+### Does this PR introduce _any_ user-facing change?
+
+### How was this patch tested?
+
+- vLLM version: v0.24.0
+- vLLM main:
+https://github.com/vllm-project/vllm/commit/85c09e9885e346ea1612da30ebff5a75f67d2350
+
+Signed-off-by: wjunLu <wjunlu217@gmail.com>
+---
+ .github/workflows/schedule_main2main.yaml | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
+
+--- Stats ---
+Files changed: 1
+Additions: 15
+Deletions: 1
+
+--- Files ---
+
+[File 1] .github/workflows/schedule_main2main.yaml
+  status: modified
+  additions: 15, deletions: 1
+  patch:
+@@ -279,7 +279,21 @@ jobs:
+             git fetch upstream main
+             git checkout -B "${BRANCH}" origin/main2main_baseline
+             if git rebase upstream/main; then
+-              echo "::notice::incremental mode: rebased main2main_baseline onto upstream/main"
++              # If a specific TARGET_COMMIT was set (e.g. manual dispatch) and
++              # it is older than what the baseline already verified, the
++              # baseline's version guards would be wrong for this older vllm
++              # commit.  Fall back to fresh mode in that case.
++              if [ -n "${TARGET_COMMIT}" ]; then
++                BASELINE_VLLM=$(cat .github/vllm-main-verified.commit 2>/dev/null || echo "")
++                if [ -n "${BASELINE_VLLM}" ] && git -C vllm-upstream merge-base --is-ancestor "${TARGET_COMMIT}" "${BASELINE_VLLM}" 2>/dev/null; then
++                  git checkout -B "${BRANCH}" upstream/main
++                  echo "::warning::target commit ${TARGET_COMMIT} is behind baseline verified commit ${BASELINE_VLLM}, forcing fresh mode"
++                else
++                  echo "::notice::incremental mode: rebased main2main_baseline onto upstream/main"
++                fi
++              else
++                echo "::notice::incremental mode: rebased main2main_baseline onto upstream/main"
++              fi
+             else
+               git rebase --abort
+               git checkout -B "${BRANCH}" upstream/main
+

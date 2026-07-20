@@ -1,0 +1,90 @@
+=== Commit 4/4 ===
+Repo: vllm-ascend
+SHA: 201120ab9ac06554d2fe580cde39f63f94c0e78e
+Author: herizhen
+Date: 2026-07-19T14:52:14+08:00
+
+--- Message ---
+[Doc][Misc] Update documentation header notification bar (#12355)
+
+### What this PR does / why we need it?
+This PR updates the hardcoded stable documentation version from
+`v0.18.0` to `v0.23.0` in the notification banner across English and
+Chinese translations, as well as the HTML templates. This ensures users
+viewing the developer preview docs are directed to the correct latest
+stable release.
+
+### Does this PR introduce _any_ user-facing change?
+Yes, it updates the notification bar text and links in the documentation
+header to point to `v0.23.0` instead of `v0.18.0`.
+
+### How was this patch tested?
+No tests were added as this is a documentation template change.
+
+- vLLM version: v0.24.0
+- vLLM main:
+https://github.com/vllm-project/vllm/commit/85c09e9885e346ea1612da30ebff5a75f67d2350
+
+Signed-off-by: herizhen <1270637059@qq.com>
+---
+ docs/hooks/macros_main.py                   | 4 ++--
+ docs/overrides/main.html                    | 2 +-
+ docs/source/_templates/sections/header.html | 2 +-
+ 3 files changed, 4 insertions(+), 4 deletions(-)
+
+--- Stats ---
+Files changed: 3
+Additions: 4
+Deletions: 4
+
+--- Files ---
+
+[File 1] docs/hooks/macros_main.py
+  status: modified
+  additions: 2, deletions: 2
+  patch:
+@@ -15,14 +15,14 @@ UI_STRINGS = {
+     "en": {
+         "banner_preview": "You are viewing the latest developer preview docs.",
+         "banner_link": "Click here",
+-        "banner_suffix": "to view docs for the latest stable release (v0.18.0).",
++        "banner_suffix": "to view docs for the latest stable release (v0.23.0).",
+         "btn_report": "report issue",
+         "aria_report": "Report a documentation issue",
+     },
+     "zh": {
+         "banner_preview": "您正在查看最新的开发者预览版文档。",
+         "banner_link": "点击此处",
+-        "banner_suffix": "查看最新稳定版（v0.18.0）的文档。",
++        "banner_suffix": "查看最新稳定版（v0.23.0）的文档。",
+         "btn_report": "反馈问题",
+         "aria_report": "报告文档问题",
+     },
+
+[File 2] docs/overrides/main.html
+  status: modified
+  additions: 1, deletions: 1
+  patch:
+@@ -24,7 +24,7 @@
+ {% if not config.extra.is_release %}
+ <div class="md-announce">
+   {{ t.banner_preview }}
+-  <a href="https://docs.vllm.ai/projects/ascend/en/v0.18.0">{{ t.banner_link }}</a>
++  <a href="https://docs.vllm.ai/projects/ascend/en/v0.23.0">{{ t.banner_link }}</a>
+   {{ t.banner_suffix }}
+ </div>
+ {% endif %}
+
+[File 3] docs/source/_templates/sections/header.html
+  status: modified
+  additions: 1, deletions: 1
+  patch:
+@@ -54,5 +54,5 @@
+   </style>
+   
+   <div class="notification-bar">
+-    <p>You are viewing the latest developer preview docs. <a href="https://docs.vllm.ai/projects/ascend/en/v0.18.0">Click here</a> to view docs for the latest stable release(v0.18.0).</p>
++    <p>You are viewing the latest developer preview docs. <a href="https://docs.vllm.ai/projects/ascend/en/v0.23.0">Click here</a> to view docs for the latest stable release(v0.23.0).</p>
+   </div>
+\ No newline at end of file
+

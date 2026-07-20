@@ -1,0 +1,937 @@
+{
+  "date": "2026-07-16",
+  "repo": "vllm-project/vllm",
+  "generated_at": "2026-07-17T11:47:25.883462+08:00",
+  "commits": [
+    {
+      "sha": "75bdad40b5e96517c7f7645ce3199a8557817e17",
+      "comment": "【变更概述】[Bug] [Quantization] 修复：修复 humming is_layer_skipped compressed-tensors \"re:\" ignore entries\n【PR号】#48507\n【变更类型】此提交为问题修复类型\n【变更文件】新增 tests/quantization/test_humming_ignore.py (+56/-0); 修改 vllm/model_executor/layers/quantization/humming.py (+11/-2)\n【统计数据】共修改 2 个文件，新增 67 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】quantization, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "quantization",
+        "tests"
+      ],
+      "pr_number": "48507",
+      "title_en": "[Bug][Quantization] Fix humming is_layer_skipped for compressed-tensors \"re:\" ignore entries",
+      "title_zh": "[Bug] [Quantization] 修复：修复 humming is_layer_skipped compressed-tensors \"re:\" ignore entries",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "d08eebad162bbd1f2e99cca550313daaa81c7654",
+      "comment": "【变更概述】[Perf] [MoE] 更新：Write FlashInfer combine into final output\n【PR号】#47156\n【变更类型】此提交为性能优化类型\n【变更文件】修改 tests/distributed/test_mnnvl_alltoall.py (+30/-0); 修改 vllm/distributed/device_communicators/all2all.py (+29/-0); 修改 vllm/model_executor/layers/fused_moe/prepare_finalize/flashinfer_nvlink_one_sided.py (+2/-2)\n【统计数据】共修改 3 个文件，新增 61 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, distributed, tests",
+      "tags": [
+        "performance",
+        "low-risk",
+        "attention",
+        "distributed",
+        "tests"
+      ],
+      "pr_number": "47156",
+      "title_en": "[Perf][MoE] Write FlashInfer combine into final output",
+      "title_zh": "[Perf] [MoE] 更新：Write FlashInfer combine into final output",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3e90d015ba5bbad6f229ddb4c1f467ca33101524",
+      "comment": "【变更概述】[Frontend] 更新：Overlap preprocessing computation pooling models offline inference\n【PR号】#47699\n【变更类型】此提交为常规更新类型\n【变更文件】修改 .buildkite/test_areas/models_language.yaml (+3/-3); 新增 tests/entrypoints/pooling/basic/test_tiling_engine.py (+108/-0); 修改 tests/models/language/pooling/test_multi_vector_retrieval.py (+3/-6); 修改 vllm/entrypoints/llm.py (+1/-1); 修改 vllm/entrypoints/pooling/base/io_processor.py (+133/-30); ... 及其他 5 个文件\n【统计数据】共修改 10 个文件，新增 673 行，删除 150 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "47699",
+      "title_en": "[Frontend] Overlap preprocessing and computation for pooling models offline inference",
+      "title_zh": "[Frontend] 更新：Overlap preprocessing computation pooling models offline inference",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7cd1d57b749fc9a0e5bad1bf8874992ed443e54b",
+      "comment": "【变更概述】[CI/Build] [Docker] 维护：升级 nvidia-cutlass-dsl 4.6.0 drop packaging workarounds\n【PR号】#47442\n【变更类型】此提交为日常维护类型\n【变更文件】修改 cmake/external_projects/vllm_flash_attn.cmake (+1/-1); 修改 docker/Dockerfile (+0/-35); 修改 requirements/cuda.txt (+2/-2); 修改 requirements/test/cuda.txt (+1/-1); 修改 tests/entrypoints/pooling/scoring/test_cross_encoder_online_vision.py (+1/-0); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 8 行，删除 120 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "attention",
+        "tests"
+      ],
+      "pr_number": "47442",
+      "title_en": "[CI/Build][Docker] Bump nvidia-cutlass-dsl to 4.6.0 and drop packaging workarounds",
+      "title_zh": "[CI/Build] [Docker] 维护：升级 nvidia-cutlass-dsl 4.6.0 drop packaging workarounds",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b8168e33e000df5c60d63d7ca244ba2ca2c34079",
+      "comment": "【变更概述】[ROCm] [Perf] [DSV4] 更新：Enable 拆分 sparse decode gfx942\n【PR号】#46275\n【变更类型】此提交为性能优化类型\n【变更文件】修改 tests/kernels/attention/test_rocm_triton_attn_dsv4.py (+44/-41); 修改 vllm/v1/attention/ops/rocm_aiter_mla_sparse.py (+1/-1)\n【统计数据】共修改 2 个文件，新增 45 行，删除 42 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, ops, tests",
+      "tags": [
+        "performance",
+        "low-risk",
+        "attention",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "46275",
+      "title_en": "[ROCm][Perf][DSV4] Enable split sparse decode on gfx942",
+      "title_zh": "[ROCm] [Perf] [DSV4] 更新：Enable 拆分 sparse decode gfx942",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "d803b44dbefd10efb85aa4ebc363017e9ead4172",
+      "comment": "【变更概述】[NIXL] 维护：升级 nixl 1.3.1\n【PR号】#47559\n【变更类型】此提交为日常维护类型\n【变更文件】修改 requirements/kv_connectors.txt (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "chore",
+        "low-risk"
+      ],
+      "pr_number": "47559",
+      "title_en": "[NIXL] Bump nixl to 1.3.1",
+      "title_zh": "[NIXL] 维护：升级 nixl 1.3.1",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "530852f9591a822ff4065908778a58fa015f0e69",
+      "comment": "【变更概述】[KV Connector] 修复：修复 PD async scheduling race condition hybrid attn models\n【PR号】#48481\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/v1/kv_connector/unit/test_nixl_connector_hma.py (+88/-0); 修改 vllm/v1/core/kv_cache_manager.py (+28/-0); 修改 vllm/v1/core/sched/scheduler.py (+37/-7); 修改 vllm/v1/core/single_type_kv_cache_manager.py (+5/-0)\n【统计数据】共修改 4 个文件，新增 158 行，删除 7 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】kv-cache, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "kv-cache",
+        "tests"
+      ],
+      "pr_number": "48481",
+      "title_en": "[KV Connector] Fix PD async scheduling race condition for hybrid attn models",
+      "title_zh": "[KV Connector] 修复：修复 PD async scheduling race condition hybrid attn models",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "a317bc573921f9c23861f0eba452277752bbdf97",
+      "comment": "【变更概述】[Misc] [Nixl] 更新：Unify `_logical_to_remote_kernel_block_ids`\n【PR号】#48717\n【变更类型】此提交为常规更新类型\n【变更文件】修改 tests/v1/kv_connector/unit/test_nixl_connector_hma.py (+7/-5); 修改 tests/v1/kv_connector/unit/test_nixl_push_connector.py (+3/-3); 修改 vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py (+24/-51); 修改 vllm/distributed/kv_transfer/kv_connector/v1/nixl/pull_worker.py (+2/-2); 修改 vllm/distributed/kv_transfer/kv_connector/v1/nixl/push_worker.py (+5/-3)\n【统计数据】共修改 5 个文件，新增 41 行，删除 64 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】distributed, tests",
+      "tags": [
+        "high-risk",
+        "distributed",
+        "tests"
+      ],
+      "pr_number": "48717",
+      "title_en": "[Misc][Nixl] Unify `_logical_to_remote_kernel_block_ids`",
+      "title_zh": "[Misc] [Nixl] 更新：Unify `_logical_to_remote_kernel_block_ids`",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "a9531edfa63197dc083cf60be85e777c64fbfb60",
+      "comment": "【变更概述】[KV Offload] 更新：Define 清理 后端 configuration boundary\n【PR号】#48150\n【变更类型】此提交为常规更新类型\n【变更文件】修改 tests/v1/kv_connector/unit/offloading_connector/test_events.py (+25/-22); 修改 tests/v1/kv_connector/unit/offloading_connector/test_scheduler.py (+167/-169); 修改 tests/v1/kv_connector/unit/offloading_connector/test_worker.py (+4/-3); 修改 tests/v1/kv_connector/unit/offloading_connector/utils.py (+17/-19); 修改 tests/v1/kv_connector/unit/test_offloading_connector.py (+1/-1); ... 及其他 22 个文件\n【统计数据】共修改 27 个文件，新增 1275 行，删除 843 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】distributed, kv-cache, tests",
+      "tags": [
+        "high-risk",
+        "distributed",
+        "kv-cache",
+        "tests"
+      ],
+      "pr_number": "48150",
+      "title_en": "[KV Offload] Define clean backend configuration boundary",
+      "title_zh": "[KV Offload] 更新：Define 清理 后端 configuration boundary",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "8c3393f3733fa37d253c4d7a3126cfc9ae27b50d",
+      "comment": "【变更概述】[Bugfix] [Rust Frontend] 更新：Limit chat top_logprobs responses\n【PR号】#48134\n【变更类型】此提交为问题修复类型\n【变更文件】修改 rust/src/server/src/routes/openai/chat_completions.rs (+10/-1); 修改 rust/src/server/src/routes/openai/chat_completions/convert.rs (+3/-0); 修改 rust/src/server/src/routes/openai/utils/logprobs.rs (+65/-4); 修改 rust/src/server/src/routes/tests.rs (+8/-0)\n【统计数据】共修改 4 个文件，新增 86 行，删除 5 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48134",
+      "title_en": "[Bugfix][Rust Frontend] Limit chat top_logprobs in responses",
+      "title_zh": "[Bugfix] [Rust Frontend] 更新：Limit chat top_logprobs responses",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "9f8cbfd8eb01de1310caa0b657840cbaf6c3b015",
+      "comment": "【变更概述】更新：Vectorize prep xfer list creation\n【PR号】#48209\n【变更类型】此提交为常规更新类型\n【变更文件】修改 tests/v1/kv_connector/unit/test_nixl_connector.py (+14/-7); 修改 tests/v1/kv_connector/unit/test_tp_mapping.py (+13/-6); 修改 vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py (+58/-61)\n【统计数据】共修改 3 个文件，新增 85 行，删除 74 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed, tests",
+      "tags": [
+        "low-risk",
+        "distributed",
+        "tests"
+      ],
+      "pr_number": "48209",
+      "title_en": "Vectorize prep xfer list creation",
+      "title_zh": "更新：Vectorize prep xfer list creation",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ea1d65fe6df278678b909ca1e98dfb6fd206d8cc",
+      "comment": "【变更概述】[Rust Frontend] 新增：添加 Seed-OSS tool parser\n【PR号】#47741\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 rust/src/chat/src/lib.rs (+1/-1); 修改 rust/src/chat/src/parser/tool/mod.rs (+7/-3); 修改 rust/src/chat/src/parser/tool/tests.rs (+4/-0); 修改 rust/src/chat/tests/roundtrip.rs (+1/-1); 修改 rust/src/parser/src/tool/mod.rs (+2/-0); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 332 行，删除 18 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "47741",
+      "title_en": "[Rust Frontend] Add Seed-OSS tool parser",
+      "title_zh": "[Rust Frontend] 新增：添加 Seed-OSS tool parser",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f44f3d6f798b1ab2e69ecaf82fab684ead5ba7f0",
+      "comment": "【变更概述】[Rust Frontend] 更新：Wait mock engine endpoints before ZMQ connect\n【PR号】#47965\n【变更类型】此提交为常规更新类型\n【变更文件】修改 rust/src/engine-core-client/src/mock_engine.rs (+34/-24)\n【统计数据】共修改 1 个文件，新增 34 行，删除 24 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "low-risk"
+      ],
+      "pr_number": "47965",
+      "title_en": "[Rust Frontend] Wait for mock engine endpoints before ZMQ connect",
+      "title_zh": "[Rust Frontend] 更新：Wait mock engine endpoints before ZMQ connect",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "cc706b05a5e5fcca9f5ba7dab57dcfd18515e27e",
+      "comment": "【变更概述】[Bugfix] [Rust Frontend] 更新：Detokenizer avoid leaking prompt zero-generated-token completions\n【PR号】#47707\n【变更类型】此提交为问题修复类型\n【变更文件】修改 rust/src/tokenizer/src/incremental.rs (+34/-5)\n【统计数据】共修改 1 个文件，新增 34 行，删除 5 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "47707",
+      "title_en": "[Bugfix][Rust Frontend] Detokenizer: avoid leaking prompt on zero-generated-token completions",
+      "title_zh": "[Bugfix] [Rust Frontend] 更新：Detokenizer avoid leaking prompt zero-generated-token completions",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "85e296950cff695695ccf06155942c80c89ef86c",
+      "comment": "【变更概述】更新：BF16x3 router GEMM\n【PR号】#47973\n【变更类型】此提交为常规更新类型\n【变更文件】新增 tests/kernels/test_bf16x3_router_gemm_cutedsl.py (+43/-0); 修改 vllm/config/kernel.py (+3/-0); 修改 vllm/engine/arg_utils.py (+7/-0); 新增 vllm/model_executor/layers/fused_moe/router/bf16x3_router_gemm_cutedsl.py (+449/-0); 修改 vllm/model_executor/layers/fused_moe/router/gate_linear.py (+53/-10)\n【统计数据】共修改 5 个文件，新增 555 行，删除 10 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, tests",
+      "tags": [
+        "low-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "47973",
+      "title_en": "BF16x3 router GEMM",
+      "title_zh": "更新：BF16x3 router GEMM",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "dc9f845ddc54c1df38fdbce5afe03f9fd15813bd",
+      "comment": "【变更概述】[Rust Frontend] 修复：修复 mock engine 测试 shutdown race\n【PR号】#48738\n【变更类型】此提交为问题修复类型\n【变更文件】修改 rust/src/mock-engine/src/tests.rs (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48738",
+      "title_en": "[Rust Frontend] Fix mock engine test shutdown race",
+      "title_zh": "[Rust Frontend] 修复：修复 mock engine 测试 shutdown race",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "12f2c515a7def384d2f775ff28ff2089947d06c2",
+      "comment": "【变更概述】[Bugfix] 修复：修复 卸载 set_ overflow packed non-uniform KV caches\n【PR号】#48530\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/distributed/kv_transfer/kv_connector/v1/offloading/worker.py (+8/-7)\n【统计数据】共修改 1 个文件，新增 8 行，删除 7 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "distributed"
+      ],
+      "pr_number": "48530",
+      "title_en": "[Bugfix] Fix offloading set_ overflow for packed non-uniform KV caches",
+      "title_zh": "[Bugfix] 修复：修复 卸载 set_ overflow packed non-uniform KV caches",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6570c9800cda6cc510525f485141d527f105b46c",
+      "comment": "【变更概述】[Model] 新增：添加 Inkling model 支持 1/N\n【PR号】#48799\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .gitignore (+3/-0); 修改 CMakeLists.txt (+1/-0); 新增 cmake/external_projects/tml_fa4.cmake (+50/-0); 修改 requirements/cuda.txt (+1/-1); 修改 rust/Cargo.lock (+2/-1); ... 及其他 90 个文件\n【统计数据】共修改 95 个文件，新增 12137 行，删除 62 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】ops, tests",
+      "tags": [
+        "feature",
+        "high-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "48799",
+      "title_en": "[Model] Add Inkling model support [1/N]",
+      "title_zh": "[Model] 新增：添加 Inkling model 支持 1/N",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "8bfd6839016f9670508cf07c16c68891f83ea117",
+      "comment": "【变更概述】[Spec Decode] 新增：添加 kv_cache_dtype speculative_config control separately from target\n【PR号】#48787\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm/config/speculative.py (+4/-0); 修改 vllm/engine/arg_utils.py (+4/-0); 修改 vllm/v1/spec_decode/llm_base_proposer.py (+9/-0); 修改 vllm/v1/worker/gpu/spec_decode/dflash/utils.py (+8/-0); 修改 vllm/v1/worker/gpu/spec_decode/dspark/utils.py (+8/-0); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 42 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】spec-decode",
+      "tags": [
+        "feature",
+        "low-risk",
+        "spec-decode"
+      ],
+      "pr_number": "48787",
+      "title_en": "[Spec Decode] Add kv_cache_dtype to speculative_config to control separately from target",
+      "title_zh": "[Spec Decode] 新增：添加 kv_cache_dtype speculative_config control separately from target",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7dc2698632867e2313625103674459c02f42f8a9",
+      "comment": "【变更概述】[ROCm] [CI] 维护：Set \"highest\" matmul precision reference hf_runner `test_bert_for_masked_lm`\n【PR号】#48784\n【变更类型】此提交为日常维护类型\n【变更文件】修改 tests/models/language/pooling/test_token_classification.py (+6/-0)\n【统计数据】共修改 1 个文件，新增 6 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "48784",
+      "title_en": "[ROCm][CI] Set \"highest\" matmul precision for reference hf_runner in `test_bert_for_masked_lm`",
+      "title_zh": "[ROCm] [CI] 维护：Set \"highest\" matmul precision reference hf_runner `test_bert_for_masked_lm`",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "59b964f37d38c3b78df56dd2cf32e1e4925276ae",
+      "comment": "【变更概述】修复：fix(lora validate LoRA rank is positive PEFTHelper\n【PR号】#48437\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/lora/test_peft_helper.py (+17/-0); 修改 vllm/lora/peft_helper.py (+2/-0)\n【统计数据】共修改 2 个文件，新增 19 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "48437",
+      "title_en": "fix(lora): validate LoRA rank is positive in PEFTHelper",
+      "title_zh": "修复：fix(lora validate LoRA rank is positive PEFTHelper",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6a9f24aa8cb856235528d01a829a4ba85fc1c19d",
+      "comment": "【变更概述】【MRV2】[ROCm] 【MRV2】[CI] 【MRV2】修复：修复 CUDA graph mem profile issue\n【PR号】#48764\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 vllm/v1/worker/gpu_model_runner.py (+13/-10)\n【统计数据】共修改 1 个文件，新增 13 行，删除 10 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner",
+      "tags": [
+        "bugfix",
+        "mrv2",
+        "high-risk",
+        "model-runner"
+      ],
+      "pr_number": "48764",
+      "title_en": "[ROCm][CI] Fix cuda graph mem profile issue",
+      "title_zh": "【MRV2】[ROCm] 【MRV2】[CI] 【MRV2】修复：修复 CUDA graph mem profile issue",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现",
+        "testing": "需要验证 vllm-ascend 的相关测试是否通过",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "整体功能回归测试"
+        ]
+      }
+    },
+    {
+      "sha": "ba47bb5be1bf8e263e978178f0ee453dbc9fa9b6",
+      "comment": "【变更概述】维护：升级 FlashInfer version 0.6.14\n【PR号】#47669\n【变更类型】此提交为日常维护类型\n【变更文件】修改 docker/Dockerfile (+1/-1); 修改 docker/versions.json (+1/-1); 修改 requirements/cuda.txt (+5/-2); 修改 setup.py (+5/-0); 修改 tests/test_jit_monitor.py (+20/-0); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 53 行，删除 18 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "47669",
+      "title_en": "Bump flashinfer version to 0.6.14",
+      "title_zh": "维护：升级 FlashInfer version 0.6.14",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "df8a0900df22bd787806f13e449ba751a458d334",
+      "comment": "【变更概述】[BugFix] 更新：Don't apply weight batch-invariant RMSNorm when has_weight=False\n【PR号】#48741\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/model_executor/layers/batch_invariant.py (+17/-12); 修改 vllm/model_executor/layers/layernorm.py (+4/-1)\n【统计数据】共修改 2 个文件，新增 21 行，删除 13 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48741",
+      "title_en": "[BugFix] Don't apply weight in batch-invariant RMSNorm when has_weight=False",
+      "title_zh": "[BugFix] 更新：Don't apply weight batch-invariant RMSNorm when has_weight=False",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2db39c7049ae7830682150a30f3faf3ac7f8029c",
+      "comment": "【变更概述】[Bugfix] [Spec Decode] 修复：修复 eagle3 first-layer qkv_proj prefix quantized drafts\n【PR号】#48068\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/model_executor/models/llama_eagle3.py (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】spec-decode",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "spec-decode"
+      ],
+      "pr_number": "48068",
+      "title_en": "[Bugfix][Spec Decode] Fix eagle3 first-layer qkv_proj prefix for quantized drafts",
+      "title_zh": "[Bugfix] [Spec Decode] 修复：修复 eagle3 first-layer qkv_proj prefix quantized drafts",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3935829f897616fdb14fb7324875d41dd4914dff",
+      "comment": "【变更概述】[Docs] 修复：修复 error key name\n【PR号】#48802\n【变更类型】此提交为问题修复类型\n【变更文件】修改 docs/deployment/k8s.md (+2/-2)\n【统计数据】共修改 1 个文件，新增 2 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "48802",
+      "title_en": "[Docs] fix error key name",
+      "title_zh": "[Docs] 修复：修复 error key name",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7746961277ac45df9c5d2b1341af649cdbdf459c",
+      "comment": "【变更概述】[CI] 修复：修复 flaky lora 测试\n【PR号】#47375\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/lora/test_gptoss_tp.py (+18/-5)\n【统计数据】共修改 1 个文件，新增 18 行，删除 5 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "47375",
+      "title_en": "[CI] Fix flaky lora test",
+      "title_zh": "[CI] 修复：修复 flaky lora 测试",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5de1add806ce524ddd8c13286500ab8089e9654e",
+      "comment": "【变更概述】[feature] 新增：添加 int4 quantization 支持 emulation MoE 后端\n【PR号】#48451\n【变更类型】此提交为新功能开发类型\n【变更文件】新增 tests/kernels/quantization/test_int4_emulation_moe.py (+1189/-0); 修改 vllm/model_executor/layers/fused_moe/config.py (+12/-0); 新增 vllm/model_executor/layers/fused_moe/experts/int4_emulation_moe.py (+129/-0); 修改 vllm/model_executor/layers/fused_moe/oracle/int_wna16.py (+281/-2); 修改 vllm/model_executor/layers/quantization/auto_awq.py (+3/-0); ... 及其他 4 个文件\n【统计数据】共修改 9 个文件，新增 1653 行，删除 10 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】ops, quantization, tests",
+      "tags": [
+        "feature",
+        "high-risk",
+        "ops",
+        "quantization",
+        "tests"
+      ],
+      "pr_number": "48451",
+      "title_en": "[feature]Add int4 quantization support for emulation moe backend",
+      "title_zh": "[feature] 新增：添加 int4 quantization 支持 emulation MoE 后端",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "915dffaa5f93f55b44c8ac630b472700d131e165",
+      "comment": "【变更概述】[Attention] 更新：Mirror Triton KV 数据类型 checks MLA\n【PR号】#47060\n【变更类型】此提交为常规更新类型\n【变更文件】修改 vllm/v1/attention/backends/mla/triton_mla.py (+26/-0)\n【统计数据】共修改 1 个文件，新增 26 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention",
+      "tags": [
+        "low-risk",
+        "attention"
+      ],
+      "pr_number": "47060",
+      "title_en": "[Attention] Mirror Triton KV dtype checks in MLA",
+      "title_zh": "[Attention] 更新：Mirror Triton KV 数据类型 checks MLA",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "81e13a05913f5365959409f6374aa624807b378a",
+      "comment": "【变更概述】[Compilation] 更新：Skip x.size(dim _decompose_size_nodes\n【PR号】#42543\n【变更类型】此提交为常规更新类型\n【变更文件】修改 tests/compile/test_graph_partition.py (+64/-0); 修改 vllm/compilation/backends.py (+5/-0)\n【统计数据】共修改 2 个文件，新增 69 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】compilation, tests",
+      "tags": [
+        "low-risk",
+        "compilation",
+        "tests"
+      ],
+      "pr_number": "42543",
+      "title_en": "[Compilation] Skip x.size(dim) in _decompose_size_nodes",
+      "title_zh": "[Compilation] 更新：Skip x.size(dim _decompose_size_nodes",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f95e3f0edb8f04844dd02a2662eaeff4545380e5",
+      "comment": "【变更概述】[Tests] 更新：Gate Step3VL under Transformers v5\n【PR号】#44349\n【变更类型】此提交为日常维护类型\n【变更文件】修改 tests/models/registry.py (+9/-1)\n【统计数据】共修改 1 个文件，新增 9 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "44349",
+      "title_en": "[Tests] Gate Step3VL under Transformers v5",
+      "title_zh": "[Tests] 更新：Gate Step3VL under Transformers v5",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5a65ba5f179887ec331bb96b1fc3cd1fb045e988",
+      "comment": "【变更概述】[Refactor] 更新：Move iteration logging frontend\n【PR号】#46647\n【变更类型】此提交为代码重构类型\n【变更文件】修改 tests/v1/core/test_scheduler.py (+82/-0); 新增 tests/v1/engine/test_iteration_logging.py (+88/-0); 修改 tests/v1/metrics/test_stats.py (+45/-1); 修改 vllm/v1/core/sched/output.py (+10/-0); 修改 vllm/v1/core/sched/scheduler.py (+32/-1); ... 及其他 4 个文件\n【统计数据】共修改 9 个文件，新增 398 行，删除 40 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证\n【涉及模块】tests",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "tests"
+      ],
+      "pr_number": "46647",
+      "title_en": "[Refactor] Move iteration logging to the frontend",
+      "title_zh": "[Refactor] 更新：Move iteration logging frontend",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "9d1c695be5875c49e34b63d7b1f9aad282551c30",
+      "comment": "【变更概述】[XPU] 新增：添加 DSpark speculative decoding 支持 DeepSeek-V4\n【PR号】#47677\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm/models/deepseek_v4/__init__.py (+1/-2); 新增 vllm/models/deepseek_v4/xpu/dspark.py (+436/-0); 修改 vllm/models/deepseek_v4/xpu/model.py (+17/-4)\n【统计数据】共修改 3 个文件，新增 454 行，删除 6 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk"
+      ],
+      "pr_number": "47677",
+      "title_en": "[XPU] Add DSpark speculative decoding support for DeepSeek-V4",
+      "title_zh": "[XPU] 新增：添加 DSpark speculative decoding 支持 DeepSeek-V4",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3c1bc1fc0dd5384c92d608824f03e6e60e98d592",
+      "comment": "【变更概述】[ROCm] [Perf] 优化：优化 sparse 注意力 prefill 内核 DeepSeek-V4\n【PR号】#48519\n【变更类型】此提交为性能优化类型\n【变更文件】修改 vllm/v1/attention/ops/rocm_aiter_mla_sparse.py (+10/-3)\n【统计数据】共修改 1 个文件，新增 10 行，删除 3 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证\n【涉及模块】attention, ops",
+      "tags": [
+        "performance",
+        "medium-risk",
+        "attention",
+        "ops"
+      ],
+      "pr_number": "48519",
+      "title_en": "[ROCm][Perf] Optimize sparse attention prefill kernel for DeepSeek-V4",
+      "title_zh": "[ROCm] [Perf] 优化：优化 sparse 注意力 prefill 内核 DeepSeek-V4",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3a5e88e629d22946041378316aa81eb77d6a8750",
+      "comment": "【变更概述】[Bugfix] 修复：修复 local speculators dots name from classifying as custom_class\n【PR号】#48754\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/config/speculative.py (+14/-7)\n【统计数据】共修改 1 个文件，新增 14 行，删除 7 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48754",
+      "title_en": "[Bugfix] Fix local speculators with dots in the name from classifying as custom_class",
+      "title_zh": "[Bugfix] 修复：修复 local speculators dots name from classifying as custom_class",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "0becb7486b3e368bb9c0e56b1ca3ccf8ee53911a",
+      "comment": "【变更概述】[BugFix] [MLA] 新增：支持 kv_cache_dtype_skip_layers MLA 注意力\n【PR号】#47309\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/model_executor/layers/attention/mla_attention.py (+14/-1)\n【统计数据】共修改 1 个文件，新增 14 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "attention"
+      ],
+      "pr_number": "47309",
+      "title_en": "[BugFix][MLA] Support kv_cache_dtype_skip_layers for MLA attention",
+      "title_zh": "[BugFix] [MLA] 新增：支持 kv_cache_dtype_skip_layers MLA 注意力",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2dab187f756f2c4549fd5e57019413f3415365a4",
+      "comment": "【变更概述】[Perf] 优化：优化 `fused_topk_bias` DSv4 1.5~2x 内核 性能 improvement\n【PR号】#47463\n【变更类型】此提交为性能优化类型\n【变更文件】修改 csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu (+67/-58); 修改 tests/kernels/moe/test_topk_softplus_sqrt.py (+2/-2); 修改 vllm/model_executor/layers/fused_moe/router/fused_topk_bias_router.py (+7/-7)\n【统计数据】共修改 3 个文件，新增 76 行，删除 67 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证\n【涉及模块】ops, tests",
+      "tags": [
+        "performance",
+        "medium-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "47463",
+      "title_en": "[Perf] Optimize `fused_topk_bias` for DSv4, 1.5~2x kernel performance improvement",
+      "title_zh": "[Perf] 优化：优化 `fused_topk_bias` DSv4 1.5~2x 内核 性能 improvement",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "015b0320ded125947ee444314921fc818dc6e5ed",
+      "comment": "【变更概述】新增：添加 giuseppegrossi ROCm label auto cc action\n【PR号】#48643\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .github/workflows/issue_autolabel.yml (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "48643",
+      "title_en": "Add giuseppegrossi to rocm label auto cc action",
+      "title_zh": "新增：添加 giuseppegrossi ROCm label auto cc action",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4238b011a76629104b00ecf999d5390b94a1d289",
+      "comment": "【变更概述】[Feature] 新增：Migrate MoE sp 支持 non-torch compiled path GLM5.2\n【PR号】#47881\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm/model_executor/layers/fused_moe/experts/trtllm_fp8_moe.py (+3/-1); 修改 vllm/model_executor/models/deepseek_mtp.py (+3/-1); 修改 vllm/models/deepseek_v32/nvidia/model.py (+82/-10); 修改 vllm/models/deepseek_v32/nvidia/mtp.py (+4/-4)\n【统计数据】共修改 4 个文件，新增 92 行，删除 16 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】quantization",
+      "tags": [
+        "feature",
+        "low-risk",
+        "quantization"
+      ],
+      "pr_number": "47881",
+      "title_en": "[Feature] Migrate moe sp support to non-torch compiled path for GLM5.2",
+      "title_zh": "[Feature] 新增：Migrate MoE sp 支持 non-torch compiled path GLM5.2",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "eb33ff34dd6501f23f5be92a5c842d34ab05d7fd",
+      "comment": "【变更概述】[ROCm] [Perf] 更新：DSv4 two-stage compressor 内核 HCA prefill\n【PR号】#47718\n【变更类型】此提交为性能优化类型\n【变更文件】修改 tests/kernels/test_compressor_kv_cache.py (+130/-0); 修改 vllm/models/deepseek_v4/common/ops/fused_compress_quant_cache.py (+355/-0); 修改 vllm/models/deepseek_v4/compressor.py (+43/-0)\n【统计数据】共修改 3 个文件，新增 528 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, kv-cache, tests",
+      "tags": [
+        "performance",
+        "low-risk",
+        "ops",
+        "kv-cache",
+        "tests"
+      ],
+      "pr_number": "47718",
+      "title_en": "[ROCm][Perf] DSv4 two-stage compressor kernel for HCA prefill",
+      "title_zh": "[ROCm] [Perf] 更新：DSv4 two-stage compressor 内核 HCA prefill",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2bd8957627bfb5668c46f2bc359bef47d371270c",
+      "comment": "【变更概述】[Bugfix] [NVFP4 MoE] 更新：Pad gated intermediate 64 FlashInfer TRT-LLM shuffle M%128\n【PR号】#46880\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/model_executor/layers/quantization/utils/flashinfer_fp4_moe.py (+7/-1)\n【统计数据】共修改 1 个文件，新增 7 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, quantization",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "attention",
+        "quantization"
+      ],
+      "pr_number": "46880",
+      "title_en": "[Bugfix][NVFP4 MoE] Pad gated intermediate to 64 for FlashInfer TRT-LLM shuffle (M%128)",
+      "title_zh": "[Bugfix] [NVFP4 MoE] 更新：Pad gated intermediate 64 FlashInfer TRT-LLM shuffle M%128",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3034c8d389edaf4a131c30304eee76bb9aef5022",
+      "comment": "【变更概述】[CI] [PD] 新增：添加 optional/nightly DSv4 Disaggregated eval\n【PR号】#42310\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .buildkite/test_areas/disaggregated.yaml (+22/-0); 修改 tests/v1/kv_connector/nixl_integration/run_accuracy_test.sh (+8/-5); 修改 tests/v1/kv_connector/nixl_integration/test_accuracy.py (+1/-0)\n【统计数据】共修改 3 个文件，新增 31 行，删除 5 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "42310",
+      "title_en": "[CI][PD] Add optional/nightly DSv4 Disaggregated eval",
+      "title_zh": "[CI] [PD] 新增：添加 optional/nightly DSv4 Disaggregated eval",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ecf4aa5ce2ccd4069f12318ca9d3fcef7c9f6257",
+      "comment": "【变更概述】【MRV2】[Bugfix] 【MRV2】修复：修复 FlashInfer non-causal draft 注意力 DFlash/DSpark Blackwell\n【PR号】#48167\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】新增 tests/v1/spec_decode/test_dflash_causality.py (+55/-0); 修改 tools/pre_commit/generate_attention_backend_docs.py (+3/-1); 修改 vllm/model_executor/models/qwen3_dflash.py (+24/-12); 修改 vllm/platforms/cuda.py (+6/-1); 修改 vllm/v1/attention/backends/flashinfer.py (+2/-1); ... 及其他 7 个文件\n【统计数据】共修改 12 个文件，新增 149 行，删除 47 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner, attention, spec-decode, tests",
+      "tags": [
+        "bugfix",
+        "mrv2",
+        "high-risk",
+        "model-runner",
+        "attention",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "48167",
+      "title_en": "[Bugfix] Fix FlashInfer non-causal draft attention (DFlash/DSpark) on Blackwell",
+      "title_zh": "【MRV2】[Bugfix] 【MRV2】修复：修复 FlashInfer non-causal draft 注意力 DFlash/DSpark Blackwell",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "49e777cf08e05ffb017233dc114b0791cb307004",
+      "comment": "【变更概述】[CI] [ROCm] 文档：Retry failed Docker build steps once\n【PR号】#48773\n【变更类型】此提交为日常维护类型\n【变更文件】修改 .buildkite/hardware_tests/amd.yaml (+6/-0)\n【统计数据】共修改 1 个文件，新增 6 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "48773",
+      "title_en": "[CI][ROCm] Retry failed Docker build steps once",
+      "title_zh": "[CI] [ROCm] 文档：Retry failed Docker build steps once",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b7950e798f2094b1163c22787c0ba2e3231bf01b",
+      "comment": "【变更概述】【MRV2】[Bugfix] 【MRV2】更新：Initialize draft CUDA-graph keys native draft_model proposer\n【PR号】#47460\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 vllm/v1/worker/gpu_model_runner.py (+2/-0)\n【统计数据】共修改 1 个文件，新增 2 行，删除 0 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner",
+      "tags": [
+        "bugfix",
+        "mrv2",
+        "high-risk",
+        "model-runner"
+      ],
+      "pr_number": "47460",
+      "title_en": "[Bugfix] Initialize draft CUDA-graph keys for the native draft_model proposer",
+      "title_zh": "【MRV2】[Bugfix] 【MRV2】更新：Initialize draft CUDA-graph keys native draft_model proposer",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现",
+        "testing": "需要验证 vllm-ascend 的相关测试是否通过",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "整体功能回归测试"
+        ]
+      }
+    },
+    {
+      "sha": "de100ffb622f435b727177fc751c8de5f41c4d3b",
+      "comment": "【变更概述】[Docs] 文档：Document pooling config resolution\n【PR号】#48497\n【变更类型】此提交为文档更新类型\n【变更文件】修改 docs/models/pooling_models/README.md (+59/-4)\n【统计数据】共修改 1 个文件，新增 59 行，删除 4 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "48497",
+      "title_en": "[Docs] Document pooling config resolution",
+      "title_zh": "[Docs] 文档：Document pooling config resolution",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "43cd340247f442cfccaa8bef24c0867493af8e7b",
+      "comment": "【变更概述】[Fix] 更新：Align OpenAI vllm_xargs value types across request schemas\n【PR号】#48252\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/entrypoints/openai/completion/protocol.py (+2/-2); 修改 vllm/entrypoints/speech_to_text/transcription/protocol.py (+2/-2)\n【统计数据】共修改 2 个文件，新增 4 行，删除 4 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48252",
+      "title_en": "[Fix] Align OpenAI vllm_xargs value types across request schemas",
+      "title_zh": "[Fix] 更新：Align OpenAI vllm_xargs value types across request schemas",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "1d99f0f42152a1459e4b54804b44fc1f989558bb",
+      "comment": "【变更概述】[ROCm] [BugFix] 更新：Triton W4A16 handling GPTQ/AutoGPTQ qzeros layout\n【PR号】#47770\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/kernels/quantization/test_triton_w4a16.py (+157/-0); 修改 vllm/model_executor/kernels/linear/mixed_precision/triton_w4a16.py (+25/-5)\n【统计数据】共修改 2 个文件，新增 182 行，删除 5 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, quantization, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ops",
+        "quantization",
+        "tests"
+      ],
+      "pr_number": "47770",
+      "title_en": "[ROCm][BugFix] Triton W4A16 handling for GPTQ/AutoGPTQ qzeros layout",
+      "title_zh": "[ROCm] [BugFix] 更新：Triton W4A16 handling GPTQ/AutoGPTQ qzeros layout",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    }
+  ],
+  "ascend_impact_summary": "修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现; 修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现",
+  "daily_summary": "当日有 2 个 commit 影响 vllm-ascend；发现 3 个 MRV2 相关变更；发现 10 个中高风险变更"
+}

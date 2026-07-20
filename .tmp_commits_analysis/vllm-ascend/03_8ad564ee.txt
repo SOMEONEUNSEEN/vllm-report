@@ -1,0 +1,115 @@
+=== Commit 3/4 ===
+Repo: vllm-ascend
+SHA: 8ad564eee8c1286360cd4284825a16df8977405d
+Author: herizhen
+Date: 2026-07-19T14:53:42+08:00
+
+--- Message ---
+[Doc] Update DeepSeek v4 support status and rename CANN install guide (#12358)
+
+### What this PR does / why we need it?
+This PR updates the support status of DeepSeek V4-Flash and DeepSeek
+V4-Pro to experimental (🔵) in the supported models matrix, and renames
+the "Ascend Environment Setup Guide" link to "CANN Installation" in the
+installation documentation.
+
+### Does this PR introduce _any_ user-facing change?
+No.
+
+### How was this patch tested?
+Documentation-only change, no testing required.
+
+
+- vLLM version: v0.24.0
+- vLLM main:
+https://github.com/vllm-project/vllm/commit/85c09e9885e346ea1612da30ebff5a75f67d2350
+
+---------
+
+Signed-off-by: herizhen <1270637059@qq.com>
+---
+ docs/source/installation.md                               |  4 ++--
+ docs/source/locale/zh_CN/LC_MESSAGES/installation.po      | 10 ++++------
+ docs/source/user_guide/support_matrix/supported_models.md |  4 ++--
+ 3 files changed, 8 insertions(+), 10 deletions(-)
+
+--- Stats ---
+Files changed: 3
+Additions: 8
+Deletions: 10
+
+--- Files ---
+
+[File 1] docs/source/installation.md
+  status: modified
+  additions: 2, deletions: 2
+  patch:
+@@ -24,7 +24,7 @@ There are two installation methods:
+ 
+ ## Configure Ascend CANN environment
+ 
+-Before installation, you need to make sure firmware/driver, and CANN are installed correctly, refer to [Ascend Environment Setup Guide](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702) for more details.
++Before installation, you need to make sure firmware/driver, and CANN are installed correctly, refer to [CANN Installation](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702) for more details.
+ 
+ ### Configure hardware environment
+ 
+@@ -34,7 +34,7 @@ To verify that the Ascend NPU firmware and driver were correctly installed, run:
+ npu-smi info
+ ```
+ 
+-Refer to [Ascend Environment Setup Guide](https://ascend.github.io/docs/sources/ascend/quick_install.html) for more details.
++Refer to [CANN Installation](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702) for more details.
+ 
+ ### Configure software environment
+ 
+
+[File 2] docs/source/locale/zh_CN/LC_MESSAGES/installation.po
+  status: modified
+  additions: 4, deletions: 6
+  patch:
+@@ -53,12 +53,11 @@ msgstr "## 配置昇腾 CANN 环境"
+ 
+ msgid ""
+ "Before installation, you need to make sure firmware/driver, and CANN are "
+-"installed correctly, refer to [Ascend Environment Setup "
+-"Guide](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702)"
++"installed correctly, refer to [CANN Installation](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702)"
+ " for more details."
+ msgstr ""
+ "安装前，需确保固件/驱动和 CANN "
+-"已正确安装，更多详情请参考[昇腾环境搭建指南](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702)。"
++"已正确安装，更多详情请参考[CANN 安装指南](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702)。"
+ 
+ msgid "### Configure hardware environment"
+ msgstr "### 配置硬件环境"
+@@ -69,11 +68,10 @@ msgid ""
+ msgstr "要验证昇腾 NPU 固件和驱动是否正确安装，请运行："
+ 
+ msgid ""
+-"Refer to [Ascend Environment Setup "
+-"Guide](https://ascend.github.io/docs/sources/ascend/quick_install.html) for "
++"Refer to [CANN Installation](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702) for "
+ "more details."
+ msgstr ""
+-"更多详情请参考[昇腾环境搭建指南](https://ascend.github.io/docs/sources/ascend/quick_install.html)。"
++"更多详情请参考[CANN 安装指南](https://www.hiascend.com/cann/download?versionId=735&ids=d806%2Ch0501%2Ch0601%2Ch0702)。"
+ 
+ msgid "### Configure software environment"
+ msgstr "### 配置软件环境"
+
+[File 3] docs/source/user_guide/support_matrix/supported_models.md
+  status: modified
+  additions: 2, deletions: 2
+  patch:
+@@ -17,8 +17,8 @@ Get the latest info here: <https://github.com/vllm-project/vllm-ascend/issues/16
+ 
+ | Model | Support | Note | BF16 | Supported Hardware | W8A8 | Chunked Prefill | Automatic Prefix Cache | LoRA | Speculative Decoding | Async Scheduling | Tensor Parallel | Pipeline Parallel | Expert Parallel | Data Parallel | Prefill-decode Disaggregation | Piecewise AclGraph | Fullgraph AclGraph | max-model-len | Doc |
+ | ------------------------------- | ----------- | ---------------------------------------------------------------------- | ------ | -------------------- | ------ | ----------------- | ------------------------ | ------ | ---------------------- | ------------------ | ----------------- | ------------------- | ----------------- | --------------- | ------------------------------- | -------------------- | -------------------- | --------------- | ----- |
+-| DeepSeek V4-Flash | ✅ |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | 1M | [DeepSeek-V4-Flash](../../tutorials/models/DeepSeek-V4-Flash.md) |
+-| DeepSeek V4-Pro | ✅ |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | 1M | [DeepSeek-V4-Pro](../../tutorials/models/DeepSeek-V4-Pro.md) |
++| DeepSeek V4-Flash | 🔵 |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | 1M | [DeepSeek-V4-Flash](../../tutorials/models/DeepSeek-V4-Flash.md) |
++| DeepSeek V4-Pro | 🔵 |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  | ✅ | 1M | [DeepSeek-V4-Pro](../../tutorials/models/DeepSeek-V4-Pro.md) |
+ | DeepSeek V3/3.1 | ✅ |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ |  | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 240k | [DeepSeek-V3.1](../../tutorials/models/DeepSeek-V3.1.md) |
+ | DeepSeek V3.2 | 🔵 |  | ✅ | A2/A3 | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 160k | [DeepSeek-V3.2](../../tutorials/models/DeepSeek-V3.2.md) |
+ | DeepSeek R1 | ✅ |  | ✅ | A2/A3 | ✅ | ✅ | ✅ |  | ✅ |  | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | 128k | [DeepSeek-R1](../../tutorials/models/DeepSeek-R1.md) |
+

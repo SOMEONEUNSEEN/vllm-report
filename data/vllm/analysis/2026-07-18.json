@@ -1,0 +1,443 @@
+{
+  "date": "2026-07-18",
+  "repo": "vllm-project/vllm",
+  "generated_at": "2026-07-19T09:13:05.068868+08:00",
+  "daily_summary": "2026-07-18 vllm 仓库共合入 21 个 commits，整体活动较前一日（42 个）回落，覆盖 bugfix、性能优化、模型加载重构、采样器优化、注意力 backend 扩展、profiler 增强、CI/文档等方向。其中最值得关注的是 MRV2（Model Runner V2）相关 1 个核心 commit：#47680 (41ea2dd4) [Bugfix][V1/V2] 修复 prompt_logprobs 使其遵循 logprobs_mode，横跨 V1（vllm/v1/worker/gpu_model_runner.py）与 V2（vllm/v1/worker/gpu/model_runner.py）两条 model runner 路径，重命名公共采样工具 compute_topk_logprobs → compute_topk_scores 并新增 logits_mode 参数，vllm-ascend 必须同步适配。另有 1 个 model runner 相关 commit：#37524 (fcd2255d) 扩展 GPU Profiler 配置与注解，修改 gpu_model_runner.py 与 gpu_worker.py（vllm-ascend 覆盖路径）。其他需关注的变更：#48496 批量移除 44 个模型的冗余 load_weights（重构模型加载路径）、#48025 修复 TP replicated/disable_tp 权重重加载、#48641 采样器停止 logits fp32 上转（V2 采样路径）、#48012 允许按 KV-cache group 选择 attention backend（高风险，影响 backend 选择核心）、#46868 InstantTensor 加载改进、#48729 GLM-4V 视频 profiling 修复。整体风险评估：1 个高风险（#48012 attention backend 选择机制）、9 个中风险、11 个低风险。对 vllm-ascend 影响：约 11 个 commits 有潜在或直接影响，需重点验证 #47680（MRV2 prompt_logprobs）、#48012（attention backend 选择）与 #48496（模型加载重构）。",
+  "ascend_impact_summary": "21 个 commits 中约 11 个对 vllm-ascend 有潜在或直接影响。直接影响（ascend_affected=true，需重点关注）：#47680 (MRV2) 同时修改 V1/V2 model runner 的 prompt_logprobs 路径并重命名公共采样工具，vllm-ascend 必须同步适配；#48012 修改 attention backend 选择核心逻辑（vllm/v1/attention/selector.py + config/attention.py），vllm-ascend 的 backend 注册需验证兼容性；#37524 扩展 gpu_model_runner.py 的 profiler 注入点。潜在影响（ascend_affected=true，需验证）：#48496 模型 load_weights 大规模重构（44 个模型文件）；#48025 TP replicated/disable_tp 权重加载修复；#48110 hybrid mamba 状态拷贝向量化；#48641 V2 采样器 logits 精度处理优化；#43979 Quark MXFP4 MoE 加载（通用路径但 bug 为 ROCm 专用）；#46868 InstantTensor 加载改进；#48729 GLM-4V 视频 profiling（vllm-ascend 重点模型）。不受影响（ascend_affected=false）：#43164 CI 队列、#48988 tml-fa4、#48759 TrtLlmLoRAExperts、#48990 Inkling NVFP4、#48829 beam-search 前端、#48797 Helion B200、#48771 macOS wheel CI、#48660 DSV4 CUDA kernel、#46115 MoRIIO toy proxy、#48788 ROCm gfx950、#48846 工具解析器。建议 vllm-ascend 团队优先验证 #47680 MRV2 prompt_logprobs 在各 logprobs_mode 下的行为，其次是 #48012 attention backend 选择机制与 #48496 模型加载重构的回归测试。",
+  "commits": [
+    {
+      "sha": "29c0ec4d63d1869f54a9fbcdf082f77534d9211a",
+      "pr_number": "43164",
+      "title_en": "[ci] Move 3 entrypoints tests to h200_35gb queue",
+      "title_zh": "[CI] 将 3 个 entrypoints 测试迁移到 h200_35gb 队列",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】将 3 个 entrypoints（openai responses）测试从原队列迁移到 h200_35gb 队列，调整 .buildkite/test_areas/entrypoints.yaml 的队列分配并修改 test_parsable_context.py 的标记。\n【PR号】#43164\n【变更类型】CI 维护 - 测试队列重新分配\n【变更文件】.buildkite/test_areas/entrypoints.yaml (+3/-0)、tests/entrypoints/openai/responses/test_parsable_context.py (+1/-1)\n【统计数据】+4/-1，共 2 个文件\n【风险评估】低风险 - 仅 CI 队列配置调整，无功能代码变更\n【涉及模块】ci",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 仅 .buildkite CI 配置和测试标记变更，不涉及运行时代码",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c7ce03bcbd380d0e94490abb111fe48861c16343",
+      "pr_number": "48988",
+      "title_en": "[Bugfix] Bump tml-fa4 for cutlass-dsl 4.6 API compatibility",
+      "title_zh": "[修复] 升级 tml-fa4 以兼容 cutlass-dsl 4.6 API",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "quantization"
+      ],
+      "comment": "【变更概述】升级 tml-fa4（FlashAttention 4 外部依赖）版本以适配 cutlass-dsl 4.6 的 API 变更，解决编译兼容性问题。\n【PR号】#48988\n【变更类型】bugfix - 依赖版本修复\n【变更文件】cmake/external_projects/tml_fa4.cmake (+1/-1)\n【统计数据】+1/-1，共 1 个文件\n【风险评估】低风险 - 仅外部依赖版本号调整，tml-fa4 为 NVIDIA FA4 专用\n【涉及模块】quantization",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - tml-fa4 是 NVIDIA CUTLASS-DSL 的 FA4 实现，vllm-ascend 不使用该 CUDA 专用依赖",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c233d90aa826df072872df47b201450059be8e71",
+      "pr_number": "48496",
+      "title_en": "Remove even more unnecessary `load_weights` methods",
+      "title_zh": "[重构] 移除更多不必要的 load_weights 方法",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "model-runner"
+      ],
+      "comment": "【变更概述】延续此前的清理工作，批量移除 44 个模型文件中冗余的 load_weights 方法，将通用逻辑收敛到 vllm/model_executor/models/utils.py（新增 111 行通用工具函数）。涉及 aria/bailing_moe/glm4_moe/jamba/lfm2_moe/openpangu/param2moe 等大量模型实现。\n【PR号】#48496\n【变更类型】重构 - 模型加载逻辑收敛到通用工具\n【变更文件】vllm/model_executor/models/utils.py (+111/-0) 及 44 个模型文件\n【统计数据】+639/-2076，共 44 个文件\n【风险评估】中风险 - 大规模重构模型加载路径，删除多于新增，需验证各模型权重加载正确性\n【涉及模块】model-runner",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/model_executor/models/utils.py 与各模型的 load_weights 路径是通用模型加载接口，vllm-ascend 的模型加载同样依赖该路径。需验证 GLM4/Qwen3 等在 vllm-ascend 上权重加载无回归",
+        "testing": "建议测试 GLM4 / Qwen3 / DeepSeek 系列模型在 Ascend 上的权重加载",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "GLM4 模型加载",
+          "Qwen3 模型加载",
+          "MoE 模型加载"
+        ]
+      }
+    },
+    {
+      "sha": "d96aee09518a57fdfe1e83369d2f4ab515f78c30",
+      "pr_number": "48025",
+      "title_en": "[Bugfix] Re-sync parameter tp_rank after process_weights_after_loading (fix replicated / disable_tp weight reload)",
+      "title_zh": "[修复] 在 process_weights_after_loading 后重新同步 parameter tp_rank（修复 replicated/disable_tp 权重重新加载）",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "model-runner",
+        "distributed"
+      ],
+      "comment": "【变更概述】修复 replicated 权重和 disable_tp 场景下权重重新加载时 tp_rank 不同步的问题。在 linear.py 的 process_weights_after_loading 后增加 tp_rank 重同步逻辑，并在 layerwise.py 和 model_loader/utils.py 中补充同步点。\n【PR号】#48025\n【变更类型】bugfix - 张量并行权重加载时序修复\n【变更文件】vllm/model_executor/layers/linear.py (+11/-7)、vllm/model_executor/model_loader/reload/layerwise.py (+5/-0)、vllm/model_executor/model_loader/utils.py (+7/-0)\n【统计数据】+23/-7，共 3 个文件\n【风险评估】中风险 - 涉及张量并行权重加载核心路径，影响 replicated/disable_tp 场景\n【涉及模块】model-runner, distributed",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - linear.py 的权重加载与 tp_rank 同步是通用张量并行路径，vllm-ascend 在 TP 场景同样使用。需验证 disable_tp / replicated 权重在 Ascend 上的加载行为",
+        "testing": "建议测试 TP 场景下 replicated 权重加载与 disable_tp 重加载",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "TP replicated 权重加载",
+          "disable_tp 重加载"
+        ]
+      }
+    },
+    {
+      "sha": "c71a583aa9f81400528e67e3d818f66b804e8340",
+      "pr_number": "48110",
+      "title_en": "[Perf][Hybrid] Vectorize _copy_mamba_state_block to uint64 for temporal",
+      "title_zh": "[性能][Hybrid] 将 _copy_mamba_state_block 向量化为 uint64 以优化 temporal 模型",
+      "tags": [
+        "performance",
+        "low-risk",
+        "model-runner"
+      ],
+      "comment": "【变更概述】对 hybrid（Mamba/SSM）模型 _copy_mamba_state_block 进行向量化优化，将状态块拷贝改为 uint64 批量拷贝，提升 temporal 系列（如 Mamba2/Hybrid）模型的状态拷贝吞吐。重构 vllm/v1/worker/mamba_utils.py，新增 54 行向量化实现。\n【PR号】#48110\n【变更类型】performance - 状态拷贝向量化\n【变更文件】vllm/v1/worker/mamba_utils.py (+54/-16)\n【统计数据】+54/-16，共 1 个文件\n【风险评估】低风险 - 局限于 mamba_utils.py 的状态拷贝实现\n【涉及模块】model-runner",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/v1/worker/mamba_utils.py 是 hybrid 模型通用状态管理路径，若 vllm-ascend 支持 Mamba/Hybrid 模型需验证 uint64 向量化在 NPU 上的正确性与性能",
+        "testing": "建议测试 hybrid/Mamba 模型状态拷贝",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "Mamba 状态拷贝",
+          "Hybrid 模型推理"
+        ]
+      }
+    },
+    {
+      "sha": "f12b80c6efa116c7c4020ee611d622ab7030ca40",
+      "pr_number": "43979",
+      "title_en": "[ROCm][Bugfix] Fix GPT-OSS Quark MXFP4 MoE loading - emulation buffer not block-aligned",
+      "title_zh": "[ROCm][修复] 修复 GPT-OSS Quark MXFP4 MoE 加载 - emulation buffer 未按 block 对齐",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "quantization",
+        "moe"
+      ],
+      "comment": "【变更概述】修复 ROCm 平台 GPT-OSS 模型使用 Quark MXFP4 量化时 MoE 加载的 emulation buffer 未按 block 对齐的问题。在 mxfp4.py 和 quark_moe.py 中调整 buffer 对齐逻辑，并补充 test_ocp_mx_moe.py 测试覆盖。\n【PR号】#43979\n【变更类型】bugfix - 量化 buffer 对齐修复\n【变更文件】tests/kernels/moe/test_ocp_mx_moe.py (+46/-0)、vllm/model_executor/layers/fused_moe/oracle/mxfp4.py (+10/-1)、vllm/model_executor/layers/quantization/quark/quark_moe.py (+3/-6)\n【统计数据】+59/-7，共 3 个文件\n【风险评估】低风险 - bug 本身为 ROCm 专用 emulation 路径，但修改了通用 quark_moe.py\n【涉及模块】quantization, moe",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - quark_moe.py 是通用 Quark 量化 MoE 路径，vllm-ascend 若使用 Quark 量化需关注对齐逻辑变更。但具体 bug（emulation buffer）为 ROCm 专用",
+        "testing": "建议验证 Quark MXFP4 MoE 在 Ascend 上的加载",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "Quark MXFP4 MoE 加载"
+        ]
+      }
+    },
+    {
+      "sha": "da64db78b989d820effd090d8ac4b65ade2cbe4f",
+      "pr_number": "48759",
+      "title_en": "[LoRA] Optimize TrtLlmLoRAExperts",
+      "title_zh": "[LoRA] 优化 TrtLlmLoRAExperts",
+      "tags": [
+        "performance",
+        "medium-risk",
+        "lora"
+      ],
+      "comment": "【变更概述】优化 TrtLlmLoRAExperts（TensorRT-LLM 风格的 LoRA MoE 专家）实现，重构 trtllm_lora_moe.py（+210/-40）并调整 lora_experts_mixin.py 的接口，提升 LoRA + MoE 的执行效率。\n【PR号】#48759\n【变更类型】performance - LoRA MoE 专家优化\n【变更文件】vllm/model_executor/layers/fused_moe/experts/lora_experts_mixin.py (+11/-1)、vllm/model_executor/layers/fused_moe/experts/trtllm_lora_moe.py (+210/-40)\n【统计数据】+221/-41，共 2 个文件\n【风险评估】中风险 - 大规模重构 LoRA MoE 专家实现\n【涉及模块】lora",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - TrtLlmLoRAExperts 是 TensorRT-LLM 风格的 CUDA 专用 LoRA MoE 实现，vllm-ascend 使用自己的 LoRA 路径",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "425c4eafb064f3804538a93584ec07c196d14cf9",
+      "pr_number": "48641",
+      "title_en": "[Sampler] Stop upcasting logits to fp32 in apply_sampling_params",
+      "title_zh": "[采样器] 在 apply_sampling_params 中停止将 logits 上转为 fp32",
+      "tags": [
+        "performance",
+        "medium-risk",
+        "sample",
+        "mrv2"
+      ],
+      "comment": "【变更概述】优化采样路径：apply_sampling_params 不再强制将 logits 上转为 fp32，改由后续 topk/topp 采样核按需处理精度。涉及 topk_topp_sampler.py、topk_topp_triton.py、gpu/sample/logit_bias.py 与 gpu/sample/sampler.py，并补充 test_topk_topp_sampler.py 测试。该路径位于 V2 采样子系统（vllm/v1/worker/gpu/sample/），属 MRV2 重构后的采样模块。\n【PR号】#48641\n【变更类型】performance - 采样精度处理优化\n【变更文件】tests/v1/sample/test_topk_topp_sampler.py (+38/-0)、vllm/v1/sample/ops/topk_topp_sampler.py (+6/-4)、vllm/v1/sample/ops/topk_topp_triton.py (+19/-13)、vllm/v1/worker/gpu/sample/logit_bias.py (+3/-1)、vllm/v1/worker/gpu/sample/sampler.py (+19/-7)\n【统计数据】+85/-25，共 5 个文件\n【风险评估】中风险 - 修改采样精度处理路径，可能影响采样结果数值一致性\n【涉及模块】sample, model-runner, mrv2",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/v1/worker/gpu/sample/sampler.py 与 topk_topp 采样路径是 V2 采样核心，vllm-ascend 的采样器需要关注 logits 精度处理变更是否影响 Ascend 上的采样数值一致性",
+        "testing": "建议测试 top-k/top-p 采样在 Ascend 上的数值正确性",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "top-k/top-p 采样",
+          "采样数值一致性"
+        ]
+      }
+    },
+    {
+      "sha": "02c01f442b8bfd0affa1f2ceedda01f2e1384303",
+      "pr_number": "48990",
+      "title_en": "[Model] Use standard ModelOpt config for Inkling NVFP4",
+      "title_zh": "[模型] 为 Inkling NVFP4 使用标准 ModelOpt 配置",
+      "tags": [
+        "refactor",
+        "low-risk",
+        "quantization"
+      ],
+      "comment": "【变更概述】将 Inkling NVFP4 量化切换到标准的 ModelOpt 配置路径，删除自定义的 vllm/models/inkling/nvfp4.py（-64 行），改用 model_arch_config_convertor.py 的标准转换。调整 inkling/nvidia 子目录下的 model.py、moe.py、mtp.py。\n【PR号】#48990\n【变更类型】refactor - 量化配置标准化\n【变更文件】tests/config/test_model_arch_config.py (+17/-0)、tests/models/inkling/test_moe_weight_layout.py (+25/-0)、vllm/models/inkling/nvfp4.py (removed -64)、vllm/models/inkling/nvidia/{model,moe,mtp}.py、vllm/transformers_utils/model_arch_config_convertor.py (+7/-2)\n【统计数据】+56/-110，共 7 个文件\n【风险评估】低风险 - Inkling NVFP4 是 NVIDIA ModelOpt 专用量化\n【涉及模块】quantization",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - Inkling NVFP4 是 NVIDIA ModelOpt 专用量化路径，vllm-ascend 不使用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "fae543015cd49dfb4db3afb3a2e96d2eccb3e1db",
+      "pr_number": "48829",
+      "title_en": "[Frontend] Flatten beam-search beams with itertools.chain instead of sum",
+      "title_zh": "[前端] 使用 itertools.chain 替代 sum 拍平 beam-search beams",
+      "tags": [
+        "performance",
+        "low-risk",
+        "frontend"
+      ],
+      "comment": "【变更概述】将 beam-search 离线入口的 beam 拍平从 sum（O(n²)）改为 itertools.chain（O(n)），小幅性能优化。\n【PR号】#48829\n【变更类型】performance - 前端列表拍平优化\n【变更文件】vllm/entrypoints/generate/beam_search/offline.py (+3/-1)\n【统计数据】+3/-1，共 1 个文件\n【风险评估】低风险 - 单文件前端优化\n【涉及模块】frontend",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 仅前端 beam-search 离线入口的纯 Python 优化，不涉及后端",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c9be3a8aa1f01f7efdc99dd9439451617ef54a00",
+      "pr_number": "48797",
+      "title_en": "[Kernel][Helion] Disable warp specialization in rms_norm_per_block_quant B200 configs",
+      "title_zh": "[内核][Helion] 在 rms_norm_per_block_quant B200 配置中禁用 warp 特化",
+      "tags": [
+        "chore",
+        "low-risk",
+        "kernel"
+      ],
+      "comment": "【变更概述】调整 Helion rms_norm_per_block_quant 在 NVIDIA B200 上的 autotuned 配置，禁用 warp specialization 以避免在该硬件上的性能回退。\n【PR号】#48797\n【变更类型】chore - 内核调优配置\n【变更文件】vllm/kernels/helion/configs/rms_norm_per_block_quant/nvidia_b200.json (+45/-45)\n【统计数据】+45/-45，共 1 个文件\n【风险评估】低风险 - 仅 B200 配置调整\n【涉及模块】kernel",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - Helion 是 Meta 的 NVIDIA GPU kernel 库，B200 配置专用，vllm-ascend 不使用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "41ea2dd44a3a20c46ebeb985de0022c7673fb953",
+      "pr_number": "47680",
+      "title_en": "[Bugfix][V1/V2] Fix prompt_logprobs to respect logprobs_mode",
+      "title_zh": "【MRV2】[修复][V1/V2] 修复 prompt_logprobs 使其遵循 logprobs_mode",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "mrv2",
+        "model-runner",
+        "sample"
+      ],
+      "comment": "【变更概述】★★★ MRV2 重点 commit ★★★\n修复 prompt_logprobs 未遵循 logprobs_mode 配置的问题。当 logprobs_mode 为 raw_logits / processed_logits 时，prompt_logprobs 应返回 logits 而非 logprobs（因 prompt token 不经过采样 processor，processed_* 与 raw_* 在 prompt 侧应一致）。\n核心改动：\n1) 将 compute_topk_logprobs 重命名为通用 compute_topk_scores，新增 logits_mode 参数控制返回 logits 还是 logprobs；\n2) PromptLogprobsWorker 构造函数新增 logprobs_mode 参数；\n3) gpu_model_runner.py（V1）与 gpu/model_runner.py（V2）的 prompt_logprobs 计算分支根据 logprobs_mode 选择 logits 或 logprobs；\n4) sampler.py / rejection_sampler.py / spec_decode rejection_sampler 同步适配新的 logits_mode 判断；\n5) 移除 vllm/config/vllm.py 中对 generate runner + logits 模式的 unsupported 限制，并在 ModelConfig 文档补充 prompt 侧 processed/raw 一致的说明。\n【PR号】#47680\n【变更类型】bugfix - 采样/对数概率模式一致性修复（横跨 V1 与 V2 model runner）\n【变更文件】tests/v1/sample/test_logprobs.py (+38/-0)、vllm/config/model.py (+2/-0)、vllm/config/vllm.py (+0/-7)、vllm/model_executor/models/diffusion_gemma.py (+4/-2)、vllm/v1/sample/rejection_sampler.py (+8/-2)、vllm/v1/worker/gpu/model_runner.py (+4/-1)、vllm/v1/worker/gpu/sample/logprob.py (+12/-5)、vllm/v1/worker/gpu/sample/prompt_logprob.py (+17/-11)、vllm/v1/worker/gpu/sample/sampler.py (+8/-6)、vllm/v1/worker/gpu/spec_decode/rejection_sampler.py (+5/-3)、vllm/v1/worker/gpu_model_runner.py (+8/-3)\n【统计数据】+106/-40，共 11 个文件\n【风险评估】中风险 - 同时修改 V1（gpu_model_runner.py）与 V2（gpu/model_runner.py）model runner 的 prompt_logprobs 路径，并重命名公共采样工具函数\n【涉及模块】mrv2, model-runner, sample\n【MRV2关联】★★★ 此变更同时修改 V1 与 V2 model runner，重命名 compute_topk_logprobs → compute_topk_scores，影响 vllm-ascend 覆盖的 gpu_model_runner.py 路径，必须同步适配",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - 修改 vllm/v1/worker/gpu_model_runner.py（V1 MR 路径，vllm-ascend 覆盖）与 vllm/v1/worker/gpu/model_runner.py（V2 MR 路径）。重命名 compute_topk_logprobs → compute_topk_scores 并新增 logits_mode 参数，vllm-ascend 若覆盖或调用该采样工具需同步适配；prompt_logprobs 计算分支变更影响 logprobs_mode=raw_logits/processed_logits 的行为",
+        "testing": "建议测试 prompt_logprobs + 各 logprobs_mode 在 Ascend 上的行为一致性",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "prompt_logprobs with raw_logits mode",
+          "prompt_logprobs with processed_logits mode",
+          "prompt_logprobs with raw_logprobs / processed_logprobs mode",
+          "spec_decode rejection_sampler 兼容性"
+        ]
+      }
+    },
+    {
+      "sha": "088c0be2684fda35b18645bb36f0944a5c5fc941",
+      "pr_number": "48771",
+      "title_en": "[CI] Fix macOS wheel release annotation context",
+      "title_zh": "[CI] 修复 macOS wheel 发布注解上下文",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】修复 .buildkite/release-pipeline.yaml 中 macOS wheel 发布步骤的 annotation context 配置错误。\n【PR号】#48771\n【变更类型】CI 维护 - 发布流水线修复\n【变更文件】.buildkite/release-pipeline.yaml (+1/-1)\n【统计数据】+1/-1，共 1 个文件\n【风险评估】低风险 - 单行 CI 配置修复\n【涉及模块】ci",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - macOS wheel 发布流水线专用，与 Ascend 无关",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "fcd2255d16bd3c62493bae5dee769ce998098f21",
+      "pr_number": "37524",
+      "title_en": "[Hardware][GPU] Profiler config additional to increase it scope and annotation details",
+      "title_zh": "[硬件][GPU] 扩展 Profiler 配置范围与注解细节",
+      "tags": [
+        "feature",
+        "medium-risk",
+        "model-runner",
+        "profiler"
+      ],
+      "comment": "【变更概述】扩展 GPU Profiler 的配置能力与注解细节：在 vllm/config/profiler.py 新增 17 行配置项，在 gpu_model_runner.py 与 gpu_worker.py 中扩展 profiler 调用点（+62/-12 与 +98/-13），并补充 test_gpu_profiler.py 测试（+63/-1）。\n【PR号】#37524\n【变更类型】feature - Profiler 功能增强\n【变更文件】tests/v1/worker/test_gpu_profiler.py (+63/-1)、vllm/config/profiler.py (+17/-0)、vllm/v1/worker/gpu_model_runner.py (+62/-12)、vllm/v1/worker/gpu_worker.py (+98/-13)\n【统计数据】+240/-26，共 4 个文件\n【风险评估】中风险 - 修改 gpu_model_runner.py（vllm-ascend 覆盖路径）与 gpu_worker.py，扩展 profiler 注入点\n【涉及模块】model-runner, profiler",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/v1/worker/gpu_model_runner.py 是 vllm-ascend 覆盖的关键路径，profiler 注入点扩展可能影响 vllm-ascend 的 model_runner 适配。vllm-ascend 的 profiler 实现需同步评估是否需要扩展对应注解",
+        "testing": "建议验证 Ascend 上 profiler 功能正常",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "Ascend profiler 功能"
+        ]
+      }
+    },
+    {
+      "sha": "b5433b6f5079feb32f9f278cf4ae23bd87375148",
+      "pr_number": "48660",
+      "title_en": "[Perf] Optimize dsv4 routing using specialized kernel, 2.94% E2E TPOT improvement",
+      "title_zh": "[性能] 使用专用内核优化 dsv4 routing，端到端 TPOT 提升 2.94%",
+      "tags": [
+        "performance",
+        "low-risk",
+        "moe",
+        "kernel"
+      ],
+      "comment": "【变更概述】为 DeepSeek-V4（DSV4）的 MoE routing 引入专用 CUDA kernel topk_softplus_sqrt，在 csrc/libtorch_stable/moe/ 新增 kernel 实现，并新增 vllm/model_executor/layers/fused_moe/router/dsv4_topk.py，在 fused_topk_bias_router.py 中为 DSV4 路由分派到专用 kernel。端到端 TPOT 提升 2.94%。\n【PR号】#48660\n【变更类型】performance - DSV4 MoE routing 专用 kernel\n【变更文件】csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu (+78/-0)、tests/kernels/moe/test_topk_softplus_sqrt.py (+45/-0)、vllm/model_executor/layers/fused_moe/router/dsv4_topk.py (added +121/-0)、vllm/model_executor/layers/fused_moe/router/fused_topk_bias_router.py (+20/-0)\n【统计数据】+264/-0，共 4 个文件\n【风险评估】低风险 - 新增专用 kernel 路径，不修改既有 kernel\n【涉及模块】moe, kernel",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - topk_softplus_sqrt_kernels.cu 为 CUDA 专用 kernel，DSV4 routing 优化在 vllm-ascend 上需自行实现对应 NPU kernel（如有需要）",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "cc25f028b76844024fddd0b4ca18d4ca169b32be",
+      "pr_number": "46868",
+      "title_en": "[Loader] Improve InstantTensor loading",
+      "title_zh": "[加载器] 改进 InstantTensor 加载",
+      "tags": [
+        "feature",
+        "medium-risk",
+        "model-runner"
+      ],
+      "comment": "【变更概述】改进 InstantTensor（即时张量）加载流程，调整 weight_utils.py 的加载逻辑（+20/-5），更新多份测试依赖（cpu/cuda/rocm/nightly-torch requirements），并修复 instanttensor_loader 测试工具。\n【PR号】#46868\n【变更类型】feature - 模型加载器改进\n【变更文件】requirements/test/{cpu,cuda.in,cuda,nightly-torch,rocm.in,rocm}.txt、setup.py、tests/model_executor/model_loader/instanttensor_loader/test_weight_utils.py (+0/-2)、vllm/model_executor/model_loader/weight_utils.py (+20/-5)\n【统计数据】+27/-14，共 9 个文件\n【风险评估】中风险 - 修改通用 weight_utils.py 模型加载路径\n【涉及模块】model-runner",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/model_executor/model_loader/weight_utils.py 是通用权重加载路径，vllm-ascend 同样使用。InstantTensor 加载逻辑变更需验证不影响 Ascend 上的模型加载",
+        "testing": "建议测试 Ascend 上模型权重加载",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "模型权重加载"
+        ]
+      }
+    },
+    {
+      "sha": "c4cd2bd5440bca29039e5b6f33b695a95721bd3e",
+      "pr_number": "46115",
+      "title_en": "[Bugfix] MoRIIO toy P/D proxy: fix DP-rank index aliasing + harden for high-concurrency bursts",
+      "title_zh": "[修复] MoRIIO toy P/D 代理：修复 DP-rank 索引别名并增强高并发突发场景",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "kv-cache"
+      ],
+      "comment": "【变更概述】修复 MoRIIO toy P/D（Prefill/Decode 分离）代理服务器在 DP-rank 索引别名上的问题，并增强高并发突发场景下的鲁棒性。修改 examples/disaggregated/ 下的 moriio_toy_proxy_server.py，新增 test_moriio_proxy_routing.py 单元测试。\n【PR号】#46115\n【变更类型】bugfix - P/D 代理服务器修复\n【变更文件】examples/disaggregated/disaggregated_serving/moriio_toy_proxy_server.py (+63/-13)、tests/v1/kv_connector/unit/test_moriio_proxy_routing.py (added +205/-0)\n【统计数据】+268/-13，共 2 个文件\n【风险评估】低风险 - 仅 examples 示例代理与对应测试\n【涉及模块】kv-cache",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - moriio_toy_proxy_server 是 examples 下的示例代理脚本，非核心运行时代码",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5784507da458656ef8248119590822445d4c67f2",
+      "pr_number": "48012",
+      "title_en": "[Attention] Allow selecting a different attention backend per KV-cache group",
+      "title_zh": "[注意力] 允许为不同 KV-cache group 选择不同 attention backend",
+      "tags": [
+        "feature",
+        "high-risk",
+        "attention"
+      ],
+      "comment": "【变更概述】引入按 KV-cache group 选择不同 attention backend 的能力。在 vllm/config/attention.py 新增 38 行配置，重构 vllm/v1/attention/selector.py（+59/-3）的 backend 选择逻辑，并补充 test_backend_per_kind.py 与 e2e/test_attention_backend_per_kind.py 测试。\n【PR号】#48012\n【变更类型】feature - attention backend 选择机制扩展\n【变更文件】tests/v1/attention/test_backend_per_kind.py (added +67/-0)、tests/v1/e2e/general/test_attention_backend_per_kind.py (added +94/-0)、vllm/config/attention.py (+38/-0)、vllm/v1/attention/selector.py (+59/-3)\n【统计数据】+258/-3，共 4 个文件\n【风险评估】高风险 - 修改 attention backend 选择核心逻辑，vllm-ascend 有自己的 attention backend 注册\n【涉及模块】attention",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - vllm/v1/attention/selector.py 与 vllm/config/attention.py 是 attention backend 选择核心。vllm-ascend 注册了自己的 Ascend attention backend，按 KV-cache group 选择 backend 的新机制需 vllm-ascend 验证其 backend 注册与选择逻辑是否兼容",
+        "testing": "建议测试多 KV-cache group + 不同 backend 选择在 Ascend 上的行为",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "Ascend attention backend 按 KV-cache group 选择",
+          "多 backend 混合场景"
+        ]
+      }
+    },
+    {
+      "sha": "bf578e1abdffc2d25232783ff59a3132279e6bdd",
+      "pr_number": "48729",
+      "title_en": "[Bugfix][GLM4V] Fix video dummy profiling and memory usage",
+      "title_zh": "[修复][GLM4V] 修复视频 dummy profiling 与内存使用",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "mm-encoder"
+      ],
+      "comment": "【变更概述】修复 GLM-4V（glm4_1v.py）在视频 dummy profiling（预分配 profiling）时的内存使用问题，重构视频处理路径（+20/-49）。补充 test_glm4_1v.py 测试（+52/-0）。\n【PR号】#48729\n【变更类型】bugfix - 多模态视频 profiling 修复\n【变更文件】tests/models/multimodal/processing/test_glm4_1v.py (+52/-0)、vllm/model_executor/models/glm4_1v.py (+20/-49)\n【统计数据】+72/-49，共 2 个文件\n【风险评估】低风险 - 局限于 GLM-4V 模型实现\n【涉及模块】mm-encoder",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - GLM-4V 是 vllm-ascend 重点支持的模型之一，glm4_1v.py 视频处理路径变更需在 Ascend 上验证视频多模态 profiling 与内存",
+        "testing": "建议测试 GLM-4V 视频多模态在 Ascend 上的 profiling",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "GLM-4V 视频 profiling",
+          "GLM-4V 内存使用"
+        ]
+      }
+    },
+    {
+      "sha": "efed8a1e8345de2b4398a48243301d6a5b1a361e",
+      "pr_number": "48788",
+      "title_en": "[ROCm][Perf][DSV4] Improve sparse decode reduction occupancy on gfx950",
+      "title_zh": "[ROCm][性能][DSV4] 优化 gfx950 上 sparse decode reduction 占用",
+      "tags": [
+        "performance",
+        "low-risk",
+        "attention"
+      ],
+      "comment": "【变更概述】优化 ROCm gfx950 上 DSV4 sparse decode reduction 的占用率，调整 vllm/v1/attention/ops/rocm_aiter_mla_sparse.py 的 kernel 参数。\n【PR号】#48788\n【变更类型】performance - ROCm sparse attention kernel 调优\n【变更文件】vllm/v1/attention/ops/rocm_aiter_mla_sparse.py (+2/-2)\n【统计数据】+2/-2，共 1 个文件\n【风险评估】低风险 - ROCm gfx950 专用\n【涉及模块】attention",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - rocm_aiter_mla_sparse.py 是 ROCm gfx950 专用 sparse attention kernel",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "11d291511a35bfa2a9ecb8fd21ee1c48b3a78d6b",
+      "pr_number": "48846",
+      "title_en": "[Bugfix][Tool Parser] Preserve whitespace in parameter values (MiniMax M2, Qwen3, MiniCPM5 XML)",
+      "title_zh": "[修复][工具解析器] 保留参数值中的空白字符（MiniMax M2 / Qwen3 / MiniCPM5 XML）",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "parser"
+      ],
+      "comment": "【变更概述】修复 MiniMax M2、Qwen3、MiniCPM5 XML 工具解析器在解析参数值时丢失空白字符的问题。修改 minimax_m2.py / qwen3.py / minicpm5xml_tool_parser.py 的解析逻辑，并补充对应测试。\n【PR号】#48846\n【变更类型】bugfix - 工具解析器空白字符保留\n【变更文件】tests/parser/engine/test_qwen3.py (+2/-2)、tests/tool_parsers/test_minicpm5xml_tool_parser.py (+52/-0)、tests/tool_parsers/test_minimax_m2_tool_parser.py (+34/-0)、tests/tool_parsers/test_qwen3coder_tool_parser.py (+55/-0)、vllm/parser/minimax_m2.py (+5/-2)、vllm/parser/qwen3.py (+11/-2)、vllm/tool_parsers/minicpm5xml_tool_parser.py (+5/-3)\n【统计数据】+164/-9，共 7 个文件\n【风险评估】低风险 - 工具解析器纯字符串处理\n【涉及模块】parser",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 工具解析器为前端纯字符串处理，与硬件后端无关",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}

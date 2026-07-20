@@ -1,0 +1,361 @@
+{
+  "date": "2026-07-18",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-19T09:13:05.068868+08:00",
+  "daily_summary": "2026-07-18 vllm-ascend 仓库共合入 21 个 commits，当日无 v2/ 目录改动，即无 MRV2（Model Runner V2）专用代码变更；MRV1 路径（model_runner_v1.py）有 2 处改动：#12049 (e1bd1504) 与 #12306 (4f0a38a9)。整体活动以 deprecated 优化路径清理、CI main2main 工作流修复、文档翻译与导航修正为主。\n重要变更：\n1) 三个大规模 deprecated 优化路径移除（共删除约 9884 行）：#12049 移除 hamming sparse attention（-6287 行，触及 attention_v1.py 与 model_runner_v1.py）；#12117 移除 FlashComm2 优化（-412 行，触及 distributed/parallel_state 与 ops/linear_op）；#12119 移除 matmul allreduce + allreduce-rms 融合 pass（-3185 行，触及 compilation graph_fusion_pass_manager）。\n2) #12035 将 fused_gdn_gating 从 AscendC 回退到 Triton 实现，需验证 Triton 路径在 NPU 上的正确性。\n3) #12306 移除 async exponential 采样优化，修改 model_runner_v1.py（MRV1）与 sampler.py。\n4) 11 个 CI/文档 commits 集中修复 main2main 工作流（Node/Go/npm 镜像、runner 类型、分支策略）与 560T 集群 HCCL 端口配置（HCCL_INTER_HCCS_DISABLE、HCCL_IF_BASE_PORT=55000）。\n整体风险评估：3 个高风险（#12049 / #12117 / #12119 大规模删除）、2 个中风险（#12035 / #12306）、16 个低风险。MRV2 维度：当日无 v2/ 目录改动，MRV2 相关变更主要在 vllm 仓库侧（#47680 V1/V2 prompt_logprobs）。",
+  "test_impact_summary": "21 个 commits 中 2 个需要关注测试看护：#12035 (fused_gdn_gating AscendC→Triton) 需确认既有 Triton 路径测试覆盖 fused_gdn_gating 场景，避免回归；#12306 (移除 async exponential 优化) 修改 vllm_ascend/sample/sampler.py 与 model_runner_v1.py，需验证既有采样测试在移除该优化后仍通过。三个大规模删除（#12049 / #12117 / #12119）已将测试用例与代码一并清理，无遗留测试缺口，但需关注 e2e 测试是否仍覆盖 hamming sparse / FlashComm2 / matmul allremove 移除后的等效路径。其余 16 个 CI/文档 commits 不涉及功能测试看护。测试策略层面：当日以 deprecated 路径清理为主，建议在下一轮回归中重点验证 attention/distributed/compilation 三大子系统在移除优化路径后的稳定性，并确认 main2main 工作流修复后能正常跑通主分支对接测试。",
+  "commits": [
+    {
+      "sha": "e1bd15041af9d9e1a274ae381da0bc0dd8b50e4d",
+      "pr_number": "12049",
+      "title_en": "[Refactor] refact hamming ops and call, remove sparse action",
+      "title_zh": "[重构] 重构 hamming 算子与调用，移除 sparse action",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "attention",
+        "model-runner"
+      ],
+      "comment": "【变更概述】移除 hamming_dist_top_k 与 reshape_and_cache_bnsd 自定义算子及其相关的 sparse attention 代码路径。删除算子源码（csrc/moe/hamming_dist_top_k、csrc/reshape_and_cache_bnsd）、构建注册、torch/meta 绑定、专用 e2e 测试、hamming sparse/KVComp 运行时辅助、model runner 接线、attention metadata 字段及相关测试配置。\n涉及 vllm_ascend/attention/attention_v1.py、vllm_ascend/attention/utils.py、vllm_ascend/ascend_config.py、vllm_ascend/worker/model_runner_v1.py（MRV1 路径）、vllm_ascend/worker/kvcomp_utils.py（删除 666 行）等。\n【PR号】#12049\n【变更类型】refactor - 移除 deprecated hamming sparse attention 路径\n【变更文件】38 个文件，删除 csrc/moe/hamming_dist_top_k、csrc/reshape_and_cache_bnsd 全部源码、vllm_ascend/attention/kvcomp_attn/attention_utils.py、vllm_ascend/worker/kvcomp_utils.py 等\n【统计数据】+3/-6287，共 38 个文件\n【风险评估】高风险 - 大规模删除（6287 行），触及 attention_v1.py 与 model_runner_v1.py（MRV1 路径），用户面有变化（移除 hamming sparse action 路径）\n【涉及模块】attention, model-runner",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "测试用例随代码一并删除（test_hamming_dist_top_k.py、test_reshape_and_cache_bnsd.py、test_kvcomp_utils.py、test_attention_v1.py 中相关 207 行），无遗留测试缺口",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c794923e62b4050b8e812ec8f0d0b635088e064d",
+      "pr_number": "12035",
+      "title_en": "[Refactor] replace fused_gdn_gating from ascendc to triton",
+      "title_zh": "[重构] 将 fused_gdn_gating 从 AscendC 切换为 Triton 实现",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "kernel"
+      ],
+      "comment": "【变更概述】回退 PR #9601 引入的 AscendC 自定义 fused_gdn_gating 算子，将通用 fused_gdn_gating 路径重新路由到既有的 Triton 实现。删除 AscendC 自定义算子源码、构建注册与相关测试。\n【PR号】#12035\n【变更类型】refactor - 算子实现回退（AscendC → Triton）\n【变更文件】涉及 csrc/ 下 fused_gdn_gating 相关源码、torch_binding、tests 等\n【风险评估】中风险 - 算子实现切换，需验证 Triton 路径在 NPU 上的正确性与性能\n【涉及模块】kernel",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "算子实现从 AscendC 切换为 Triton，需确认既有 Triton 路径测试覆盖 fused_gdn_gating 场景，避免回归",
+        "suggested_test_areas": [
+          "fused_gdn_gating Triton 实现正确性",
+          "GDN gating 模型端到端推理"
+        ]
+      }
+    },
+    {
+      "sha": "316aa01c4eff7d16fe39fcee7d6ee4d0e5355928",
+      "pr_number": "12350",
+      "title_en": "[CI] install Node from Huawei Cloud mirror",
+      "title_zh": "[CI] 从华为云镜像安装 Node",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】main2main 工作流改为从华为云镜像下载并校验 Node.js ARM64 安装包，避开 setup-node 与 GitHub 下载路径，并通过华为云 npm registry 安装 OpenCode。\n【PR号】#12350\n【变更类型】CI 维护 - Node 安装源切换\n【变更文件】.github/workflows/schedule_main2main.yaml (+24/-12)\n【统计数据】+24/-12，共 1 个文件\n【风险评估】低风险 - 仅 CI 安装源\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 main2main 工作流 CI 安装源调整，不涉及功能代码",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "d823ceb5f7a155479e6307b36b2acf148d027477",
+      "pr_number": "12335",
+      "title_en": "[Doc] Translated Doc files 2026-07-18",
+      "title_zh": "[文档] 2026-07-18 翻译文档",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】自动翻译 14 个文档文件（balance_schedule_refactor 等设计文档与用户指南的 zh_CN LC_MESSAGES）。\n【PR号】#12335\n【变更类型】docs - 自动翻译\n【变更文件】docs/source/locale/zh_CN/LC_MESSAGES/ 下 14 个 .po 文件\n【风险评估】低风险 - 纯文档翻译\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档翻译，不涉及代码",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "343bce31ac0dd5f6c6f6d8ade828b16fcc7336ed",
+      "pr_number": "12326",
+      "title_en": "[Doc] fix broken anchor links in service_profiling_guide",
+      "title_zh": "[文档] 修复 service_profiling_guide 中失效的锚点链接",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】修复 service_profiling_guide.md 中失效的锚点链接，删除 4 行无效链接。\n【PR号】#12326\n【变更类型】docs - 锚点链接修复\n【变更文件】docs/source/developer_guide/performance_and_debug/service_profiling_guide.md (+0/-4)\n【统计数据】+0/-4，共 1 个文件\n【风险评估】低风险 - 纯文档\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档锚点修复",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2d983710a499e71502229ed5a8849b5e2c8bc0dd",
+      "pr_number": "12341",
+      "title_en": "[Doc][Misc] Fix Chinese release notes link",
+      "title_zh": "[文档][杂项] 修复中文 release notes 链接",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】修复 PR #7390 中文 release notes 链接缺失 https:// 前缀的问题，避免文档生成器将其作为相对链接处理。\n【PR号】#12341\n【变更类型】docs - 链接协议修复\n【变更文件】release notes 相关 .po 文件\n【风险评估】低风险 - 纯文档\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档链接修复",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ff83573c37c0bc84e33111e0558086f2c4d73aea",
+      "pr_number": "12331",
+      "title_en": "[BugFix][Doc] Preserve Chinese Markdown structure during translation",
+      "title_zh": "[修复][文档] 翻译时保留中文 Markdown 结构",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "comment": "【变更概述】修复中文文档生成器在还原受保护 Markdown span 时因翻译改变多反引号代码 span 换行而导致 span 列表错位的问题，避免后续 list marker、prose 与代码块错乱。\n【PR号】#12331\n【变更类型】bugfix - 文档翻译流程修复\n【变更文件】文档生成相关脚本\n【风险评估】低风险 - 文档生成工具修复\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "文档翻译生成器修复，不涉及运行时代码",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5aafc0bce7dd2d92a4187a6613b426351c6c04d3",
+      "pr_number": "12334",
+      "title_en": "[Doc][Misc] Fix documentation navigation and formatting issues",
+      "title_zh": "[文档][杂项] 修复文档导航与格式问题",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】合并 4 处文档修正：将 Performance and Debug 落地页改为有用目录链接到其 4 篇指南；恢复 CPU frequency governor 小节缺失的标题；移除 MkDocs 迁移后冗余的两行 Sphinx 锚点；修正 supported-models 表中 GLM-5.2 模型链接标签。\n【PR号】#12334\n【变更类型】docs - 文档导航与格式修正\n【变更文件】docs/source/developer_guide/performance_and_debug/index.md 等 4 个文件\n【统计数据】+9/-8，共 4 个文件\n【风险评估】低风险 - 纯文档\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档导航与格式修正",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5bbb58eab7d87283effce78c08c6f73c5e6c87bc",
+      "pr_number": "12348",
+      "title_en": "[CI][Misc] Set up Node before installing OpenCode",
+      "title_zh": "[CI][杂项] 在安装 OpenCode 前先设置 Node",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】修复 main2main 工作流中 'Install opencode + main2main-flow' 步骤因 npm 未找到而失败的问题。使用 actions/setup-node@v6 安装 Node.js 24 ARM64，从华为云 Node 镜像下载，配置 npm 使用华为云 registry。\n【PR号】#12348\n【变更类型】CI 维护 - Node 依赖安装修复\n【变更文件】.github/workflows/schedule_main2main.yaml (+10/-7)\n【统计数据】+10/-7，共 1 个文件\n【风险评估】低风险 - CI 安装步骤修复\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 main2main 工作流 Node 安装步骤修复",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "22fb0ccf6158a4d647d54f5e20884a9051447afe",
+      "pr_number": "12346",
+      "title_en": "[CI] Refactor main2main workflow to use unchanged branch",
+      "title_zh": "[CI] 重构 main2main 工作流以使用 unchanged 分支",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】重构 main2main 工作流，使其使用 unchanged 分支进行测试。\n【PR号】#12346\n【变更类型】CI 维护 - 工作流分支调整\n【变更文件】.github/workflows/schedule_main2main.yaml (+12/-2)\n【统计数据】+12/-2，共 1 个文件\n【风险评估】低风险 - CI 工作流调整\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 main2main 工作流分支配置调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "92ff388f9dc8d28827446ce5f1a792071bdf7173",
+      "pr_number": "12340",
+      "title_en": "[CI][Misc] Use domestic Go proxy and local pre-commit cache",
+      "title_zh": "[CI][杂项] 使用国内 Go 代理与本地 pre-commit 缓存",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】为 golang 类 pre-commit hook（如 actionlint）配置华为云国内 GOPROXY 与 GONOSUMDB，并为 main2main runner 设置 PRE_COMMIT_HOME=/tmp/main2main-pre-commit 缓存，解决 proxy.golang.org 超时问题。\n【PR号】#12340\n【变更类型】CI 维护 - 代理与缓存配置\n【变更文件】.github/workflows/pr_test.yaml (+3/-0)、.github/workflows/schedule_main2main.yaml (+5/-0)\n【统计数据】+8/-0，共 2 个文件\n【风险评估】低风险 - CI 环境配置\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 CI 环境变量配置",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f583c2fa15b3151529cb1885e8e62f2d50edbe7f",
+      "pr_number": "12117",
+      "title_en": "[Refactor] Remove flashcomm2 optimization techniques",
+      "title_zh": "[重构] 移除 flashcomm2 优化技术",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "distributed"
+      ],
+      "comment": "【变更概述】移除 VLLM_ASCEND_FLASHCOMM2_PARALLEL_SIZE 配置与 FlashComm2 优化路径。删除 config/env 迁移条目、校验辅助、FlashComm2 process groups、row-parallel linear 分派路径、量化适配器分支、相关测试与 additional_config 文档。\n涉及 vllm_ascend/ascend_config.py、vllm_ascend/ascend_forward_context.py、vllm_ascend/distributed/parallel_state.py（-65 行）、vllm_ascend/envs.py、vllm_ascend/ops/linear_op.py（-131 行）、vllm_ascend/platform.py、vllm_ascend/quantization/method_adapters.py、vllm_ascend/quantization/methods/w8a8_static.py 等。\n【PR号】#12117\n【变更类型】refactor - 移除 deprecated FlashComm2 优化\n【变更文件】21 个文件，涉及 distributed/parallel_state、ops/linear_op、quantization 等\n【统计数据】+15/-412，共 21 个文件\n【风险评估】高风险 - 大规模删除 distributed/parallel_state 与 ops/linear_op 路径，触及量化适配器\n【涉及模块】distributed",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "测试用例与配置文档随代码一并清理（test_parallel_state、test_linear、test_ascend_config 等同步删除对应分支），无遗留测试缺口",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "14f10a82ad2a3971e14524a92cf426d5d54c4729",
+      "pr_number": "12330",
+      "title_en": "[CI][Misc] Use domestic npm mirror for OpenCode installation",
+      "title_zh": "[CI][杂项] 使用国内 npm 镜像安装 OpenCode",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】main2main 工作流通过华为云国内 npm 镜像安装 opencode-ai，避开查询 GitHub API 与从 GitHub 下载 release 的慢路径。保留既有 $HOME/.opencode/bin 安装路径。\n【PR号】#12330\n【变更类型】CI 维护 - npm 镜像切换\n【变更文件】.github/workflows/schedule_main2main.yaml (+9/-4)\n【统计数据】+9/-4，共 1 个文件\n【风险评估】低风险 - CI 安装源\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 CI 安装源切换",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f9e183086944ef1c0064a1c63344ae4ea3ff42a2",
+      "pr_number": "12314",
+      "title_en": "[Doc][Misc] Standardize support matrix terminology and update documentation anchors",
+      "title_zh": "[文档][杂项] 标准化支持矩阵术语并更新文档锚点",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】将 'Features and Models' 与 'Feature x Feature' 统一重命名为 'support_matrix' 与 'feature_matrix'，涉及 mkdocs.yml 与多份用户指南；同时更新本地化文件、修复文档链接、补充 header anchors、修正翻译字符串。\n【PR号】#12314\n【变更类型】docs - 术语标准化与锚点更新\n【变更文件】50 个文件，含 mkdocs.yml、docs/source/ 下多份 .md 与 .po\n【统计数据】+92/-94，共 50 个文件\n【风险评估】低风险 - 纯文档术语与锚点\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档术语与锚点标准化",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4f0a38a95c439b30948c30e777403633e0dd638b",
+      "pr_number": "12306",
+      "title_en": "[Refactor] asnc exponential optimization unset",
+      "title_zh": "【MRV1】[重构] 移除 async exponential 优化",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "sample",
+        "model-runner"
+      ],
+      "comment": "【变更概述】移除 enable_async_exponential 配置选项及其相关实现，清理 sampler 逻辑、worker 执行路径与配置处理。涉及 vllm_ascend/ascend_config.py（-9 行）、vllm_ascend/sample/sampler.py（-33 行）、vllm_ascend/worker/model_runner_v1.py（-7 行，MRV1 路径）、tests/e2e/pull_request/one_card/test_sampler.py（-40 行）与 additional_config 文档。\n【PR号】#12306\n【变更类型】refactor - 移除 deprecated async exponential 采样优化\n【变更文件】vllm_ascend/ascend_config.py、vllm_ascend/sample/sampler.py、vllm_ascend/worker/model_runner_v1.py（MRV1 路径）、tests/e2e/pull_request/one_card/test_sampler.py、文档\n【统计数据】+2/-99，共 6 个文件\n【风险评估】中风险 - 修改 vllm_ascend/sample/sampler.py 与 model_runner_v1.py（MRV1 路径），移除采样优化分支\n【涉及模块】sample, model-runner\n【MRV1关联】修改 vllm_ascend/worker/model_runner_v1.py（MRV1 路径），不影响 MRV2（v2/ 目录无改动）",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "移除 enable_async_exponential 优化分支并修改 sampler.py 与 model_runner_v1.py，需验证既有采样测试在移除该优化后仍通过，并确认无遗留依赖",
+        "suggested_test_areas": [
+          "vllm_ascend/sample/sampler.py 采样回归",
+          "model_runner_v1.py 采样调用路径",
+          "tests/e2e/pull_request/one_card/test_sampler.py 覆盖"
+        ]
+      }
+    },
+    {
+      "sha": "9f4f74ed0b1576babe4f018c4f555dc5de266711",
+      "pr_number": "12318",
+      "title_en": "[CI] set HCCL_INTER_HCCS_DISABLE and HCCL_IF_BASE_PORT for 560T cluster",
+      "title_zh": "[CI] 为 560T 集群设置 HCCL_INTER_HCCS_DISABLE 与 HCCL_IF_BASE_PORT",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】560T 集群使用共享/非独占机器且无 HCCS 支持，HCCL 端口计算可能因非零基物理设备 ID 溢出超过 65535。本 PR 设置 HCCL_INTER_HCCS_DISABLE=TRUE 强制使用 RoCE，并设置 HCCL_IF_BASE_PORT=55000 保持端口在有效范围内。仅影响 560T 专用模板与工作流，A3 不受影响。\n【PR号】#12318\n【变更类型】CI 维护 - 560T 集群 HCCL 端口配置\n【变更文件】tests/e2e/nightly/multi_node/scripts/lws_560t.yaml.jinja2 (+4/-0)\n【统计数据】+4/-0，共 1 个文件\n【风险评估】低风险 - 仅 560T CI 模板\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 560T 集群 CI 模板环境变量配置，不涉及功能代码",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "34fa3b2165ab9415aadfaa9d8b7e658c14d41b6b",
+      "pr_number": "12310",
+      "title_en": "[Doc][Misc] Disable flashcomm1 in Qwen3-Omni-30B-A3B-Thinking tutorial",
+      "title_zh": "[文档][杂项] 在 Qwen3-Omni-30B-A3B-Thinking 教程中禁用 flashcomm1",
+      "tags": [
+        "docs",
+        "low-risk"
+      ],
+      "comment": "【变更概述】在 Qwen3-Omni-30B-A3B-Thinking 教程的 3 个 serving 示例（基线、投机解码/低延迟、长上下文）的 --additional-config 中将 enable_flashcomm1 设为 false。当前 vLLM-Ascend 发行版不建议为该模型启用 flashcomm1，禁用以对齐已验证稳定的推理配置。\n【PR号】#12310\n【变更类型】docs - 教程配置修正\n【变更文件】docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md (+3/-3)\n【统计数据】+3/-3，共 1 个文件\n【风险评估】低风险 - 纯文档配置示例\n【涉及模块】docs",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯教程文档配置示例调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "1cf6047a3ef80a9ed33f1aa269d6e0739d3c6b17",
+      "pr_number": "12313",
+      "title_en": "[CI] Disable HCCL inter-HCCS to avoid port conflicts on 560T shared cluster",
+      "title_zh": "[CI] 禁用 HCCL inter-HCCS 以避免 560T 共享集群端口冲突",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】560T 非独占集群上 HCCS 片间总线在 pod 间未正确隔离，导致 HCCL 端口绑定冲突。设置 HCCL_INTER_HCCS_DISABLE=TRUE 强制 HCCL 使用 RoCE 网络路径（在 K8s 中正确命名空间隔离）。\n【PR号】#12313\n【变更类型】CI 维护 - 560T HCCL 端口冲突修复\n【变更文件】.github/workflows/_e2e_nightly_single_node_560t.yaml (+0/-1)、tests/e2e/nightly/multi_node/scripts/lws_560t.yaml.jinja2 (+4/-4)\n【统计数据】+4/-5，共 2 个文件\n【风险评估】低风险 - 560T CI 配置\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 560T 集群 CI 配置调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f45d8c10f92064f7335bcbd73b4861f2d696276e",
+      "pr_number": "12312",
+      "title_en": "[CI] Change Main2main runner from A2B3 to A2B1",
+      "title_zh": "[CI] 将 Main2main runner 从 A2B3 改为 A2B1",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】将 main2main 工作流的 runner 从 A2B3 改为 A2B1。\n【PR号】#12312\n【变更类型】CI 维护 - runner 切换\n【变更文件】.github/actionlint.yaml (+1/-0)、.github/workflows/schedule_main2main.yaml (+3/-3)\n【统计数据】+4/-3，共 2 个文件\n【风险评估】低风险 - CI runner 配置\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 main2main runner 类型切换",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4a34653f47c8d683aafd6951111a9bf98581603e",
+      "pr_number": "12303",
+      "title_en": "[CI] Set HCCL_IF_BASE_PORT for 560T cluster to avoid port overflow",
+      "title_zh": "[CI] 为 560T 集群设置 HCCL_IF_BASE_PORT 以避免端口溢出",
+      "tags": [
+        "ci",
+        "low-risk"
+      ],
+      "comment": "【变更概述】560T 共享/非独占机器上 HCCL 端口计算可能因非零基物理设备 ID 溢出超过 65535。显式设置 HCCL_IF_BASE_PORT=55000 保持计算后的监听端口在有效 TCP 范围内。新增 lws_560t.yaml.jinja2 模板为 leader 与 worker 容器硬编码 HCCL_IF_BASE_PORT=55000，切换多节点 560T 工作流使用新模板。\n【PR号】#12303\n【变更类型】CI 维护 - 560T 端口配置模板\n【变更文件】.github/workflows/_e2e_nightly_multi_node_560t.yaml (+1/-1)、.github/workflows/_e2e_nightly_single_node_560t.yaml (+2/-1)、tests/e2e/nightly/multi_node/scripts/lws_560t.yaml.jinja2 (added +173/-0)\n【统计数据】+176/-2，共 3 个文件\n【风险评估】低风险 - 560T CI 模板新增\n【涉及模块】ci",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅 560T 集群 CI 模板新增，不涉及功能代码",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2ee50f3847e4873e61d280911b2a24d85f5278d6",
+      "pr_number": "12119",
+      "title_en": "[Refactor] Remove matmulallreduce and pass optimization techniques",
+      "title_zh": "[重构] 移除 matmulallreduce 与 pass 优化技术",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "distributed",
+        "compilation"
+      ],
+      "comment": "【变更概述】移除 VLLM_ASCEND_ENABLE_MATMUL_ALLREDUCE 配置与 fuse_allreduce_rms 优化路径。删除 matmul_allreduce_add_rmsnorm 自定义算子（csrc/mc2/matmul_allreduce_add_rmsnorm 全部源码）、graph fusion pass（vllm_ascend/compilation/passes/allreduce_rmsnorm_fusion_pass.py -159 行）、linear matmul-allreduce 分派路径、config/env 迁移条目、相关测试与 additional_config 文档。\n涉及 vllm_ascend/ascend_config.py（-40 行）、vllm_ascend/compilation/graph_fusion_pass_manager.py、vllm_ascend/ops/linear_op.py（-45 行）、vllm_ascend/envs.py、vllm_ascend/utils.py、vllm_ascend/batch_invariant.py 等。\n【PR号】#12119\n【变更类型】refactor - 移除 deprecated matmul allreduce 与 allreduce-rms 优化\n【变更文件】38 个文件，含 csrc/mc2/matmul_allreduce_add_rmsnorm 全部删除、vllm_ascend/compilation/passes/allreduce_rmsnorm_fusion_pass.py 删除等\n【统计数据】+6/-3185，共 38 个文件\n【风险评估】高风险 - 大规模删除（3185 行），触及 compilation graph_fusion_pass_manager 与 ops/linear_op\n【涉及模块】distributed, compilation",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "测试用例与配置文档随代码一并清理（test_matmul_allreduce_add_rmsnorm.py、test_linear、test_ascend_config 等同步删除对应分支），无遗留测试缺口",
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}

@@ -1,0 +1,356 @@
+=== Commit 1/8 ===
+Repo: vllm
+SHA: e6d1310b2ac52e56e266450693af9de12a871a51
+Author: Taneem Ibrahim
+Date: 2026-07-19T20:18:03+08:00
+
+--- Message ---
+[Bugfix] Reject removed pooling parameters (#48984)
+
+Signed-off-by: Taneem Ibrahim <taneem.ibrahim@gmail.com>
+---
+ tests/test_pooling_params.py                  | 38 +++++++++++++++++++++++++++
+ vllm/config/pooler.py                         | 18 ++++++++++++-
+ vllm/entrypoints/pooling/base/protocol.py     | 13 +++++++++
+ vllm/entrypoints/pooling/classify/protocol.py | 12 +++++----
+ vllm/entrypoints/pooling/embed/protocol.py    | 10 ++++---
+ vllm/entrypoints/pooling/pooling/protocol.py  | 12 +++++----
+ vllm/entrypoints/pooling/pooling/serving.py   |  4 ++-
+ vllm/pooling_params.py                        |  3 ++-
+ vllm/tasks.py                                 | 15 +++++++++++
+ 9 files changed, 108 insertions(+), 17 deletions(-)
+
+--- Stats ---
+Files changed: 9
+Additions: 108
+Deletions: 17
+
+--- Files ---
+
+[File 1] tests/test_pooling_params.py
+  status: modified
+  additions: 38, deletions: 0
+  patch:
+@@ -1,12 +1,18 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ from dataclasses import dataclass
++from typing import Any
+ 
+ import pytest
++from pydantic import TypeAdapter, ValidationError
+ 
+ from tests.models.utils import EmbedModelInfo
+ from vllm import PoolingParams
+ from vllm.config import ModelConfig, PoolerConfig
++from vllm.entrypoints.pooling.classify.protocol import ClassificationRequest
++from vllm.entrypoints.pooling.embed.protocol import EmbeddingRequest
++from vllm.entrypoints.pooling.pooling.protocol import PoolingRequest
++from vllm.exceptions import VLLMValidationError
+ 
+ EMBEDDING_MODELS = [
+     EmbedModelInfo("intfloat/multilingual-e5-small", is_matryoshka=False),
+@@ -27,6 +33,38 @@ class MockModelConfig:
+     pooler_config: PoolerConfig
+ 
+ 
++@pytest.mark.parametrize(
++    ("parameter", "value", "message"),
++    [
++        (
++            "normalize",
++            False,
++            "Parameter `normalize` was removed; use `use_activation` instead.",
++        ),
++        ("task", "score", "`score` task was removed; use `classify` instead."),
++        (
++            "task",
++            "encode",
++            "`encode` task was removed; use `token_embed` or `token_classify` instead.",
++        ),
++    ],
++)
++def test_removed_pooling_parameters(parameter: str, value: Any, message: str):
++    data = {"input": "hello", parameter: value}
++    for request_type in (EmbeddingRequest, ClassificationRequest, PoolingRequest):
++        with pytest.raises(ValidationError, match=message) as exc_info:
++            TypeAdapter(request_type).validate_python(data)
++        assert len(exc_info.value.errors()) == 1
++
++    with pytest.raises(ValidationError, match=message) as exc_info:
++        TypeAdapter(PoolerConfig).validate_python({parameter: value})
++    assert len(exc_info.value.errors()) == 1
++
++    if parameter == "task":
++        with pytest.raises(VLLMValidationError, match=message):
++            PoolingParams(task=value)
++
++
+ def test_embed():
+     task = "embed"
+     model_config = MockModelConfig(pooler_config=PoolerConfig(seq_pooling_type="CLS"))
+
+[File 2] vllm/config/pooler.py
+  status: modified
+  additions: 17, deletions: 1
+  patch:
+@@ -3,9 +3,12 @@
+ 
+ from typing import Any, Literal, get_args
+ 
++from pydantic import model_validator
++from pydantic_core import ArgsKwargs
++
+ from vllm.config.utils import config
+ from vllm.logger import init_logger
+-from vllm.tasks import PoolingTask
++from vllm.tasks import PoolingTask, check_removed_pooling_task
+ from vllm.utils.hashing import safe_hash
+ 
+ logger = init_logger(__name__)
+@@ -112,6 +115,19 @@ class PoolerConfig:
+     `math-shepherd-mistral-7b-prm` model.
+     """
+ 
++    @model_validator(mode="before")
++    @classmethod
++    def reject_removed_parameters(cls, data):
++        values = data.kwargs if isinstance(data, ArgsKwargs) else data
++        if not isinstance(values, dict):
++            return data
++        if "normalize" in values:
++            raise ValueError(
++                "Parameter `normalize` was removed; use `use_activation` instead."
++            )
++        check_removed_pooling_task(values.get("task"))
++        return data
++
+     def __post_init__(self) -> None:
+         if self.logit_sigma is not None and self.logit_sigma == 0:
+             raise ValueError("logit_sigma cannot be 0 (division by zero)")
+
+[File 3] vllm/entrypoints/pooling/base/protocol.py
+  status: modified
+  additions: 13, deletions: 0
+  patch:
+@@ -14,10 +14,23 @@ from vllm.entrypoints.chat_utils import (
+ from vllm.entrypoints.openai.engine.protocol import OpenAIBaseModel
+ from vllm.exceptions import VLLMValidationError
+ from vllm.renderers import ChatParams, TokenizeParams, merge_kwargs
++from vllm.tasks import check_removed_pooling_task
+ from vllm.utils import random_uuid
+ from vllm.utils.serial_utils import EmbedDType, EncodingFormat, Endianness
+ 
+ 
++def reject_removed_pooling_parameters(data):
++    if not isinstance(data, dict):
++        return data
++    if "normalize" in data:
++        raise VLLMValidationError(
++            "Parameter `normalize` was removed; use `use_activation` instead.",
++            parameter="normalize",
++        )
++    check_removed_pooling_task(data.get("task"))
++    return data
++
++
+ class PoolingBasicRequestMixin(OpenAIBaseModel):
+     # --8<-- [start:pooling-common-params]
+     model: str | None = None
+
+[File 4] vllm/entrypoints/pooling/classify/protocol.py
+  status: modified
+  additions: 7, deletions: 5
+  patch:
+@@ -2,9 +2,9 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ 
+ import time
+-from typing import TypeAlias
++from typing import Annotated, TypeAlias
+ 
+-from pydantic import Field
++from pydantic import BeforeValidator, Field
+ 
+ from vllm import PoolingParams
+ from vllm.entrypoints.openai.engine.protocol import OpenAIBaseModel, UsageInfo
+@@ -17,6 +17,7 @@ from ..base.protocol import (
+     CompletionRequestMixin,
+     FixedMaxLenTokenizeParamsMixin,
+     PoolingBasicRequestMixin,
++    reject_removed_pooling_parameters,
+ )
+ 
+ logger = init_logger(__name__)
+@@ -48,9 +49,10 @@ class ClassificationChatRequest(
+         )
+ 
+ 
+-ClassificationRequest: TypeAlias = (
+-    ClassificationCompletionRequest | ClassificationChatRequest
+-)
++ClassificationRequest: TypeAlias = Annotated[
++    ClassificationCompletionRequest | ClassificationChatRequest,
++    BeforeValidator(reject_removed_pooling_parameters),
++]
+ 
+ 
+ class ClassificationData(OpenAIBaseModel):
+
+[File 5] vllm/entrypoints/pooling/embed/protocol.py
+  status: modified
+  additions: 6, deletions: 4
+  patch:
+@@ -13,7 +13,7 @@ from collections.abc import Sequence
+ from typing import Annotated, Any, Literal, TypeAlias
+ 
+ import pybase64 as base64
+-from pydantic import BaseModel, Field, model_validator
++from pydantic import BaseModel, BeforeValidator, Field, model_validator
+ 
+ from vllm import PoolingParams
+ from vllm.entrypoints.chat_utils import ChatCompletionMessageParam
+@@ -27,6 +27,7 @@ from ..base.protocol import (
+     EmbeddingTokenizeParamsMixin,
+     EmbedRequestMixin,
+     PoolingBasicRequestMixin,
++    reject_removed_pooling_parameters,
+ )
+ 
+ 
+@@ -154,13 +155,14 @@ class EmbeddingBatchChatInputRequest(EmbeddingBatchChatRequest):
+         return normalized
+ 
+ 
+-EmbeddingRequest: TypeAlias = (
++EmbeddingRequest: TypeAlias = Annotated[
+     EmbeddingCompletionRequest
+     | EmbeddingChatRequest
+     | EmbeddingBatchChatRequest
+     | EmbeddingChatInputRequest
+-    | EmbeddingBatchChatInputRequest
+-)
++    | EmbeddingBatchChatInputRequest,
++    BeforeValidator(reject_removed_pooling_parameters),
++]
+ 
+ 
+ # ---------------------------------------------------------------------------
+
+[File 6] vllm/entrypoints/pooling/pooling/protocol.py
+  status: modified
+  additions: 7, deletions: 5
+  patch:
+@@ -1,9 +1,9 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ import time
+-from typing import Generic, TypeAlias, TypeVar
++from typing import Annotated, Generic, TypeAlias, TypeVar
+ 
+-from pydantic import Field
++from pydantic import BeforeValidator, Field
+ 
+ from vllm import PoolingParams
+ from vllm.config import ModelConfig
+@@ -20,6 +20,7 @@ from ..base.protocol import (
+     EncodingRequestMixin,
+     FixedMaxLenTokenizeParamsMixin,
+     PoolingBasicRequestMixin,
++    reject_removed_pooling_parameters,
+ )
+ 
+ 
+@@ -92,9 +93,10 @@ class IOProcessorResponse(OpenAIBaseModel, Generic[T]):
+     """
+ 
+ 
+-PoolingRequest: TypeAlias = (
+-    PoolingCompletionRequest | PoolingChatRequest | IOProcessorRequest
+-)
++PoolingRequest: TypeAlias = Annotated[
++    PoolingCompletionRequest | PoolingChatRequest | IOProcessorRequest,
++    BeforeValidator(reject_removed_pooling_parameters),
++]
+ 
+ 
+ class PoolingResponseData(OpenAIBaseModel):
+
+[File 7] vllm/entrypoints/pooling/pooling/serving.py
+  status: modified
+  additions: 3, deletions: 1
+  patch:
+@@ -1,5 +1,7 @@
+ # SPDX-License-Identifier: Apache-2.0
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
++from typing import cast
++
+ from fastapi.responses import JSONResponse, Response, StreamingResponse
+ from typing_extensions import assert_never
+ 
+@@ -52,7 +54,7 @@ class ServingPooling(PoolingBaseServing):
+         self.json_response_cls = get_json_response_cls()
+ 
+     def get_io_processor(self, request: AnyPoolingRequest) -> PoolingIOProcessor:
+-        assert isinstance(request, PoolingRequest)
++        request = cast(PoolingRequest, request)
+         pooling_task = self._verify_pooling_task(request)
+         return self.io_processors[pooling_task]
+ 
+
+[File 8] vllm/pooling_params.py
+  status: modified
+  additions: 2, deletions: 1
+  patch:
+@@ -9,7 +9,7 @@ import msgspec
+ from vllm.config import ModelConfig, PoolerConfig
+ from vllm.logger import init_logger
+ from vllm.sampling_params import RequestOutputKind
+-from vllm.tasks import PoolingTask
++from vllm.tasks import PoolingTask, check_removed_pooling_task
+ 
+ logger = init_logger(__name__)
+ 
+@@ -229,6 +229,7 @@ class PoolingParams(
+         )
+ 
+     def __post_init__(self) -> None:
++        check_removed_pooling_task(self.task)
+         if self.output_kind != RequestOutputKind.FINAL_ONLY:
+             raise ValueError(
+                 "For pooling output_kind has to be FINAL_ONLY, "
+
+[File 9] vllm/tasks.py
+  status: modified
+  additions: 15, deletions: 0
+  patch:
+@@ -2,6 +2,8 @@
+ # SPDX-FileCopyrightText: Copyright contributors to the vLLM project
+ from typing import Literal, get_args
+ 
++from vllm.exceptions import VLLMValidationError
++
+ GenerationTask = Literal["generate", "transcription", "realtime"]
+ GENERATION_TASKS: tuple[GenerationTask, ...] = get_args(GenerationTask)
+ 
+@@ -15,6 +17,19 @@ PoolingTask = Literal[
+ ]
+ POOLING_TASKS: tuple[PoolingTask, ...] = get_args(PoolingTask)
+ 
++_REMOVED_POOLING_TASK_MESSAGES = {
++    "score": "`score` task was removed; use `classify` instead.",
++    "encode": (
++        "`encode` task was removed; use `token_embed` or `token_classify` instead."
++    ),
++}
++
++
++def check_removed_pooling_task(task: object) -> None:
++    if isinstance(task, str) and (message := _REMOVED_POOLING_TASK_MESSAGES.get(task)):
++        raise VLLMValidationError(message, parameter="task")
++
++
+ ScoreType = Literal["bi-encoder", "cross-encoder", "late-interaction"]
+ SCORE_TYPE_MAP: dict[PoolingTask, ScoreType] = {
+     "embed": "bi-encoder",
+

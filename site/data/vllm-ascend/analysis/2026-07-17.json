@@ -1,0 +1,496 @@
+{
+  "date": "2026-07-17",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-18T09:11:12.672969+08:00",
+  "daily_summary": "2026-07-17 vllm-ascend 共合入 25 个 commit，方向集中在 MRV2 能力补强、调度器增强、KV 传输/PD 分离 bugfix、文档与 CI 基础设施。MRV2 方面有两个关键合入：(#12094) 修复 Ascend MRV2 实现 `compute_topk_logprobs` 签名以匹配 vLLM v1 新接口，并重新启用 Qwen3 dense eager 模式 e2e 测试；(#11895) 为 MRV2 下的 DFlash 投机解码新增 FullGraph 支持，同时修复 v2 aclgraph GraphParams 以 capture 描述符对齐（解决 spec decode 下 `_init_candidates` 向上取整导致的 KeyError 启动失败）。调度器方面新增 (#12240) Batch-Job-Aware Scheduler，提供 LPT 调度、KV cache 预留、按 job 分组的动态优先级，专门面向离线批量推理，benchmark 显示抢占数降低 89-98%。scheduler 配置还做了 (#12177) 重构，统一迁移入 `additional_config[\"scheduler_config\"]` 并保留旧字段兼容。KV 传输/PD 方向：(#12012) 修复 AscendStore KV 事件父块哈希链异常；(#12126) 将 Mooncake receiver 线程绑定到 KV cache 设备，修复 TP 不一致时 device 0 上下文泄漏；(#11917) 将 GDN attention 的 layerwise KV saving 从 forward() 移到 _forward_core() 以适配 torch.compile。其他功能性变更包括 (#11384) 用 vLLM parser-engine 替换 MiniMax parser backport。CI 方面新增 A3 560T 夜间测试工作流、依赖升级 actions/checkout@v7 和 setup-python@v6。文档类（含中文翻译）占相当比例。",
+  "test_impact_summary": "当日 25 个 commit 中，明确随 PR 新增了单元/端到端测试的有 4 个：#12240（batch_job_aware_scheduler ut+e2e）、#11917（gdn_layerwise_kv ut）、#12126（mooncake connector ut）、#11384（替换后的 patch_parser_reasoning_usage ut）。#12094 与 #11895 虽改动 MRV2 核心路径，但仅重新启用或扩展了既有e2e。建议补充看护的 commit：#12012（AscendStore 父块哈希链，缺乏新增回归）、#12237（multistream_overlap_shared_expert 互斥逻辑）、#12177（scheduler 配置嵌套重构，已加 ut 但涉及兼容性）。CI 与文档类改动不需要新增功能测试。重点风险点是 MRV2 DFlash FullGraph 路径——目前仅靠 test_dflash_acceptance.py 做正确性验证，缺少针对 aclgraph capture size 向上取整边界（如 num_spec_tokens+1 倍数对齐）的单元测试。",
+  "commits": [
+    {
+      "sha": "695b97cbe151ab1a33c2c1b98c4e35acf0b8a295",
+      "comment": "【变更概述】修复 AscendStore KV 事件父块哈希链异常（issue #12002）。\n【问题根因】原实现在 KVCacheStoreSendingThread 中用 `prev_key` 跨循环迭代记录上一块哈希，但当 sequence 中部分 block 已缓存被跳过时，prev_key 仍指向被跳过块，导致 BlockStored 事件的 parent_block_hash 错误或抛异常。\n【修复方式】改为预计算整组 block 哈希 `all_hashes = [maybe_convert_block_hash(bh) for bh in group_block_hashes]`，再用 `block_idx = start // group_block_size` 直接通过 `all_hashes[block_idx-1]` 查找父块哈希；同时移除 prev_key 跨迭代状态。\n【影响范围】仅修改 ascend_store/kv_transfer.py 一个文件，+8/-5 行。\n【风险评估】中风险：变更涉及 KV 传输事件正确性，若哈希索引越界会触发 KeyError；已加 block_idx 边界检查（>= len(all_hashes) 时 continue）但未补单测。",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "kv-transfer",
+        "kv-cache"
+      ],
+      "pr_number": "12012",
+      "title_en": "[Ops][BugFix] Fix parent block hash chain exception in AscendStore KV event",
+      "title_zh": "[Ops][BugFix] 修复 AscendStore KV 事件父块哈希链异常",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修复 KV 传输核心事件链路逻辑，但未新增针对 group_block_hashes 与 block_idx 边界场景的回归测试，存在覆盖缺口",
+        "suggested_test_areas": [
+          "tests/ut/distributed/test_ascend_store_kv_transfer.py",
+          "tests/ut/kv_transfer/"
+        ]
+      }
+    },
+    {
+      "sha": "8abdd1eb322ae43931709d379784da7a94ba91bc",
+      "comment": "【变更概述】修正 GLM5.2 1M PD 部署脚本的启动参数。\n【具体改动】将 `--max-num-batched-tokens` 从 16384 改为 128；`--gpu-memory-utilization` 从 0.75 提升至 0.93；关闭 `enable_flashcomm1` 与 `enable_dsa_cp` 两个特性。\n【变更意图】1M 长上下文 PD 场景下原配置不可用或性能不佳，缩小 batch tokens 防止 OOM，关闭与 CP（Context Parallel）相关的优化避免兼容性问题。\n【影响范围】仅 docs/source/tutorials/models/GLM5.2.md，+3/-3。\n【风险评估】低风险：仅文档示例。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12289",
+      "title_en": "[Doc] Fix glm5.2 1M PD script",
+      "title_zh": "[Doc] 修复 GLM5.2 1M PD 部署脚本参数",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "仅修改教程文档示例参数，不涉及代码逻辑",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2044419f8f3dec6288eb1b1b1f54245d4c2b0904",
+      "comment": "【变更概述】当 `enable_fused_mc2` 启用时自动关闭 `multistream_overlap_shared_expert` 并告警。\n【问题根因】fused mc2 启用时：1) shared expert 多流与 CV 并行不兼容且无性能收益；2) 若同时未启用 enable_shared_expert_dp，MOE 大融合算子与 shared expert 的 TP 通信（AIV 模式）分处两个 stream，可能死锁挂死。\n【修复方式】在 ascend_config.py 中加入互斥逻辑：检测到两者同时开启时强制将 multistream_overlap_shared_expert 置为 False 并打印 warning；同时清理 GLM5/GLM5.2/Kimi-K2.5/MiniMax/Qwen3.5 等文档与 e2e yaml 中冗余的 `multistream_overlap_shared_expert: true`。\n【影响范围】9 文件：1 代码 + 5 docs + 3 测试 yaml，+33/-27。\n【风险评估】中风险：影响 MoE 模型 shared expert 调度路径，若互斥判定遗漏场景仍可能死锁。",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "distributed",
+        "docs",
+        "tests"
+      ],
+      "pr_number": "12237",
+      "title_en": "[BugFix] Disable multistream_overlap_shared_expert when enable_fused_mc2 is enabled",
+      "title_zh": "[BugFix] 启用 enable_fused_mc2 时自动禁用 multistream_overlap_shared_expert",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "新增互斥逻辑但未新增单测覆盖同时开启两选项的场景，建议补 ascend_config 单测",
+        "suggested_test_areas": [
+          "tests/ut/test_ascend_config.py",
+          "tests/e2e/weekly/multi_node/external_dp/config/GLM_5_1_PD_in32k_bs16-0.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "c4219e906b5e1f50910ecedb708f3845c251a406",
+      "comment": "【变更概述】修改 A3 560T 夜间测试的 PVC 名称。\n【具体改动】.github/workflows/_e2e_nightly_multi_node_560t.yaml 中将 PVC 名字段更新为新的命名。\n【影响范围】1 文件，+1/-1。\n【风险评估】低风险：纯 CI 配置。",
+      "tags": [
+        "ci",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12288",
+      "title_en": "[CI] change pvc name for a3 560t",
+      "title_zh": "[CI] 修改 A3 560T 测试的 PVC 名称",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯 CI 基础设施配置调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "17f6905698d30f15c8dc18d2b515061ce4a8d109",
+      "comment": "【变更概述】用 vLLM 0.24 的 parser-engine 路径替换过期的 MiniMax parser backport。\n【具体改动】删除 patch_minimax_m2_tool_call_parser.py（-520）和 patch_minimax_usage_accounting.py（-462）；新增 patch_parser_reasoning_usage.py（+740）作为 vLLM PR #45802 的 backport；保留 completion_tokens_details.reasoning_tokens 对 parser-engine 与 MiniMax append-think reasoning parser 的支持；移除过期的小显式 MiniMax-M2 MoE TP reduction（vLLM MoE runner 已内置）。\n【副作用】同时解决 issue #10758（旧本地 parser 路径泄露 split `</parameter>` 标签问题）。\n【影响范围】9 文件，+1100/-1752，主要在 vllm_ascend/patch/platform 下；删除 2 个 ut、新增 1 个 ut。\n【风险评估】中风险：用户侧 tool-call 解析路径变化，需保证 reasoning-token usage 与 streaming 输出与历史一致。",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "patch",
+        "tests"
+      ],
+      "pr_number": "11384",
+      "title_en": "[Refactor][Patch] Replace MiniMax parser backports",
+      "title_zh": "[Refactor][Patch] 用 vLLM parser-engine 替换 MiniMax parser backport",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "已新增 tests/ut/patch/platform/test_patch_parser_reasoning_usage.py 覆盖新路径",
+        "suggested_test_areas": [
+          "tests/ut/patch/platform/test_patch_parser_reasoning_usage.py",
+          "tests/e2e/pull_request/ (MiniMax-M2 streaming/non-streaming tool-call)"
+        ]
+      }
+    },
+    {
+      "sha": "6bc7484f5d912f5a868366f409b9ac4a20d6ed2c",
+      "comment": "【变更概述】调整 A3 560T 测试的 runner 配置。\n【具体改动】pr_nightly_command.yml 与 schedule_nightly_test_a3_560t.yaml 中替换 runner label。\n【影响范围】2 文件，+2/-2。\n【风险评估】低风险：纯 CI 配置。",
+      "tags": [
+        "ci",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12285",
+      "title_en": "[CI] change runner for a3 560t test",
+      "title_zh": "[CI] 修改 A3 560T 测试的 runner",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯 CI runner 配置调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4efde17e72313272f6f6ee3c1454d95b6d840dee",
+      "comment": "【变更概述】统一 310P 部署文档的命名与布局，覆盖 Qwen3-Dense 与 Qwen3.6-35B-A3B。\n【具体改动】Qwen3-Dense.md 重命名/重组示例并新增量化模型支持说明；Qwen3.6-35B-A3B.md 整理布局。\n【影响范围】2 文件，+78/-58。\n【风险评估】低风险：纯文档。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12250",
+      "title_en": "[Docs][Misc] 310P user guide changes naming layout",
+      "title_zh": "[Docs][Misc] 310P 用户指南命名与布局调整",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "20193b0af36c39c8e0d54caccf706c5b17c9b87c",
+      "comment": "【变更概述】为 A3 560T 集群新增夜间测试工作流与配置，支持非独占共享机器。\n【具体改动】新增 `_e2e_nightly_multi_node_560t.yaml`（+463）支持 K8s 调度的多节点/双节点测试；新增 `_e2e_nightly_single_node_560t.yaml`（+370）跑单节点多卡；重构 schedule_nightly_test_a3_560t.yaml 使用 560T 专属 config 路径并优化 job 顺序（单卡→多卡→双节点→多节点）；扩展 resolve_nightly_tests.py 与 pr_nightly_command.yml 让 /nightly 命令可以派发到 560T workflow。\n【影响范围】7 文件，+1376/-17，含 3 个新增 workflow。\n【风险评估】中风险：CI 调度路径变化，若 workflow 间依赖或 matrix 配置错误可能导致夜间任务整体阻塞。",
+      "tags": [
+        "ci",
+        "medium-risk",
+        "ci",
+        "tests"
+      ],
+      "pr_number": "12270",
+      "title_en": "[CI] add nightly test workflow and config for A3 560T clusters",
+      "title_zh": "[CI] 为 A3 560T 集群新增夜间测试工作流与配置",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "CI 工作流配置，通过实际触发 nightly 调度即可验证；非功能性测试",
+        "suggested_test_areas": [
+          ".github/workflows/_e2e_nightly_single_node_560t.yaml",
+          ".github/workflows/_e2e_nightly_multi_node_560t.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "491911909068e34e11b114e21878e2b2a25d7a4e",
+      "comment": "【变更概述】新增 Batch-Job-Aware Scheduler，面向离线批量推理场景的调度器扩展。\n【设计要点】1) LPT 调度：decode 阶段优先调度长任务以提升平均每轮 token 数；2) KV cache 预留：RunningBlockReserver 用两级增量缓存（O(1) 单请求添加）预测下一步 KV block 需求，显著降低抢占；3) 按 job name（从 request id 中的 `#job_name[${JOB_NAME}]#` 提取）分组，使用 RequestBucket 提供 O(log n) best-fit prefill 搜索，并根据 KV 可用量动态切换长/短 decode 优先。\n【decode 长度估计】每 job 用 EWMA 估计，冷启动默认 128 token；首次观测初始化 EWMA，后续增量更新。\n【配置】新增 batch_job_sched_config（enabled/max_jobs/reserve_margin_blocks/reserve_max_blocks/low_available_tokens_threshold/short_decode_token_threshold），默认 disabled。\n【重要警告】该调度器未实现防饥饿，仅适用于批量或对延迟不敏感场景。\n【影响范围】9 文件，+1899，含 685 行核心实现、769 行 ut、207 行 e2e。\n【风险评估】中风险：新增独立调度器并注册到 platform.py，默认关闭，对存量用户透明；benchmark 显示抢占降低 89-98%、吞吐 +22-26%（混合负载）。",
+      "tags": [
+        "feature",
+        "medium-risk",
+        "scheduler",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "12240",
+      "title_en": "[Feature] Support batch job aware scheduler",
+      "title_zh": "[Feature] 新增批量任务感知调度器（Batch-Job-Aware Scheduler）",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "PR 已附带 769 行 ut（覆盖 7 个组件，73 个子用例）和 207 行 e2e（4 场景），测试覆盖完整",
+        "suggested_test_areas": [
+          "tests/ut/core/test_batch_job_aware_scheduler.py",
+          "tests/e2e/pull_request/one_card/test_batch_job_aware_scheduler_e2e.py"
+        ]
+      }
+    },
+    {
+      "sha": "12ddf3ce42b5029eb6292c4cf992921e1b00d845",
+      "comment": "【变更概述】将 GDN (GatedDeltaNet) attention 的 layerwise KV saving 从 forward() 移到 _forward_core()，修复 torch.compile 下 PD 分离挂死。\n【问题根因】torch.compile 下 forward() 被 trace 在 opaque `vllm::qwen_gdn_attention_core` custom op 周围，导致 `maybe_save_kv_layer_to_connector(\"\", [])` Python 回调不可靠被调用；在 layerwise KV connector 场景下 GDN/Mamba cache group 未提交，decode 请求永久等待。\n【修复方式】将 callback 从 AscendGatedDeltaNetAttention.forward() 移到 _forward_core() 末尾，保持在 custom-op runtime 路径内，确保 conv/SSM state 更新后再调用。\n【覆盖范围】eager + PIECEWISE 编译；FULL ACLGraph replay 下的 Python 回调不在本 PR 范围。\n【影响范围】4 文件，+299/-1，含 196+101 行新增 ut（CPU/NPU）。\n【风险评估】中风险：影响 Qwen3.5 等 GDN 混合架构模型的 PD 分离编译路径，需要 layerwise connector 场景回归。",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "attention",
+        "kv-transfer",
+        "compilation",
+        "tests"
+      ],
+      "pr_number": "11917",
+      "title_en": "[BugFix] Move KV layer saving to _forward_core for compilation support",
+      "title_zh": "[BugFix] 将 KV 层保存移至 _forward_core 以支持 torch.compile",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "PR 已附带 tests/ut/ops/test_gdn_layerwise_kv.py 与 tests/ut/ops/a2/test_gdn_layerwise_kv.py 覆盖 eager + torch.compile 路径",
+        "suggested_test_areas": [
+          "tests/ut/ops/test_gdn_layerwise_kv.py",
+          "tests/ut/ops/a2/test_gdn_layerwise_kv.py"
+        ]
+      }
+    },
+    {
+      "sha": "82b13d502f9354ec18ed91f5e69293fe680a84db",
+      "comment": "【变更概述】全面更新 Qwen3-VL 文档：Qwen3-VL-235B-A22B-Instruct.md 与 Qwen3-VL-30B-A3B-Instruct.md。\n【具体改动】补齐前置准备/安装/在线部署/功能验证/评测/调优/FAQ 完整章节；新增 Qwen3-VL 特有指引，包括多模态限制、image/video serving、本地媒体路径、多模态 processor cache、ACLGraph、EP、MP、PD 分离；并更新 supported_models.md。\n【影响范围】3 文件，+884/-248。\n【风险评估】低风险：纯文档。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "multimodal",
+        "docs"
+      ],
+      "pr_number": "11884",
+      "title_en": "[Doc][Misc] Update Qwen3-VL documents",
+      "title_zh": "[Doc][Misc] 更新 Qwen3-VL 文档",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档更新",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "545e0c7815f07d667d3c460df34ff502f34a2c25",
+      "comment": "【变更概述】将 Kimi 单节点周测试配置从 K2.5 升级到 K2.6。\n【具体改动】重命名 Kimi-K2.5*.yaml → Kimi-K2.6*.yaml；更新 weekly_config.yaml、model_dataset_list.json 中的模型/数据路径与 case 名。\n【影响范围】4 文件，+39/-41。\n【风险评估】低风险：纯测试配置调整，但需确保 K2.6 模型路径与权重可用。",
+      "tags": [
+        "test",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "12219",
+      "title_en": "[Test][Misc] Update Kimi weekly single-node test configs to K2.6",
+      "title_zh": "[Test][Misc] Kimi 单节点周测试配置升级到 K2.6",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "本身就是测试配置升级；通过 weekly 测试套件验证",
+        "suggested_test_areas": [
+          "tests/e2e/weekly/single_node/configs/Kimi-K2.6.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "0f795c57371c3fed8b4cc22ec59835a1585b8492",
+      "comment": "【变更概述】批量修正文档不准确表述与格式问题。\n【具体改动】1) 修正大小写（python→Python、Tcmalloc→TCMalloc）；2) 修正 Ascend NPU 上speculative tokens 上限从 15 改为 16；3) 标准化单位（1 GB→1GB、2 MiB→2MiB）；4) 修复失效链接与图片 alt 文本；5) 同步中文 .po 翻译文件。\n【影响范围】32 文件（含 16 个 .po 翻译文件），+128/-132。\n【风险评估】低风险：纯文档；但 speculative tokens 上限值 16 应与代码实际限制一致。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs",
+        "spec-decode"
+      ],
+      "pr_number": "12194",
+      "title_en": "[Doc][Misc] Correct inaccurate statements in documentation.",
+      "title_zh": "[Doc][Misc] 修正文档中的不准确表述",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档修正，无代码变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "9676437fad23903bf53544baf9accd382fb932d3",
+      "comment": "【变更概述】将 Mooncake receiver ThreadPoolExecutor 工作线程绑定到 KV cache 所在 NPU 设备。\n【问题根因】NPU current-device 是线程局部状态；decode model worker 创建的 executor worker 不继承model worker 线程选定的设备，逻辑设备默认为 0。当 prefill/decode TP 不一致时，executor worker 中执行 NPU KV cache 重整会让 `torch.npu.synchronize()` 在 device 0 上意外创建 context，导致同一 non-zero-rank worker PID 同时出现在分配的 NPU 与 device 0。\n【修复方式】不能从 tp_rank 推导（DP/PP/PCP 与 ASCEND_RT_VISIBLE_DEVICES 重映射会破坏对应关系），改为以注册的 KV cache tensor 为权威源，在每个 worker 启动时调用 torch.npu.set_device。\n【影响范围】4 文件，+181/-8；同时为标准与 hybrid Mooncake connector 应用相同修复；新增针对两 worker 场景的回归测试。\n【风险评估】中风险：影响 Mooncake PD 分离在 TP 不一致拓扑下的 KV 传输路径。",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "kv-transfer",
+        "distributed",
+        "tests"
+      ],
+      "pr_number": "12126",
+      "title_en": "[Bugfix] Bind Mooncake receiver threads to KV cache device",
+      "title_zh": "[Bugfix] 将 Mooncake receiver 线程绑定到 KV cache 设备",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "PR 已新增 test_mooncake_connector.py 与 test_mooncake_hybrid_connector.py 回归测试覆盖两 worker 场景",
+        "suggested_test_areas": [
+          "tests/ut/kv_offload/test_mooncake_connector.py",
+          "tests/ut/kv_offload/test_mooncake_hybrid_connector.py"
+        ]
+      }
+    },
+    {
+      "sha": "b269feeed211b1de089c9ad23f8b1a94ed981c58",
+      "comment": "【变更概述】【MRV2】修复 Ascend MRV2 实现中 `compute_topk_logprobs` 函数签名以匹配 vLLM v1 新接口，并重新启用 Qwen3 dense eager 模式 e2e 测试。\n【问题根因】vLLM v1 上游更新了 `compute_topk_logprobs` 接口签名，Ascend MRV2 的 vllm_ascend/worker/v2/sample/logprob.py 未同步，导致 MRV2 路径下 logprobs 计算调用失败。\n【修复方式】同步更新 logprob.py 中的 compute_topk_logprobs 签名（+10/-5）；同时取消 tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py 中对 test_qwen3_dense_eager_mode 的 skip 标记，恢复对该路径的 e2e 看护。\n【影响范围】2 文件，+14/-7。\n【风险评估】中风险：MRV2 是新 model runner 路径，签名错配会导致 MRV2 启用场景崩溃；恢复的 e2e 可有效看护后续回归。",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "mrv2",
+        "model-runner",
+        "tests"
+      ],
+      "pr_number": "12094",
+      "title_en": "[CI][BugFix][MRV2] Fix logprobs signature for MRV2",
+      "title_zh": "【MRV2】[CI][BugFix] 修复 MRV2 的 logprobs 函数签名",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "PR 本身已通过重新启用 test_qwen3_dense_eager_mode e2e 覆盖 MRV2 logprobs 路径",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py",
+          "vllm_ascend/worker/v2/sample/logprob.py"
+        ]
+      }
+    },
+    {
+      "sha": "ab0f7b975e310e41b7ecfd31fc0310396c2ea317",
+      "comment": "【变更概述】修复中文文档锚点链接。\n【具体改动】更新 graph_mode.po 与 speculative_decoding.po 中的锚点以匹配翻译后的标题；清理 testing.md 中过期 e2e 示例；新增 .markdownlint.yaml 一条规则。\n【影响范围】6 文件，+7/-8。\n【风险评估】低风险：纯文档。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12182",
+      "title_en": "[Doc] Fix Chinese documentation anchor links",
+      "title_zh": "[Doc] 修复中文文档锚点链接",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档修复，本地构建验证链接",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6582e57267f7eaed407dac091a708d8672fe485e",
+      "comment": "【变更概述】在多个模型部署教程中将 prefill 节点的 num_speculative_tokens 改为 1。\n【变更意图】PD 分离部署中 prefill 节点不执行投机生成，应设为 1（即不投机）才是正确配置；原教程中 2/3/5 等取值会误导用户。\n【影响范围】5 个教程文件（DeepSeek-V3.2、GLM4.x、GLM5.2、GLM5、Kimi-K2.5），+11/-11。\n【风险评估】低风险：纯文档。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs",
+        "spec-decode"
+      ],
+      "pr_number": "12144",
+      "title_en": "[Doc][Misc] Update num_speculative_tokens to 1 in model tutorials",
+      "title_zh": "[Doc][Misc] 模型教程中将 num_speculative_tokens 更新为 1",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯文档调整",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6315caac8e05b531b559c4f5fb5c1f8a7db4ed3d",
+      "comment": "【变更概述】Revert PR #12217（即恢复 vllm main 的 e2e 测试以适配 v0.24.0rc）。\n【背景】PR #12217（commit 70b0e96a）此前移除了 pr_e2e_command.yml 与 pr_test.yaml 中 vllm main 的 e2e 测试；本 revert 把这两行配置恢复回来。\n【影响范围】2 文件，+2/-0。\n【风险评估】低风险：仅 CI 配置回滚。",
+      "tags": [
+        "ci",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12229",
+      "title_en": "[Revert] Revert \"[CI] Drop vllm main e2e test for v0.24.0rc\" (#12217)",
+      "title_zh": "[Revert] 撤销「[CI] 移除 v0.24.0rc 的 vllm main e2e 测试」",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯 CI 配置回滚",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "acc052524e2ae3ab69ed3075865705cb8e85ecc1",
+      "comment": "【变更概述】将 Ascend scheduler 扩展配置统一收纳到 `additional_config[\"scheduler_config\"]` 下。\n【迁移策略】保留旧顶级 key 兼容但触发 deprecation warning；更新运行时消费者（recompute_scheduler、scheduler_profiling_chunk、short_request_first_scheduler、patch_balance_schedule、patch_profiling_chunk、platform、utils、model_runner_v1 等）改读嵌套字段；新增 120 行 test_ascend_config.py 与 47 行 test_patch_balance_schedule.py 单测覆盖嵌套解析、legacy 兼容、优先级、platform 选择、Balance fallback；同步更新文档与 .po 翻译。\n【影响范围】22 文件，+346/-102，跨核心 config/worker/patch 多模块。\n【风险评估】中风险：改动 config 入口，旧配置依赖方若未走 deprecation 路径会读取失败；同时影响 model_runner_v1 与 patch_balance_schedule 的运行时行为。",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "scheduler",
+        "patch",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "12177",
+      "title_en": "[Refactor][Scheduler] Nest scheduler configuration",
+      "title_zh": "[Refactor][Scheduler] 将 scheduler 配置嵌套收纳到 scheduler_config 下",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "PR 已新增 test_ascend_config.py + test_patch_balance_schedule.py 单测覆盖嵌套与兼容路径",
+        "suggested_test_areas": [
+          "tests/ut/test_ascend_config.py",
+          "tests/ut/patch/platform/test_patch_balance_schedule.py"
+        ]
+      }
+    },
+    {
+      "sha": "70b0e96a9d737a45fb544130f9327f20405c9ede",
+      "comment": "【变更概述】为 v0.24.0rc 移除 vllm main 的 e2e 测试（此 PR 后被 #12229 revert）。\n【具体改动】在 pr_e2e_command.yml 与 pr_test.yaml 中删除触发 vllm main e2e 的行。\n【影响范围】2 文件，+0/-2。\n【风险评估】低风险：纯 CI 配置；后续 #12229 已撤销此变更。",
+      "tags": [
+        "ci",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12217",
+      "title_en": "[CI] Drop vllm main e2e test for v0.24.0rc",
+      "title_zh": "[CI] 为 v0.24.0rc 移除 vllm main e2e 测试",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯 CI 配置变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "929ef87a0b8b534e094a1ea296e729001de41864",
+      "comment": "【变更概述】【MRV2】为 MRV2 下的 DFlash 投机解码新增 FullGraph 支持，并修复 v2 aclgraph GraphParams 与 capture descriptors 对齐问题。\n【问题根因】spec decoding + FULL_DECODE_ONLY 下，v2 ACL graph managers 用原始 cudagraph_capture_sizes 作为 GraphParams key，但 `_init_candidates` 会将每个 size 向上取整为 decode_query_len (num_spec_tokens+1) 的倍数（如 496→504），导致 attention backend 索引 graph_params.events[504] 时 KeyError 启动失败。\n【修复方式】vllm_ascend/worker/v2/aclgraph_utils.py 改为从 capture descriptors 推导 v2 graph-params sizes；新增 vllm_ascend/worker/v2/spec_decode/dflash/aclgraph.py（+117）专门承载 DFlash FullGraph 逻辑；扩展 speculator.py（+49）支持 graph 模式；同时复用调整 eagle/aclgraph.py 中的公共逻辑（+11/-16）；新增 patch/worker/patch_v2/patch_dflash_speculator.py（+25）作为补丁入口；attention_mask.py 补 9 行处理 spec decode 掩码。\n【验证】VLLM_USE_V2_MODEL_RUNNER=1 跑 Qwen3-8B + Qwen3-8B-DFlash-b16 + 8 spec tokens + gsm8k 400 prompts：Full Graph throughput 1554 tok/s（vs eager 1440 tok/s），mean acceptance length 5.04，且各 token 位命中率与 eager 一致。\n【影响范围】8 文件，+255/-21；扩展 model_runner_v2/test_basic.py 增加 13 行 e2e。\n【风险评估】中风险：MRV2 + aclgraph + spec decode 三重叠加路径，capture size 向上取整边界对齐需充分覆盖；目前缺少针对 num_spec_tokens+1 倍数对齐边界的单元测试。",
+      "tags": [
+        "feature",
+        "medium-risk",
+        "mrv2",
+        "model-runner",
+        "aclgraph",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "11895",
+      "title_en": "[Feature][MRV2] Support FullGraph for DFlash",
+      "title_zh": "【MRV2】[Feature] 为 DFlash 投机解码支持 FullGraph",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "新增 MRV2 + DFlash + FullGraph 路径但仅靠 e2e acceptance 脚本验证，缺少针对 aclgraph capture size 向上取整边界（num_spec_tokens+1 倍数）与 KeyError 回归的单元测试",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py",
+          "tests/ut/worker/v2/ (建议新增 test_aclgraph_utils_graph_params_sizing.py)",
+          "vllm_ascend/worker/v2/aclgraph_utils.py",
+          "vllm_ascend/worker/v2/spec_decode/dflash/aclgraph.py"
+        ]
+      }
+    },
+    {
+      "sha": "239c64b0a985be05bbb78dbdd953111ca218b189",
+      "comment": "【变更概述】dependabot 升级 actions/checkout v4 → v7。\n【具体改动】在 8 个 workflow yaml 中将 actions/checkout 引用从 @v4 升到 @v7：_selected_tests、schedule_main2main、schedule_nightly_test_a2/a3、schedule_test_coverage、schedule_weekly_test_310p/a2/a3。\n【影响范围】8 文件，+14/-14。\n【风险评估】低风险：依赖版本升级，需确认 v7 行为兼容（默认 fetch 行为可能有变化）。",
+      "tags": [
+        "ci",
+        "chore",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "11472",
+      "title_en": "[CI] Bump actions/checkout from 4 to 7",
+      "title_zh": "[CI] 升级 actions/checkout v4 到 v7",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "第三方 action 版本升级，由 CI 实际触发即可验证",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f64ff509c89b0e35450a3b0e2ad92c7cf1e65afb",
+      "comment": "【变更概述】dependabot 升级 actions/setup-python v5 → v6。\n【具体改动】在 6 个 workflow yaml 中升级 actions/setup-python 引用：schedule_nightly_test_a2/a3、schedule_release_code_and_wheel.yml、schedule_weekly_test_310p/a2/a3。\n【影响范围】6 文件，+11/-11。\n【风险评估】低风险：依赖版本升级。",
+      "tags": [
+        "ci",
+        "chore",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "11471",
+      "title_en": "[CI] Bump actions/setup-python from 5 to 6",
+      "title_zh": "[CI] 升级 actions/setup-python v5 到 v6",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "第三方 action 版本升级",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "50f0f24bf08f20493f24bdca221ab37c48602c38",
+      "comment": "【变更概述】CI 自动更新 test_config.yaml 中 estimated_times。\n【具体方法】各测试 job 上传 timing-data-* artifact；workflow 聚合后取中位数抑制离群点，再追加 10% 安全余量并取整到 10 秒；写回 .github/workflows/scripts/test_config.yaml。\n【影响范围】1 文件，+73/-72。\n【风险评估】低风险：纯 CI 元数据更新。",
+      "tags": [
+        "ci",
+        "chore",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12210",
+      "title_en": "[CI] Auto-update estimated test times in test_config.yaml",
+      "title_zh": "[CI] 自动更新 test_config.yaml 中的预估测试耗时",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "CI 自动维护测试耗时元数据",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "682061b6c53a82c181821fb5e06af63b9ace57b4",
+      "comment": "【变更概述】自动翻译 14 个中文 .po 文档（2026-07-16 batch）。\n【覆盖文件】使用_ais_bench、installation、quick_start、GLM4.x、MiniMax-M2、Qwen3-30B-A3B、Qwen3-Coder-30B-A3B、additional_config、feature_guide/index、kv_pool、layerwise_kv_pool、recompute_cpu_offload（新增）、feature_matrix、supported_models。\n【影响范围】14 文件，+999/-656。\n【风险评估】低风险：纯翻译，机器翻译质量需人工 review。",
+      "tags": [
+        "docs",
+        "chore",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12145",
+      "title_en": "[Doc] Translated Doc files 2026-07-16",
+      "title_zh": "[Doc] 翻译文档批次（2026-07-16）",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "纯翻译文件更新",
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}

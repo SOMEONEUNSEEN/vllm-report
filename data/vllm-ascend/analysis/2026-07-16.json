@@ -1,0 +1,440 @@
+{
+  "date": "2026-07-16",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-17T11:47:26.258476+08:00",
+  "commits": [
+    {
+      "sha": "0074dfa4a152173b8209af4803bd118678f6851e",
+      "comment": "【变更概述】[Bugfix] 更新：recover qwen3vt 310p patch\n【PR号】#12134\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm_ascend/patch/worker/patch_idex_310.py (+5/-0)\n【统计数据】共修改 1 个文件，新增 5 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】patch",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "patch"
+      ],
+      "pr_number": "12134",
+      "title_en": "[Bugfix] recover qwen3vt 310p patch",
+      "title_zh": "[Bugfix] 更新：recover qwen3vt 310p patch",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2c7fd4f2db764e035ce7af2bbc415f5aac01dda6",
+      "comment": "【变更概述】[Doc] 文档：GLM5.2 DCP 更新 GLM5.2 文档 1M Context Configuration\n【PR号】#12121\n【变更类型】此提交为文档更新类型\n【变更文件】修改 docs/source/tutorials/models/GLM5.2.md (+263/-0)\n【统计数据】共修改 1 个文件，新增 263 行，删除 0 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "docs",
+        "medium-risk",
+        "docs"
+      ],
+      "pr_number": "12121",
+      "title_en": "[Doc](GLM5.2, DCP): update GLM5.2 docs with 1M Context Configuration",
+      "title_zh": "[Doc] 文档：GLM5.2 DCP 更新 GLM5.2 文档 1M Context Configuration",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "560ea5e4226e4d88d3443c33fceb718d0e271d96",
+      "comment": "【变更概述】[Doc] [BugFix] 修复：修复 parameter configuration functional verification request\n【PR号】#12155\n【变更类型】此提交为问题修复类型\n【变更文件】修改 docs/source/tutorials/models/Qwen3.5-27B-Qwen3.6-27B.md (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12155",
+      "title_en": "[Doc][BugFix] Fix parameter configuration in functional verification request",
+      "title_zh": "[Doc] [BugFix] 修复：修复 parameter configuration functional verification request",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "9c5826eaf1f9c78da954578705d7d9dd85941eef",
+      "comment": "【变更概述】[BugFix] [CI] 修复：修复 AOP parameter misalignment 升级 bisect trial 超时\n【PR号】#11998\n【变更类型】此提交为问题修复类型\n【变更文件】修改 .github/workflows/_e2e_nightly_single_node.yaml (+1/-0); 修改 tools/bisect/auto_bisect.py (+1/-1); 修改 tools/bisect/config.py (+1/-1)\n【统计数据】共修改 3 个文件，新增 3 行，删除 2 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性",
+      "tags": [
+        "bugfix",
+        "high-risk",
+        "ci"
+      ],
+      "pr_number": "11998",
+      "title_en": "[BugFix][CI] Fix AOP parameter misalignment and bump bisect trial timeout",
+      "title_zh": "[BugFix] [CI] 修复：修复 AOP parameter misalignment 升级 bisect trial 超时",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c3fff895f78bc155504ae64357361a351e9186fb",
+      "comment": "【变更概述】[Refactor] 更新：移除 dispatch_gmm_combine_decode ops\n【PR号】#12031\n【变更类型】此提交为代码重构类型\n【变更文件】修改 csrc/build_aclnn.sh (+0/-1); 删除 csrc/mc2/dispatch_gmm_combine_decode/CMakeLists.txt (+0/-19); 删除 csrc/mc2/dispatch_gmm_combine_decode/dispatch_gmm_combine_decode_torch_adpt.h (+0/-83); 删除 csrc/mc2/dispatch_gmm_combine_decode/op_host/CMakeLists.txt (+0/-32); 删除 csrc/mc2/dispatch_gmm_combine_decode/op_host/dispatch_gmm_combine_decode_def.cpp (+0/-220); ... 及其他 44 个文件\n【统计数据】共修改 49 个文件，新增 36 行，删除 11956 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】distributed, ops, tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "distributed",
+        "ops",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "12031",
+      "title_en": "[Refactor] Remove dispatch_gmm_combine_decode ops",
+      "title_zh": "[Refactor] 更新：移除 dispatch_gmm_combine_decode ops",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/single_node/ops/multicard_ops_a3/test_dispatch_gmm_combine_decode.py",
+          "tests/ut/test_ascend_config.py",
+          "tests/ut/test_ascend_forward_context.py"
+        ]
+      }
+    },
+    {
+      "sha": "094d1ccabebc52d5f85757991f6b63d9fb66719e",
+      "comment": "【变更概述】[Doc] 更新：更新 MiniMax M2 serving parameters\n【PR号】#12187\n【变更类型】此提交为文档更新类型\n【变更文件】修改 docs/source/tutorials/models/MiniMax-M2.md (+3/-3)\n【统计数据】共修改 1 个文件，新增 3 行，删除 3 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "docs",
+        "medium-risk",
+        "docs"
+      ],
+      "pr_number": "12187",
+      "title_en": "[Doc] update MiniMax M2 serving parameters",
+      "title_zh": "[Doc] 更新：更新 MiniMax M2 serving parameters",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "5b9da64ee3b62c88f9c3e6e084db2eb8340e6a31",
+      "comment": "【变更概述】【MRV2】[Misc] 【MRV2】修复：添加 debug logging probes speculative decoding diagnostics\n【PR号】#11123\n【变更类型】此提交为问题修复类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 vllm_ascend/sample/rejection_sampler.py (+87/-2); 修改 vllm_ascend/worker/model_runner_v1.py (+39/-0)\n【统计数据】共修改 2 个文件，新增 126 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】model-runner, sample",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "model-runner",
+        "sample"
+      ],
+      "pr_number": "11123",
+      "title_en": "[Misc] Add debug logging probes for speculative decoding diagnostics",
+      "title_zh": "【MRV2】[Misc] 【MRV2】修复：添加 debug logging probes speculative decoding diagnostics",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/sample/rejection_sampler.py",
+          "vllm_ascend/worker/model_runner_v1.py"
+        ]
+      }
+    },
+    {
+      "sha": "64dad4d8712ff5ff4bc348923fc199fd651b90fb",
+      "comment": "【变更概述】[Feature] 更新：Printing reserved allocated values after warmup\n【PR号】#11495\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm_ascend/worker/worker.py (+3/-1)\n【统计数据】共修改 1 个文件，新增 3 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk"
+      ],
+      "pr_number": "11495",
+      "title_en": "[Feature]Printing of the reserved and allocated values after warmup",
+      "title_zh": "[Feature] 更新：Printing reserved allocated values after warmup",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/worker/worker.py"
+        ]
+      }
+    },
+    {
+      "sha": "76113ef3cc72690ee4dfb57846ef15ee74e291d8",
+      "comment": "【变更概述】[CI] 修复：修复 _manual-hitest.yaml avoid E2E break\n【PR号】#12185\n【变更类型】此提交为问题修复类型\n【变更文件】修改 .github/workflows/_manual-hitest.yaml (+6/-0)\n【统计数据】共修改 1 个文件，新增 6 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12185",
+      "title_en": "[CI] fix _manual-hitest.yaml avoid E2E break",
+      "title_zh": "[CI] 修复：修复 _manual-hitest.yaml avoid E2E break",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f59b54dcb70efb0b5dc1902f574eea94d88f78e7",
+      "comment": "【变更概述】[Doc] 新增：添加 constraints `num_speculative_tokens` PD separation\n【PR号】#12104\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md (+5/-0); 修改 docs/source/user_guide/feature_guide/speculative_decoding.md (+4/-0)\n【统计数据】共修改 2 个文件，新增 9 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12104",
+      "title_en": "[Doc] Add constraints of `num_speculative_tokens` for PD separation",
+      "title_zh": "[Doc] 新增：添加 constraints `num_speculative_tokens` PD separation",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4069587c9b95d5c246c9743912a6d1fb5625e1f2",
+      "comment": "【变更概述】[CI] 新增：添加 hitest 测试\n【PR号】#12140\n【变更类型】此提交为新功能开发类型\n【变更文件】重命名 .github/workflows/_manual-hitest.yaml (+0/-0); 修改 .github/workflows/pr_test.yaml (+10/-0)\n【统计数据】共修改 2 个文件，新增 10 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12140",
+      "title_en": "[CI] add hitest test",
+      "title_zh": "[CI] 新增：添加 hitest 测试",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c2a8d0c4676120888c8fc7ea72864a8f592c2f2f",
+      "comment": "【变更概述】[Cherry-pick] [main] [Feature] [KVCache] 新增：添加 multi-group layerwise KV 缓存 支持 DSV4 MemCache 后端\n【PR号】#12147\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm_ascend/attention/context_parallel/dsa_cp.py (+13/-1); 修改 vllm_ascend/attention/dsa_v1.py (+18/-1); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/config_data.py (+24/-0); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py (+182/-96); 修改 vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py (+103/-75); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 679 行，删除 392 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, distributed",
+      "tags": [
+        "feature",
+        "low-risk",
+        "attention",
+        "distributed"
+      ],
+      "pr_number": "12147",
+      "title_en": "[Cherry-pick][main][Feature][KVCache] Add multi-group layerwise KV cache support for DSV4 with MemCache backend",
+      "title_zh": "[Cherry-pick] [main] [Feature] [KVCache] 新增：添加 multi-group layerwise KV 缓存 支持 DSV4 MemCache 后端",
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "修改了核心模块但未更新测试，建议补充测试用例",
+        "suggested_test_areas": [
+          "vllm_ascend/attention/context_parallel/dsa_cp.py",
+          "vllm_ascend/attention/dsa_v1.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/config_data.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py",
+          "vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py"
+        ]
+      }
+    },
+    {
+      "sha": "9f695d06346b655d5faf5e5c6da3f9b161fb581a",
+      "comment": "【变更概述】[Doc] [Misc] 维护：move 310p related user guides under specific models\n【PR号】#12164\n【变更类型】此提交为日常维护类型\n【变更文件】修改 docs/source/tutorials/models/Qwen3-Dense.md (+221/-116); 修改 docs/source/tutorials/models/Qwen3.6-35B-A3B.md (+183/-77)\n【统计数据】共修改 2 个文件，新增 404 行，删除 193 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "chore",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12164",
+      "title_en": "[Doc][Misc] move 310p related user guides under specific models",
+      "title_zh": "[Doc] [Misc] 维护：move 310p related user guides under specific models",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4249b5c263f6151b48ec07645259b1293427905f",
+      "comment": "【变更概述】[Doc] [Misc] 新增：Unify modification 310 naming PaddleOCRVL\n【PR号】#12074\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 docs/source/tutorials/models/PaddleOCR-VL.md (+14/-14)\n【统计数据】共修改 1 个文件，新增 14 行，删除 14 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12074",
+      "title_en": "[Doc][Misc] Unify the modification of 310 naming of PaddleOCRVL.",
+      "title_zh": "[Doc] [Misc] 新增：Unify modification 310 naming PaddleOCRVL",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7e3678b406d4dbc814bdeb9917cb14b8ebc789ce",
+      "comment": "【变更概述】[Doc] [BugFix] 修复： 修复 broken Docker run command ray tutorial\n【PR号】#12160\n【变更类型】此提交为问题修复类型\n【变更文件】修改 docs/source/tutorials/features/ray.md (+2/-2)\n【统计数据】共修改 1 个文件，新增 2 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "12160",
+      "title_en": "[Doc][BugFix]: fix broken docker run command in ray tutorial",
+      "title_zh": "[Doc] [BugFix] 修复： 修复 broken Docker run command ray tutorial",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "6b3445bc24c4ef188363785b0da2628b4c66272d",
+      "comment": "【变更概述】[BugFix] [CI] 修复：添加 E2E KV sliding window 修复 block 尺寸 input 问题\n【PR号】#12103\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/e2e/pull_request/two_card/spec_decode/test_spec_decode.py (+84/-0); 修改 vllm_ascend/spec_decode/llm_base_proposer.py (+20/-26)\n【统计数据】共修改 2 个文件，新增 104 行，删除 26 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】spec-decode, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "12103",
+      "title_en": "[BugFix][CI] Add E2E for kv sliding window; fix block size input bug",
+      "title_zh": "[BugFix] [CI] 修复：添加 E2E KV sliding window 修复 block 尺寸 input 问题",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/two_card/spec_decode/test_spec_decode.py"
+        ]
+      }
+    },
+    {
+      "sha": "7456a98148857b00381cfe55f4414c88e28642a3",
+      "comment": "【变更概述】[CI] 新增：添加 310P weekly 测试 dispatch from PR /weekly command\n【PR号】#12153\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .github/workflows/configs/weekly_config.yaml (+1/-1); 修改 .github/workflows/pr_nightly_command.yml (+47/-1); 修改 .github/workflows/schedule_weekly_test_310p.yaml (+5/-0); 修改 .github/workflows/scripts/resolve_nightly_tests.py (+5/-1)\n【统计数据】共修改 4 个文件，新增 58 行，删除 3 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12153",
+      "title_en": "[CI] add 310P weekly test dispatch from PR /weekly command",
+      "title_zh": "[CI] 新增：添加 310P weekly 测试 dispatch from PR /weekly command",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "be0740941944d6462403c43fa7f7469384df6e96",
+      "comment": "【变更概述】[BugFix] [CI] 新增：添加 partition distinction CI output log files prevent overwriting\n【PR号】#12143\n【变更类型】此提交为问题修复类型\n【变更文件】修改 .github/workflows/_selected_tests.yaml (+1/-1)\n【统计数据】共修改 1 个文件，新增 1 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ci"
+      ],
+      "pr_number": "12143",
+      "title_en": "[BugFix][CI] Add partition distinction to CI output log files to prevent overwriting",
+      "title_zh": "[BugFix] [CI] 新增：添加 partition distinction CI output log files prevent overwriting",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b266da5d6cb1557c2a2c2f172729f3bf1cfe2f37",
+      "comment": "【变更概述】[Refactor] 更新：移除 get_masked_input_and_mask ops\n【PR号】#12112\n【变更类型】此提交为代码重构类型\n【变更文件】删除 benchmarks/ops/ben_vocabparallelembedding.py (+0/-148); 删除 csrc/kernels/get_masked_input_and_mask_kernel.cpp (+0/-378); 修改 csrc/ops.h (+0/-14); 修改 csrc/torch_binding.cpp (+0/-113); 修改 csrc/torch_binding_meta.cpp (+0/-15); ... 及其他 4 个文件\n【统计数据】共修改 9 个文件，新增 6 行，删除 790 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】ops, tests",
+      "tags": [
+        "refactor",
+        "high-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "12112",
+      "title_en": "[Refactor] Remove get_masked_input_and_mask ops",
+      "title_zh": "[Refactor] 更新：移除 get_masked_input_and_mask ops",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/single_node/ops/singlecard_ops/test_vocabparallelembedding.py",
+          "tests/ut/ops/test_vocab_parallel_embedding.py"
+        ]
+      }
+    },
+    {
+      "sha": "28d0cdff7c8a6fe5e3c72ef34d3b6e41ac400a79",
+      "comment": "【变更概述】[Doc] [Misc] 新增：添加 documentation enable_reduce_sample additional config\n【PR号】#11975\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 docs/source/user_guide/configuration/additional_config.md (+1/-0)\n【统计数据】共修改 1 个文件，新增 1 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "pr_number": "11975",
+      "title_en": "[Doc][Misc] Add documentation for enable_reduce_sample in additional config",
+      "title_zh": "[Doc] [Misc] 新增：添加 documentation enable_reduce_sample additional config",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4edcfe270be83e5c28ec48daa222ba185c8d122f",
+      "comment": "【变更概述】[CI] [Misc] 维护：更新 MiniMax-M2.5 测试 config set environment variables parameters 调整 baselines\n【PR号】#11972\n【变更类型】此提交为日常维护类型\n【变更文件】修改 tests/e2e/weekly/single_node/configs/MiniMax-M2.5-w8a8-QuaRot-A3.yaml (+20/-64)\n【统计数据】共修改 1 个文件，新增 20 行，删除 64 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证\n【涉及模块】quantization, tests",
+      "tags": [
+        "chore",
+        "medium-risk",
+        "quantization",
+        "tests"
+      ],
+      "pr_number": "11972",
+      "title_en": "[CI][Misc] Update MiniMax-M2.5 test config: set environment variables and parameters, and adjust baselines",
+      "title_zh": "[CI] [Misc] 维护：更新 MiniMax-M2.5 测试 config set environment variables parameters 调整 baselines",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/weekly/single_node/configs/MiniMax-M2.5-w8a8-QuaRot-A3.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "e77502ef715f612f2cc6f3c833174431f26cb765",
+      "comment": "【变更概述】【MRV2】[Refactor] 【MRV2】更新：移除 weight prefetch config\n【PR号】#11949\n【变更类型】此提交为代码重构类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 .github/workflows/scripts/test_config.yaml (+2/-2); 修改 docs/hooks/nav_titles.py (+0/-1); 修改 docs/source/_templates/Model-Deployment-Tutorial-Template.md (+7/-8); 修改 docs/source/_templates/Model-Deployment-Tutorial-Template.zh.md (+5/-6); 修改 docs/source/locale/zh_CN/LC_MESSAGES/user_guide/configuration/additional_config.po (+0/-29); ... 及其他 38 个文件\n【统计数据】共修改 43 个文件，新增 66 行，删除 1256 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner, attention, spec-decode, ops, quantization, tests",
+      "tags": [
+        "refactor",
+        "mrv2",
+        "high-risk",
+        "model-runner",
+        "attention",
+        "spec-decode",
+        "ops",
+        "quantization",
+        "ci",
+        "tests",
+        "docs"
+      ],
+      "pr_number": "11949",
+      "title_en": "[Refactor] Remove weight prefetch config",
+      "title_zh": "【MRV2】[Refactor] 【MRV2】更新：移除 weight prefetch config",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/multi_node/internal_dp/scripts/test_multi_node.py",
+          "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8-A2.yaml",
+          "tests/e2e/nightly/single_node/models/configs/Qwen3-32B-Int8.yaml",
+          "tests/e2e/nightly/single_node/models/configs/Qwen3-VL-32B-Instruct-W8A8.yaml",
+          "tests/e2e/nightly/single_node/models/configs/Qwen3.5-27B-w8a8-A2.yaml",
+          "tests/e2e/nightly/single_node/models/scripts/test_single_node.py",
+          "tests/e2e/nightly/single_node/ops/singlecard_ops/test_fused_moe.py",
+          "tests/e2e/pull_request/two_card/test_flashcomm_distributed.py",
+          "tests/ut/attention/a2/test_mla_cp.py",
+          "tests/ut/attention/a2/test_mla_precision.py",
+          "tests/ut/attention/a2/test_mla_v1.py",
+          "tests/ut/ops/a2/test_weight_prefetch.py",
+          "tests/ut/ops/a3_2/test_activation.py",
+          "tests/ut/ops/a3_2/test_select_experts.py",
+          "tests/ut/ops/test_linear.py",
+          "tests/ut/ops/test_moe_mlp.py",
+          "tests/ut/quantization/methods/a2/test_w8a8_static.py",
+          "tests/ut/spec_decode/test_speculators_vwn_eagle3.py"
+        ]
+      }
+    }
+  ],
+  "test_impact_summary": "修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例; 修改了核心模块但未更新测试，建议补充测试用例",
+  "daily_summary": "有 3 个 commit 需要更新测试；发现 2 个 MRV2 相关变更；发现 7 个中高风险变更"
+}

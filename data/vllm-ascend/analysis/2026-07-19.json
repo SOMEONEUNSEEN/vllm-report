@@ -1,0 +1,82 @@
+{
+  "date": "2026-07-19",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-20T09:00:00+08:00",
+  "daily_summary": "2026-07-19 vllm-ascend 仓库共合入 4 个 commits，全部为 CI 与文档变更，无功能性代码改动，无 MRV2（Model Runner V2）专用代码变更（v2/ 目录未触及），亦无 MRV1 路径（model_runner_v1.py）改动。当日核心主题为 main2main 工作流的增量同步重构与文档维护。\n\n重要变更：\n1) #12374 (c6be8750) 重构 main2main 工作流：从全量同步切换为增量同步，基于 main2main_baseline 分支 rebase 到 upstream/main，并新增 Chain next run 链式触发机制（completed 且 steps_completed != 0 时自动触发下一轮）。该变更提升 main2main 工作流的执行效率，避免重复适配已验证的 vllm 提交。\n2) #12376 (acdaf769) 修复 main2main 增量模式边界场景：当手动 workflow_dispatch 指定的 TARGET_COMMIT 早于 baseline 已验证的 vllm commit 时，baseline 中针对更新版本 vllm 的版本守护代码会对旧版本生成错误的版本判断，此时通过 git merge-base --is-ancestor 检测并强制回退到 fresh 模式。\n3) #12358 (8ad564ee) 文档：更新 DeepSeek V4-Flash 与 V4-Pro 的支持状态为实验性（🔵），将安装指南中的 Ascend Environment Setup Guide 重命名为 CANN Installation。\n4) #12355 (201120ab) 文档：将文档顶部通知栏中的稳定版版本号从 v0.18.0 更新为 v0.23.0。\n\n整体风险评估：4 个 commits 均为低风险，不涉及运行时功能代码。MRV2 维度：当日 vllm-ascend 侧无 MRV2 相关变更，但需重点关注 vllm 侧 #46570 (MRV2 PCP for MLA) 对 vllm-ascend 的跨项目影响，详见 vllm 仓库的 ascend_impact 分析。",
+  "test_impact_summary": "4 个 commits 均无需新增测试：#12374 与 #12376 为 main2main 工作流变更（.github/workflows/schedule_main2main.yaml），通过工作流自身的运行验证；#12358 与 #12355 为文档变更，无测试需求。建议下一轮 main2main 工作流运行时观察 #12374 增量同步与 #12376 fresh 模式回退是否按预期工作。",
+  "commits": [
+    {
+      "sha": "acdaf7698e399fdc9b0eab115ae59d37cd8e44f4",
+      "pr_number": "12376",
+      "title_en": "[CI] Main2main fall back to fresh mode when target commit is behind baseline",
+      "title_zh": "[CI] 当目标 commit 早于 baseline 时 main2main 回退到 fresh 模式",
+      "tags": [
+        "ci",
+        "low-risk",
+        "main2main"
+      ],
+      "comment": "【变更概述】修复 main2main 增量模式的一个边界场景：当用户通过手动 workflow_dispatch 指定 TARGET_COMMIT，且该 commit 早于 baseline 中已验证的 vllm commit 时，baseline 中针对更新版本 vllm 写的版本守护代码（version guards）会对旧版本生成错误的版本判断。该 commit 在增量同步路径中新增 merge-base --is-ancestor 检测：若 TARGET_COMMIT 是 BASELINE_VLLM 的祖先（即更旧），则强制回退到 fresh 模式（从 upstream/main 重新开始适配），并打印 warning 提示。该变更是 #12374 增量同步重构的补丁，处理手动指定旧版本 commit 的边界情况。\n【PR号】#12376\n【变更类型】bugfix - main2main 工作流边界场景修复\n【变更文件】.github/workflows/schedule_main2main.yaml (+15/-1)\n【统计数据】+15/-1，共 1 个文件\n【风险评估】低风险 - 仅 CI 工作流变更，不影响运行时代码\n【涉及模块】ci, main2main\n【作用说明】该 commit 修复 main2main 增量模式在手动指定旧版本 TARGET_COMMIT 时的版本守护错误问题，通过 merge-base --is-ancestor 检测自动回退到 fresh 模式，保证适配代码的正确性。",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "CI 工作流变更，通过工作流自身的运行验证即可，无单元测试需求",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c6be875048cc4dbbb96ad053aa9cc8e22757ba1e",
+      "pr_number": "12374",
+      "title_en": "[CI] Refactor main2main from full to incremental synchronization",
+      "title_zh": "[CI] 将 main2main 从全量同步重构为增量同步",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "ci",
+        "main2main"
+      ],
+      "comment": "【变更概述】重构 main2main 工作流，从全量同步模式切换为增量同步模式。主要变更：(1) 增量模式：先从 fork 拉取 main2main_baseline 分支（携带此前累积的适配 commit），将其 rebase 到最新的 upstream/main，合并外部变更（如自上次运行后合入的 PR）；若 rebase 冲突则回退到 fresh 模式。(2) 修复 rebase 冲突时的回退逻辑：原代码 rebase 失败后未显式 checkout -B 到 upstream/main，新代码补全该路径。(3) 新增 Chain next run：当 final-status 为 completed 且 steps_completed != 0 时，自动触发下一轮 main2main 工作流，实现持续适配。(4) 在 final-status 输出中新增 steps_completed 字段，便于追踪。\n【PR号】#12374\n【变更类型】refactor - main2main 工作流从全量到增量\n【变更文件】.github/workflows/schedule_main2main.yaml (+21/-6)\n【统计数据】+21/-6，共 1 个文件\n【风险评估】中风险 - main2main 工作流是 vllm-ascend 与 vllm 主分支对接的关键流程，增量同步的 rebase 路径需验证稳定性\n【涉及模块】ci, main2main\n【作用说明】该 commit 将 main2main 工作流从全量同步重构为增量同步，提升执行效率（避免重复适配已验证的 vllm 提交），并通过 Chain next run 实现持续适配。这是 main2main 工作流的重要演进。",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "CI 工作流变更，通过工作流自身的运行验证即可。建议下一轮 main2main 运行时观察增量 rebase 路径与 Chain next run 是否按预期工作",
+        "suggested_test_areas": [
+          "main2main 增量同步 rebase 路径",
+          "Chain next run 链式触发"
+        ]
+      }
+    },
+    {
+      "sha": "8ad564eee8c1286360cd4284825a16df8977405d",
+      "pr_number": "12358",
+      "title_en": "[Doc] Update DeepSeek v4 support status and rename CANN install guide",
+      "title_zh": "[文档] 更新 DeepSeek v4 支持状态并重命名 CANN 安装指南",
+      "tags": [
+        "docs",
+        "low-risk",
+        "deepseek",
+        "installation"
+      ],
+      "comment": "【变更概述】两项文档变更：(1) 将 DeepSeek V4-Flash 与 DeepSeek V4-Pro 在支持矩阵（supported_models.md）中的状态从 ✅（完全支持）下调为 🔵（实验性支持），反映当前实际验证状态。(2) 将安装指南（installation.md 及其中文翻译 .po 文件）中的 Ascend Environment Setup Guide 链接文本重命名为 CANN Installation，并统一链接到华为云 CANN 下载页面，移除指向 ascend.github.io 的旧链接。\n【PR号】#12358\n【变更类型】docs - 文档更新\n【变更文件】docs/source/installation.md (+2/-2)、docs/source/locale/zh_CN/LC_MESSAGES/installation.po (+4/-6)、docs/source/user_guide/support_matrix/supported_models.md (+2/-2)\n【统计数据】+8/-10，共 3 个文件\n【风险评估】低风险 - 仅文档变更\n【涉及模块】docs, deepseek, installation\n【作用说明】该 commit 更新 DeepSeek V4 模型的支持状态为实验性，并将 CANN 安装指南的链接文本统一为 CANN Installation，提升文档准确性。",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "文档变更，无测试需求",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "201120ab9ac06554d2fe580cde39f63f94c0e78e",
+      "pr_number": "12355",
+      "title_en": "[Doc][Misc] Update documentation header notification bar",
+      "title_zh": "[文档][杂项] 更新文档顶部通知栏",
+      "tags": [
+        "docs",
+        "low-risk",
+        "misc"
+      ],
+      "comment": "【变更概述】将文档顶部通知栏中的稳定版版本号从 v0.18.0 更新为 v0.23.0，涉及三处：(1) docs/hooks/macros_main.py 中的 UI_STRINGS（en 与 zh 两份文本的 banner_suffix）；(2) docs/overrides/main.html 中的 banner 链接 href；(3) docs/source/_templates/sections/header.html 中的 notification-bar 文本与链接。确保访问开发者预览版文档的用户被引导到最新的稳定版 v0.23.0。\n【PR号】#12355\n【变更类型】docs - 文档版本号更新\n【变更文件】docs/hooks/macros_main.py (+2/-2)、docs/overrides/main.html (+1/-1)、docs/source/_templates/sections/header.html (+1/-1)\n【统计数据】+4/-4，共 3 个文件\n【风险评估】低风险 - 仅文档模板版本号变更\n【涉及模块】docs, misc\n【作用说明】该 commit 将文档顶部通知栏的稳定版版本号从 v0.18.0 更新为 v0.23.0，确保用户被引导到正确的最新稳定版文档。",
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "文档模板变更，无测试需求",
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}

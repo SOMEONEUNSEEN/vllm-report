@@ -1,0 +1,393 @@
+{
+  "date": "2026-07-13",
+  "repo": "vllm-project/vllm",
+  "generated_at": "2026-07-14T14:22:48.514008+08:00",
+  "commits": [
+    {
+      "sha": "93e3bc8f30b1e135b88a2ffc7f219e3428d39293",
+      "comment": "【变更概述】[XPU] [CI] 维护：调整 timeout_in_minutes Intel GPU CI\n【PR号】#48418\n【变更类型】此提交为日常维护类型\n【变更文件】修改 .buildkite/hardware_tests/intel_xpu_ci/test-intel.yaml (+3/-3); 修改 .buildkite/intel_jobs/basic_correctness.yaml (+1/-1); 修改 .buildkite/intel_jobs/lora_intel.yaml (+1/-1); 修改 .buildkite/intel_jobs/misc_intel.yaml (+5/-5); 修改 .buildkite/intel_jobs/models_distributed_intel.yaml (+1/-1); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 18 行，删除 18 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "48418",
+      "title_en": "[XPU][CI]Adjust timeout_in_minutes in Intel GPU CI",
+      "title_zh": "[XPU] [CI] 维护：调整 timeout_in_minutes Intel GPU CI",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c2c9f7c5e2445fc83137165c502326684bd98910",
+      "comment": "【变更概述】更新：移除 强制 channels_last Idefics3MultiModalProcessor\n【PR号】#48467\n【变更类型】此提交为常规更新类型\n【变更文件】修改 vllm/model_executor/models/idefics3.py (+4/-1)\n【统计数据】共修改 1 个文件，新增 4 行，删除 1 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性",
+      "tags": [
+        "high-risk"
+      ],
+      "pr_number": "48467",
+      "title_en": "remove force channels_last in Idefics3MultiModalProcessor",
+      "title_zh": "更新：移除 强制 channels_last Idefics3MultiModalProcessor",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "1be6e937b2b49bae652370d80294f6171bd7b981",
+      "comment": "【变更概述】【MRV2】更新：降低 内存 所需 捕获 CUDA图 大 cudagraph 尺寸\n【PR号】#48483\n【变更类型】此提交为常规更新类型\n【MRV2关联】此变更涉及 Model Runner V2 核心模块，需重点关注\n【变更文件】修改 vllm/v1/worker/gpu_model_runner.py (+5/-1)\n【统计数据】共修改 1 个文件，新增 5 行，删除 1 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】model-runner",
+      "tags": [
+        "mrv2",
+        "high-risk",
+        "model-runner"
+      ],
+      "pr_number": "48483",
+      "title_en": "lower memory required for capturing cudagraphs for large cudagraph sizes",
+      "title_zh": "【MRV2】更新：降低 内存 所需 捕获 CUDA图 大 cudagraph 尺寸",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现",
+        "testing": "需要验证 vllm-ascend 的相关测试是否通过",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "整体功能回归测试"
+        ]
+      }
+    },
+    {
+      "sha": "b3cfca996c8340263cd1fb770a4c5e0b7f400b26",
+      "comment": "【变更概述】[Mypy Fix] 更新：拆分 Mypy 工作\n【PR号】#48490\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tools/pre_commit/mypy.py (+24/-1)\n【统计数据】共修改 1 个文件，新增 24 行，删除 1 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48490",
+      "title_en": "[Mypy Fix] Split mypy work",
+      "title_zh": "[Mypy Fix] 更新：拆分 Mypy 工作",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "487dfb34185e12177ed9eb8f8b0fe337e85b591a",
+      "comment": "【变更概述】[CI] 新增：添加 SPDX 许可证 头 Rust/Protobuf 源码\n【PR号】#48472\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 .pre-commit-config.yaml (+1/-1); 修改 rust/proto/vllm_grpc.proto (+3/-0); 修改 rust/src/chat/examples/external_engine_chat_qwen.rs (+3/-0); 修改 rust/src/chat/src/backend/hf.rs (+3/-0); 修改 rust/src/chat/src/backend/mod.rs (+3/-0); ... 及其他 248 个文件\n【统计数据】共修改 253 个文件，新增 813 行，删除 30 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "tests"
+      ],
+      "pr_number": "48472",
+      "title_en": "[CI] Add SPDX license header to Rust/Protobuf sources",
+      "title_zh": "[CI] 新增：添加 SPDX 许可证 头 Rust/Protobuf 源码",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "107a03ba63e005ff03424fed9c4e6cf551b98bb2",
+      "comment": "【变更概述】[Core] 新增：支持 fp32 lm_head generation models via head_dtype RFC §3.6\n【PR号】#48390\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 tests/models/language/generation_ppl_test/ppl_utils.py (+1/-0); 修改 tests/models/language/generation_ppl_test/test_gpt.py (+11/-1); 新增 tests/v1/sample/test_head_dtype.py (+172/-0); 修改 vllm/config/model.py (+5/-11); 修改 vllm/lora/layers/logits_processor.py (+9/-0); ... 及其他 1 个文件\n【统计数据】共修改 6 个文件，新增 249 行，删除 15 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】sample, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "sample",
+        "tests"
+      ],
+      "pr_number": "48390",
+      "title_en": "[Core] Support fp32 lm_head for generation models via head_dtype (RFC #48305 §3.6)",
+      "title_zh": "[Core] 新增：支持 fp32 lm_head generation models via head_dtype RFC §3.6",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "56a357ed33dec39357344816ccba2732109a96a8",
+      "comment": "【变更概述】[Bugfix] [KV Cache] 更新：Don't route uniform-page-size MLA+SWA models into DeepseekV4 packing\n【PR号】#48256\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/v1/core/test_kv_cache_utils.py (+43/-0); 修改 vllm/v1/core/kv_cache_utils.py (+5/-0)\n【统计数据】共修改 2 个文件，新增 48 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】kv-cache, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "kv-cache",
+        "tests"
+      ],
+      "pr_number": "48256",
+      "title_en": "[Bugfix][KV Cache] Don't route uniform-page-size MLA+SWA models into DeepseekV4 packing",
+      "title_zh": "[Bugfix] [KV Cache] 更新：Don't route uniform-page-size MLA+SWA models into DeepseekV4 packing",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "bea70c7cfc10303f843cb4bda0e990e88f525f76",
+      "comment": "【变更概述】[Attention] 新增：Make sliding-window 支持 explicit 后端 capability\n【PR号】#48011\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 vllm/model_executor/layers/attention/attention.py (+1/-0); 修改 vllm/v1/attention/backend.py (+7/-0); 修改 vllm/v1/attention/backends/cpu_attn.py (+4/-0); 修改 vllm/v1/attention/backends/flash_attn.py (+4/-0); 修改 vllm/v1/attention/backends/flashinfer.py (+4/-0); ... 及其他 5 个文件\n【统计数据】共修改 10 个文件，新增 41 行，删除 0 行\n【风险评估】高风险 - 涉及核心接口或架构变更，可能影响系统稳定性\n【涉及模块】attention",
+      "tags": [
+        "feature",
+        "high-risk",
+        "attention"
+      ],
+      "pr_number": "48011",
+      "title_en": "[Attention] Make sliding-window support an explicit backend capability",
+      "title_zh": "[Attention] 新增：Make sliding-window 支持 explicit 后端 capability",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "修改了 vLLM 核心接口文件 vllm/v1/attention/backend.py，可能影响 vllm-ascend 的适配实现",
+        "testing": "需要验证 vllm-ascend 的相关测试是否通过",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "整体功能回归测试"
+        ]
+      }
+    },
+    {
+      "sha": "75fe92a3162a68d74581ec324f04684a752e3ad2",
+      "comment": "【变更概述】[Distributed] [Perf] 更新：Enable FlashInfer MNNVL AllReduce RMS quant 融合\n【PR号】#48064\n【变更类型】此提交为性能优化类型\n【变更文件】修改 vllm/compilation/passes/fusion/allreduce_rms_fusion.py (+33/-9); 修改 vllm/distributed/device_communicators/flashinfer_all_reduce.py (+41/-13)\n【统计数据】共修改 2 个文件，新增 74 行，删除 22 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, compilation, distributed",
+      "tags": [
+        "performance",
+        "low-risk",
+        "attention",
+        "compilation",
+        "distributed"
+      ],
+      "pr_number": "48064",
+      "title_en": "[Distributed][Perf] Enable FlashInfer MNNVL allreduce RMS quant fusion",
+      "title_zh": "[Distributed] [Perf] 更新：Enable FlashInfer MNNVL AllReduce RMS quant 融合",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b7b58d1eba73be5cceeb778212c02999e05c6f7c",
+      "comment": "【变更概述】[ROCm] [CI] 更新：缓存 Rust builds by source inputs\n【PR号】#46527\n【变更类型】此提交为日常维护类型\n【变更文件】修改 .buildkite/scripts/ci-bake-rocm.sh (+181/-18); 修改 docker/Dockerfile.rocm (+111/-17); 修改 docker/ci-rocm.hcl (+45/-2)\n【统计数据】共修改 3 个文件，新增 337 行，删除 37 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "chore",
+        "low-risk"
+      ],
+      "pr_number": "46527",
+      "title_en": "[ROCm][CI] Cache Rust builds by source inputs",
+      "title_zh": "[ROCm] [CI] 更新：缓存 Rust builds by source inputs",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "36484e464a6cf763c5b4c8af7be8e19df324997a",
+      "comment": "【变更概述】[BugFix] 更新：Restore full tokens Qwen MTP When MoE SP\n【PR号】#48429\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/model_executor/models/qwen3_5_mtp.py (+10/-1); 修改 vllm/model_executor/models/qwen3_next_mtp.py (+10/-1)\n【统计数据】共修改 2 个文件，新增 20 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "pr_number": "48429",
+      "title_en": "[BugFix] Restore full tokens for Qwen MTP When MoE SP",
+      "title_zh": "[BugFix] 更新：Restore full tokens Qwen MTP When MoE SP",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "9e57de7197f234f9d9187715d96e07e007048c0f",
+      "comment": "【变更概述】[CPU] 更新：Create Proper Numa topology s390x\n【PR号】#40714\n【变更类型】此提交为常规更新类型\n【变更文件】修改 docker/Dockerfile.s390x (+4/-97); 修改 requirements/common.txt (+1/-1); 修改 vllm/distributed/device_communicators/cpu_communicator.py (+1/-0); 修改 vllm/platforms/cpu.py (+6/-1); 修改 vllm/utils/cpu_resource_utils.py (+49/-4); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 84 行，删除 105 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed",
+      "tags": [
+        "low-risk",
+        "distributed"
+      ],
+      "pr_number": "40714",
+      "title_en": "[CPU] Create Proper Numa topology for s390x",
+      "title_zh": "[CPU] 更新：Create Proper Numa topology s390x",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "8c5dafcd0986b75602e509c8d3bf7e59451b4181",
+      "comment": "【变更概述】[Bugfix] [UT] 修复：修复 EagleMiniCPMForCausalLM meet TypeError\n【PR号】#48452\n【变更类型】此提交为问题修复类型\n【变更文件】修改 tests/models/registry.py (+1/-1); 修改 vllm/model_executor/models/minicpm_eagle.py (+10/-2)\n【统计数据】共修改 2 个文件，新增 11 行，删除 3 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】spec-decode, tests",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "spec-decode",
+        "tests"
+      ],
+      "pr_number": "48452",
+      "title_en": "[Bugfix][UT]Fix EagleMiniCPMForCausalLM meet TypeError",
+      "title_zh": "[Bugfix] [UT] 修复：修复 EagleMiniCPMForCausalLM meet TypeError",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "05fa8183a6e2c1e1c6e4643d54b9709fa29ff753",
+      "comment": "【变更概述】[CPU] [Spec Decode] 新增：支持 DFlash speculative decoding GDN models CPU\n【PR号】#46090\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 csrc/cpu/sgl-kernels/fla.cpp (+255/-0); 修改 csrc/cpu/torch_bindings.cpp (+17/-0); 修改 vllm/_custom_ops.py (+34/-0); 修改 vllm/model_executor/layers/mamba/ops/cpu/gdn_attention.py (+442/-9); 修改 vllm/model_executor/layers/utils.py (+7/-1)\n【统计数据】共修改 5 个文件，新增 755 行，删除 10 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ops"
+      ],
+      "pr_number": "46090",
+      "title_en": "[CPU][Spec Decode] Support DFlash speculative decoding for GDN models on CPU",
+      "title_zh": "[CPU] [Spec Decode] 新增：支持 DFlash speculative decoding GDN models CPU",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "d973cce3ca809b44e0794ee044519e8ba91502e1",
+      "comment": "【变更概述】更新：Re-disable CUDA graph 内存 profiling ROCm\n【PR号】#48440\n【变更类型】此提交为常规更新类型\n【变更文件】修改 vllm/v1/worker/gpu_worker.py (+5/-7)\n【统计数据】共修改 1 个文件，新增 5 行，删除 7 行\n【风险评估】低风险 - 变更范围较小，影响可控",
+      "tags": [
+        "low-risk"
+      ],
+      "pr_number": "48440",
+      "title_en": "Re-disable CUDA graph memory profiling on ROCm",
+      "title_zh": "更新：Re-disable CUDA graph 内存 profiling ROCm",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "775c1589ea9c7df49a866f900341e3645c5bd60c",
+      "comment": "【变更概述】[Bugfix] [ROCm] 更新：Keep TP all_gather base-class collective\n【PR号】#48446\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/distributed/device_communicators/cuda_communicator.py (+8/-0)\n【统计数据】共修改 1 个文件，新增 8 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "distributed"
+      ],
+      "pr_number": "48446",
+      "title_en": "[Bugfix][ROCm] Keep TP all_gather on base-class collective",
+      "title_zh": "[Bugfix] [ROCm] 更新：Keep TP all_gather base-class collective",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "2595d5cebcc16d08a0f22b636e6e0741e4ea99b3",
+      "comment": "【变更概述】[Model] 优化：优化 Qwen3.5 H20\n【PR号】#48350\n【变更类型】此提交为性能优化类型\n【变更文件】新增 vllm/model_executor/layers/fused_moe/configs/E=256,N=256,device_name=NVIDIA_H20.json (+147/-0)\n【统计数据】共修改 1 个文件，新增 147 行，删除 0 行\n【风险评估】中风险 - 涉及一定范围的功能修改，需要验证",
+      "tags": [
+        "performance",
+        "medium-risk"
+      ],
+      "pr_number": "48350",
+      "title_en": "[Model] Optimize Qwen3.5 on H20",
+      "title_zh": "[Model] 优化：优化 Qwen3.5 H20",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ee5a89f4d7b818af7d92770dbf6aa1b41b503b4a",
+      "comment": "【变更概述】[ROCm] [MiniMax-M3] 新增：添加 AITER sparse paged 注意力\n【PR号】#47287\n【变更类型】此提交为新功能开发类型\n【变更文件】修改 csrc/libtorch_stable/fused_minimax_m3_qknorm_rope_kv_insert_kernel.cu (+126/-75); 修改 csrc/libtorch_stable/ops.h (+1/-1); 修改 csrc/libtorch_stable/torch_bindings.cpp (+1/-1); 修改 tests/kernels/attention/test_minimax_m3.py (+41/-0); 修改 tests/kernels/test_fused_minimax_m3_qknorm_rope_kv_insert.py (+130/-13); ... 及其他 10 个文件\n【统计数据】共修改 15 个文件，新增 1553 行，删除 127 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】attention, ops, quantization, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "attention",
+        "ops",
+        "quantization",
+        "tests"
+      ],
+      "pr_number": "47287",
+      "title_en": "[ROCm][MiniMax-M3] Add AITER sparse paged attention",
+      "title_zh": "[ROCm] [MiniMax-M3] 新增：添加 AITER sparse paged 注意力",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "e26264f3ef5987a172162bbf497b8ae7ecbe0108",
+      "comment": "【变更概述】[Kernel] 新增：实现 CUDA 内核 ReLUSquaredActivation relu^2\n【PR号】#39058\n【变更类型】此提交为新功能开发类型\n【变更文件】新增 benchmarks/kernels/benchmark_relu_squared.py (+108/-0); 修改 csrc/libtorch_stable/activation_kernels.cu (+14/-0); 修改 csrc/libtorch_stable/ops.h (+2/-0); 修改 csrc/libtorch_stable/torch_bindings.cpp (+4/-0); 修改 csrc/ops.h (+2/-0); ... 及其他 2 个文件\n【统计数据】共修改 7 个文件，新增 140 行，删除 2 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】ops, tests",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ops",
+        "tests"
+      ],
+      "pr_number": "39058",
+      "title_en": "[Kernel] Implement CUDA kernel for ReLUSquaredActivation (relu^2)",
+      "title_zh": "[Kernel] 新增：实现 CUDA 内核 ReLUSquaredActivation relu^2",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4c81772e8bdf9e37ab2b8adfd80e4308b618fa92",
+      "comment": "【变更概述】[Bugfix] [KV Offloading] 修复：修复 stale transfer_jobs after reset_cache + harden job completion\n【PR号】#48102\n【变更类型】此提交为问题修复类型\n【变更文件】修改 vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py (+1/-0)\n【统计数据】共修改 1 个文件，新增 1 行，删除 0 行\n【风险评估】低风险 - 变更范围较小，影响可控\n【涉及模块】distributed",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "distributed"
+      ],
+      "pr_number": "48102",
+      "title_en": "[Bugfix][KV Offloading] Fix stale transfer_jobs after reset_cache + harden job completion",
+      "title_zh": "[Bugfix] [KV Offloading] 修复：修复 stale transfer_jobs after reset_cache + harden job completion",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    }
+  ],
+  "ascend_impact_summary": "修改了 vLLM 核心接口文件 vllm/v1/worker/gpu_model_runner.py，可能影响 vllm-ascend 的适配实现; 修改了 vLLM 核心接口文件 vllm/v1/attention/backend.py，可能影响 vllm-ascend 的适配实现",
+  "daily_summary": "当日有 2 个 commit 影响 vllm-ascend；发现 1 个 MRV2 相关变更；发现 4 个中高风险变更"
+}

@@ -1,0 +1,93 @@
+=== Commit 4/8 ===
+Repo: vllm
+SHA: 9243e0124e5c5396213258b2fb6d6401ee8965e9
+Author: Isotr0py
+Date: 2026-07-19T05:41:04+08:00
+
+--- Message ---
+[Multimodal] Automatically fallback to ViT DP when TP is unavailable (#49046)
+
+Signed-off-by: Isotr0py <Isotr0py@outlook.com>
+Co-authored-by: Roger Wang <hey@rogerw.io>
+---
+ vllm/model_executor/models/kimi_k25.py     |  6 +++---
+ vllm/model_executor/models/kimi_k25_vit.py |  2 +-
+ vllm/model_executor/models/vision.py       | 14 +++++++++++++-
+ 3 files changed, 17 insertions(+), 5 deletions(-)
+
+--- Stats ---
+Files changed: 3
+Additions: 17
+Deletions: 5
+
+--- Files ---
+
+[File 1] vllm/model_executor/models/kimi_k25.py
+  status: modified
+  additions: 3, deletions: 3
+  patch:
+@@ -34,6 +34,7 @@ from vllm.model_executor.models.kimi_k25_vit import (
+     MoonViT3dPretrainedModel,
+     vision_tower_forward,
+ )
++from vllm.model_executor.models.vision import is_vit_use_data_parallel
+ from vllm.multimodal import MULTIMODAL_REGISTRY
+ from vllm.multimodal.inputs import (
+     MultiModalFieldConfig,
+@@ -336,9 +337,8 @@ class KimiK25ForConditionalGeneration(
+         self.config = config
+         quant_config = vllm_config.quant_config
+ 
+-        # Check for MoonViT config compatibility
+-        self.use_data_parallel = (
+-            model_config.multimodal_config.mm_encoder_tp_mode == "data"
++        self.use_data_parallel = is_vit_use_data_parallel(
++            config.vision_config.num_attention_heads
+         )
+         self.hidden_size = config.text_config.hidden_size
+         self.device = current_platform.current_device()
+
+[File 2] vllm/model_executor/models/kimi_k25_vit.py
+  status: modified
+  additions: 1, deletions: 1
+  patch:
+@@ -357,7 +357,7 @@ class MoonViTEncoderLayer(nn.Module):
+         attn_bias: bool = False,
+     ):
+         super().__init__()
+-        self.use_data_parallel = is_vit_use_data_parallel()
++        self.use_data_parallel = is_vit_use_data_parallel(num_heads)
+ 
+         self.num_heads = num_heads
+         self.hidden_dim = hidden_dim
+
+[File 3] vllm/model_executor/models/vision.py
+  status: modified
+  additions: 13, deletions: 1
+  patch:
+@@ -139,11 +139,23 @@ def get_fp8_padded_hidden_size(num_heads: int, head_dim: int) -> int | None:
+     return num_heads * round_up(head_dim, 16)
+ 
+ 
+-def is_vit_use_data_parallel():
++def is_vit_use_data_parallel(num_heads: int | None = None) -> bool:
+     """
+     Get the tensor parallel type for Vision Transformer.
+     """
+     mm_cfg = get_multimodal_config()
++    can_split = (
++        num_heads % get_tensor_model_parallel_world_size() == 0
++        if num_heads is not None
++        else None
++    )
++    if num_heads is not None and not can_split:
++        logger.warning_once(
++            "The number of vision attention heads is not divisible by "
++            "the tensor parallel size. Falling back to data parallelism "
++            "for the vision encoder."
++        )
++        return True
+     return mm_cfg is not None and mm_cfg.mm_encoder_tp_mode == "data"
+ 
+ 
+

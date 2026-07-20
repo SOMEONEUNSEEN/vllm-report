@@ -1,0 +1,263 @@
+{
+  "date": "2026-07-13",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-14T10:54:34.553129+08:00",
+  "commits": [
+    {
+      "sha": "3b75c4ecf8ef471fc751ce34af806e1be407f397",
+      "comment": "修复问题，修改 tests/ut/conftest.py；新增 tests/ut/ops/test_mm_encoder_attention.py；新增 tests/ut/worker/test_encoder_acl_graph.py；及其他 2 个文件，变更 405 行，删除 147 行。",
+      "tags": [
+        "bugfix",
+        "high-risk",
+        "compilation",
+        "mm-encoder",
+        "ops",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/ut/conftest.py",
+          "tests/ut/ops/test_mm_encoder_attention.py",
+          "tests/ut/worker/test_encoder_acl_graph.py"
+        ]
+      }
+    },
+    {
+      "sha": "05e1cf94e8d7b955e09df7b2af9593d3b8b2a393",
+      "comment": "新增功能，修改 .github/workflows/configs/nightly_config.yaml，变更 23 行，删除 23 行。",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ci"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3f3e1cf834df5009e8e24d4b01292f48506ef933",
+      "comment": "新增功能，修改 tests/ut/spec_decode/a2/test_eagle_proposer.py；修改 vllm_ascend/spec_decode/llm_base_proposer.py；修改 vllm_ascend/spec_decode/utils.py，变更 164 行，删除 1 行。",
+      "tags": [
+        "feature",
+        "low-risk",
+        "spec-decode",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/spec_decode/a2/test_eagle_proposer.py"
+        ]
+      }
+    },
+    {
+      "sha": "920462d871499734c9f79a4d03ac9cb5f0e20eff",
+      "comment": "新增功能，新增 docs/source/user_guide/feature_guide/recompute_cpu_offload.md，变更 313 行，删除 0 行。",
+      "tags": [
+        "feature",
+        "low-risk",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "038a844fbcb84e7aa0d8ef1b06225494c5a77a78",
+      "comment": "新增功能，修改 docs/source/tutorials/models/GLM5.2.md；修改 docs/source/tutorials/models/GLM5.md；修改 tests/e2e/nightly/multi_node/external_dp/config/GLM5_1-W8A8-EP-external.yaml；及其他 10 个文件，变更 53 行，删除 52 行。",
+      "tags": [
+        "feature",
+        "high-risk",
+        "tests",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/multi_node/external_dp/config/GLM5_1-W8A8-EP-external.yaml",
+          "tests/e2e/nightly/multi_node/internal_dp/config/GLM5_1-W8A8-A2-dual-nodes.yaml",
+          "tests/e2e/nightly/multi_node/internal_dp/config/GLM5_1-W8A8-A3-dual-nodes.yaml",
+          "tests/e2e/nightly/multi_node/internal_dp/config/GLM5_1-W8A8-EP.yaml",
+          "tests/e2e/nightly/multi_node/internal_dp/config/GLM5_2-W8A8-A3-dual-nodes.yaml",
+          "tests/e2e/nightly/single_node/models/configs/DeepSeek-V3.2-W8A8-DCP.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/GLM_5_1_PD_in32k_bs16-0.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/GLM_5_1_PD_in32k_bs20-90.yaml",
+          "tests/e2e/weekly/multi_node/external_dp/config/GLM_5_1_PD_in64k_bs16-90.yaml",
+          "tests/e2e/weekly/single_node/configs/GLM-5.yaml",
+          "tests/e2e/weekly/single_node/configs/GLM-5_1-W8A8_A3_weekly.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "f39361f349bb08ef425123711536248879ab2046",
+      "comment": "文档更新，修改 docs/source/tutorials/models/MiniMax-M2.md；修改 docs/source/tutorials/models/Qwen3-30B-A3B.md；修改 docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md，变更 113 行，删除 124 行。",
+      "tags": [
+        "docs",
+        "low-risk",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b2c4fd58853331243f1efd03294e718e18e6e0d8",
+      "comment": "维护任务，修改 tests/e2e/nightly/single_node/ops/singlecard_ops/test_store_kv_block.py，变更 1 行，删除 37 行。",
+      "tags": [
+        "chore",
+        "low-risk",
+        "ops",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/single_node/ops/singlecard_ops/test_store_kv_block.py"
+        ]
+      }
+    },
+    {
+      "sha": "96b1b507b272a497b1419a806631322a18bc9212",
+      "comment": "文档更新，修改 README.md；修改 README.zh.md，变更 8 行，删除 0 行。",
+      "tags": [
+        "docs",
+        "medium-risk",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "15474a661e4cfd28a135e1f87a193911829d0c50",
+      "comment": "新增功能，修改 tests/ut/ops/test_moe_mlp.py；修改 vllm_ascend/ops/fused_moe/moe_mlp.py；修改 vllm_ascend/patch/__init__.py；及其他 3 个文件，变更 141 行，删除 16 行。",
+      "tags": [
+        "feature",
+        "low-risk",
+        "ops",
+        "patch",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/ut/ops/test_moe_mlp.py"
+        ]
+      }
+    },
+    {
+      "sha": "5f6c00be04dc9dd386201d7396a14bb4b8ba7400",
+      "comment": "文档更新，修改 docs/source/tutorials/models/DeepSeek-V3.2.md，变更 387 行，删除 425 行。",
+      "tags": [
+        "docs",
+        "medium-risk",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "3a97fe2ada5c04177170d4ce328a6261afa6698b",
+      "comment": "维护任务，修改 tests/e2e/pull_request/four_card/test_pipeline_parallel.py，变更 4 行，删除 2 行。",
+      "tags": [
+        "chore",
+        "low-risk",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/four_card/test_pipeline_parallel.py"
+        ]
+      }
+    },
+    {
+      "sha": "cacf69a950fd32163ac7893bf7fb599e7ae91304",
+      "comment": "修复问题，修改 tests/e2e/nightly/single_node/models/configs/Qwen3.5-397B-A17B-w8a8-mtp-longseq-A3.yaml；修改 tests/ut/ops/a2/test_gdn_chunk_meta.py；修改 vllm_ascend/ops/gdn_attn_builder.py；及其他 1 个文件，变更 71 行，删除 5 行。",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "ops",
+        "quantization",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "更新了测试用例",
+        "suggested_test_areas": [
+          "tests/e2e/nightly/single_node/models/configs/Qwen3.5-397B-A17B-w8a8-mtp-longseq-A3.yaml",
+          "tests/ut/ops/a2/test_gdn_chunk_meta.py"
+        ]
+      }
+    },
+    {
+      "sha": "63183aa9525b2f5ea6f5053fd300d79d4b7ef630",
+      "comment": "修复问题，修改 vllm_ascend/batch_invariant.py，变更 6 行，删除 1 行。",
+      "tags": [
+        "bugfix",
+        "low-risk"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "928410c6567012ad370c9acdbea438aa27e436fc",
+      "comment": "修复问题，修改 docs/source/user_guide/feature_guide/dynamic_chunk_pipeline_parallel.md，变更 162 行，删除 15 行。",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "docs"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "未涉及核心逻辑变更",
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "41ff81e1a7a92e6e3f546198d80702d78b7a50b7",
+      "comment": "新增功能，涉及 Model Runner 模块，修改 .github/workflows/scripts/test_config.yaml；新增 tests/e2e/pull_request/one_card/spec_decode/test_dspark.py；修改 tests/e2e/pull_request/one_card/spec_decode/utils.py；及其他 9 个文件，变更 410 行，删除 24 行。",
+      "tags": [
+        "feature",
+        "low-risk",
+        "model-runner",
+        "spec-decode",
+        "ops",
+        "patch",
+        "ci",
+        "tests"
+      ],
+      "test_impact": {
+        "needs_test_update": false,
+        "reason": "新增测试用例，完善测试覆盖",
+        "suggested_test_areas": [
+          "tests/e2e/pull_request/one_card/spec_decode/test_dspark.py",
+          "tests/e2e/pull_request/one_card/spec_decode/utils.py"
+        ]
+      }
+    }
+  ],
+  "test_impact_summary": "无需更新测试",
+  "daily_summary": "当日变更无需更新测试；发现 1 个 MRV2 相关变更；发现 4 个中高风险变更"
+}

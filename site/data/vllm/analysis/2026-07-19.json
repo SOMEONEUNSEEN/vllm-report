@@ -1,0 +1,193 @@
+{
+  "date": "2026-07-19",
+  "repo": "vllm-project/vllm",
+  "generated_at": "2026-07-20T09:00:00+08:00",
+  "daily_summary": "2026-07-19 vllm 仓库共合入 8 个 commits，整体活动较为平淡，但包含 1 个极为重要的 MRV2（Model Runner V2）核心架构 commit：#46570 (b6ff8a2f) [Core] Add MRV2 virtual-batch PCP for MLA，新增 680 行 PCPManager 类，修改 39 个文件（+1204/-196），首次为 MLA（Multi-Head Latent Attention）实现 Prefill Context Parallelism 虚拟批次机制。该 commit 修改了 vllm-ascend 的多个核心覆盖路径（gpu/model_runner.py、gpu/attn_utils.py、gpu/model_states/default.py、gpu/block_table.py、block_table.py、attention/backend.py、attention/selector.py、mla_attention.py、parallel_state.py、config/parallel.py），vllm-ascend 必须评估并适配 PCP 功能，否则在 Ascend 上启用 PCP+MLA 时会出现功能缺失或运行时错误。其他 commits：#48984 修复 pooling 参数被移除后的校验问题；#49003 重构 structured_outputs 参数创建逻辑；#49046 多模态 ViT 在 TP 不可用时自动回退到 DP；#49015 修复 Qwen3-VL/Qwen-Omni 视频提示的像素参数处理；#48535 前端填充 num_cache_creation_tokens 字段以兼容 Anthropic API；#49055 与 #46832 均为 ROCm 专用优化。整体风险评估：1 个高风险（#46570 MRV2 PCP，影响跨项目核心路径）、2 个中风险（#48984、#49003）、5 个低风险。对 vllm-ascend 影响：3 个 commits 有潜在或直接影响，其中 #46570 必须重点验证，#49046 和 #49015 涉及多模态路径需回归测试。",
+  "ascend_impact_summary": "8 个 commits 中 3 个对 vllm-ascend 有潜在或直接影响。必须重点关注（ascend_affected=true，需评估适配）：#46570 (MRV2 PCP for MLA) 同时修改了 vllm-ascend 的多个核心覆盖路径——gpu/model_runner.py（vllm-ascend 通过 NPUModelRunner 继承）、gpu/attn_utils.py（vllm-ascend 自有实现）、gpu/model_states/default.py（vllm-ascend 覆盖）、gpu/block_table.py 和 block_table.py（vllm-ascend 通过 block_table_patch 打补丁）、attention/backend.py 和 selector.py（vllm-ascend 有自己的 backend）、mla_attention.py（DeepSeek 等 MLA 模型在 Ascend 上使用）、parallel_state.py 与 config/parallel.py（分布式与配置通用路径），vllm-ascend 需评估是否需要在 NPUModelRunner 中集成 PCPManager、是否需要在 attention backend 中实现 supports_pcp 接口；潜在影响（ascend_affected=true，需回归测试）：#49046 ViT DP 回退涉及多模态 vision 处理路径；#49015 Qwen3-VL/Qwen-Omni 视频像素参数修复涉及 vllm-ascend 支持的模型。不受影响（ascend_affected=false）：#48984（pooling 参数校验，vllm-ascend 不涉及）、#49003（OpenAI 入口重构）、#49055（ROCm CI）、#48535（Anthropic 前端字段）、#46832（ROCm MLA 性能）。建议 vllm-ascend 团队优先验证 #46570 PCP+MLA 在 Ascend 上的可行性与适配路径，其次是 #49046 和 #49015 的多模态回归测试。",
+  "commits": [
+    {
+      "sha": "e6d1310b2ac52e56e266450693af9de12a871a51",
+      "pr_number": "48984",
+      "title_en": "[Bugfix] Reject removed pooling parameters",
+      "title_zh": "[Bugfix] 拒绝已被移除的 pooling 参数",
+      "tags": [
+        "bugfix",
+        "medium-risk",
+        "pooling",
+        "entrypoints"
+      ],
+      "comment": "【变更概述】修复 pooling 参数被移除后的校验问题。当用户传入已被废弃的 pooling 参数时，vLLM 此前会静默忽略，现在改为显式抛出 Pydantic BeforeValidator 校验错误，提示用户这些参数已被移除。变更新增了 vllm/entrypoints/pooling/base/protocol.py、classify/protocol.py、embed/protocol.py 三个入口点的参数校验逻辑，并在 vllm/config/pooler.py 中补充了对应的 PoolerConfig 字段校验。同时新增 tests/test_pooling_params.py（+38）覆盖各种被移除参数的拒绝场景。\n【PR号】#48984\n【变更类型】bugfix - 参数校验增强\n【变更文件】vllm/config/pooler.py (+17/-1)、vllm/entrypoints/pooling/base/protocol.py (+13/-0)、vllm/entrypoints/pooling/classify/protocol.py (+7/-5)、vllm/entrypoints/pooling/embed/protocol.py (+6/-4)、vllm/tasks.py 等 4 个文件、tests/test_pooling_params.py (+38/-0)\n【统计数据】+108/-17，共 9 个文件\n【风险评估】中风险 - 涉及 pooling 入口点公共 API 行为变更，可能影响依赖旧参数的客户端\n【涉及模块】pooling, entrypoints, tests\n【作用说明】该 commit 通过 Pydantic BeforeValidator 显式拒绝已被移除的 pooling 参数，避免用户在不知情的情况下继续使用废弃参数导致行为不一致。这是 vLLM 持续清理废弃 API、提升类型安全与开发者体验的一部分。",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - pooling 入口点（classify/embed）与 vllm-ascend 无关，vllm-ascend 不覆盖 pooling 路径",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ac5f38a0f7af29cb5bc15a1e73623922d9832500",
+      "pr_number": "49003",
+      "title_en": "[Refactor] Extract StructuredOutputsParams creation logic from Request.to_sampling_params",
+      "title_zh": "[重构] 从 Request.to_sampling_params 中抽取 StructuredOutputsParams 创建逻辑",
+      "tags": [
+        "refactor",
+        "medium-risk",
+        "structured-output",
+        "entrypoints"
+      ],
+      "comment": "【变更概述】将分散在 chat_completion、completion、responses 三个 OpenAI 入口点 protocol.py 中的 StructuredOutputsParams 创建逻辑抽取到统一的 vllm/entrypoints/openai/engine/protocol.py 中，新增 _make_structured_outputs_params 函数（+36/-2），消除三处重复代码。重构后各入口点只需调用统一的工厂函数，便于后续维护与扩展结构化输出参数。\n【PR号】#49003\n【变更类型】重构 - 代码去重与逻辑收敛\n【变更文件】vllm/entrypoints/openai/engine/protocol.py (+36/-2)、vllm/entrypoints/openai/chat_completion/protocol.py (+9/-37)、vllm/entrypoints/openai/completion/protocol.py (+9/-37)、vllm/entrypoints/openai/responses/protocol.py (+26/-22)、tests/entrypoints/openai/responses/test_sampling_params.py (+15/-0)\n【统计数据】+95/-98，共 5 个文件\n【风险评估】中风险 - 涉及 OpenAI 兼容入口点的参数处理逻辑，需要验证 chat/completion/responses 三种接口的结构化输出行为一致\n【涉及模块】entrypoints, structured-output, tests\n【作用说明】该 commit 通过抽取公共函数消除三处入口点的重复代码，使 StructuredOutputsParams 的创建逻辑收敛到单一位置，便于后续维护和扩展。这是代码质量改进，无功能性变更。",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - OpenAI 入口点的结构化输出参数处理与 vllm-ascend 无关",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b6ff8a2f509cc7ac9c58176f5115a836aa1e08bd",
+      "pr_number": "46570",
+      "title_en": "[Core] Add MRV2 virtual-batch PCP for MLA",
+      "title_zh": "[Core][MRV2] 为 MLA 添加虚拟批次 Prefill Context Parallelism 支持",
+      "tags": [
+        "feature",
+        "mrv2",
+        "high-risk",
+        "model-runner",
+        "attention",
+        "distributed",
+        "kv-cache",
+        "mla",
+        "pcp",
+        "tests"
+      ],
+      "comment": "【变更概述】【MRV2 关键 commit】首次为 MLA（Multi-Head Latent Attention，DeepSeek V3/R1 等模型使用的注意力机制）实现 Prefill Context Parallelism（PCP，预填上下文并行）虚拟批次机制。核心新增 vllm/v1/worker/gpu/pcp_manager.py（680 行）实现 PCPManager 类，负责将全局批次按 PCP rank 切分为 rank-local 的 DualChunkSwap 行，在 GPUModelRunner 的 prepare_input_batch、prepare_attn、prepare_dummy_slot_mappings、sample 流程中插入 PCP 处理逻辑。同时新增 vllm/model_executor/layers/attention/pcp.py（92 行）实现 PCP 相关的注意力层工具。\n\n【PCP 机制说明】\n1. PCP（Prefill Context Parallelism）与 DCP（Decode Context Parallelism）的语义区分：PCP 扩展进程世界规模（world size），但不增加 KV-cache 分片计数；DCP 不扩展进程世界规模，仅复用 TP ranks 进行 KV-cache 分片。\n2. DualChunkSwap 切分策略：将全局 batch 按 PCP rank 切分为 rank-local 行，prefill 阶段每个 rank 仅处理自己分到的 chunk，通过 all-gather 与 LSE reduce 合并结果。\n3. ParallelConfig 新增校验：PCP 启用时 DCP 必须为 1、PCP 或 TP×PCP；PCP 暂不支持 DP；EPLB 需要 TP/PCP/DP 任一大于 1。\n4. MLAAttention 增加 use_pcp 字段，处理 PCP+DCP 组合的 all-gather 与 LSE reduce。\n5. AttentionBackend 新增 supports_pcp 接口，AttentionSelector 在选择 backend 时检查 PCP 支持。\n\n【PR号】#46570\n【变更类型】feature - 新功能开发，架构级变更\n【变更文件】新增 vllm/v1/worker/gpu/pcp_manager.py (+680/-0)、vllm/model_executor/layers/attention/pcp.py (+92/-0)；修改 vllm/config/parallel.py (+37/-25)、vllm/config/vllm.py (+3/-2)、vllm/distributed/device_communicators/all2all.py (+27/-17)、vllm/distributed/parallel_state.py (+25/-?)、vllm/model_executor/layers/attention/mla_attention.py (+72/-?)、vllm/v1/attention/backend.py (+16/-?)、vllm/v1/attention/selector.py (+5/-?)、vllm/v1/worker/block_table.py (+6/-?)、vllm/v1/worker/gpu/attn_utils.py (+7/-0)、vllm/v1/worker/gpu/block_table.py (+22/-?)、vllm/v1/worker/gpu/model_runner.py (+24/-?)、vllm/v1/worker/gpu/model_states/default.py (+8/-?) 等 39 个文件\n【统计数据】+1204/-196，共 39 个文件\n【风险评估】高风险 - 涉及 MRV2 核心架构变更，修改 model runner、attention backend、distributed、kv-cache 等核心模块\n【涉及模块】model-runner, attention, distributed, kv-cache, mla, pcp, tests\n【作用说明】该 commit 是 MRV2 在 MLA 长上下文场景下的关键扩展，使得 DeepSeek V3/R1 等使用 MLA 的模型能够在 prefill 阶段利用 PCP 跨多 GPU 分片计算，突破单卡显存限制，支持更长上下文（如 1M tokens）。新增的 PCPManager 通过 DualChunkSwap 虚拟批次切分实现 rank-local 计算 + all-gather 合并，避免了传统 CP 的复杂通信模式。这是 MRV2 路径上的重要能力补充。",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - 该 commit 修改了 vllm-ascend 的多个核心覆盖路径：(1) vllm/v1/worker/gpu/model_runner.py - vllm-ascend 通过 vllm_ascend.worker.model_runner_v1.NPUModelRunner 继承 GPUModelRunner，新增的 self.pcp_manager 字段、prepare_input_batch/prepare_attn/prepare_dummy_slot_mappings/sample 中的 PCP 处理逻辑会传递到 Ascend 子类；(2) vllm/v1/worker/gpu/attn_utils.py - vllm-ascend 有自己的 attn_utils 实现，supports_pcp 接口需在 Ascend backend 中实现；(3) vllm/v1/worker/gpu/model_states/default.py - vllm-ascend 覆盖该路径，prepare_attn 中的 PCP 处理需评估；(4) vllm/v1/worker/gpu/block_table.py 与 vllm/v1/worker/block_table.py - vllm-ascend 通过 vllm_ascend.patch.worker.block_table_patch 打补丁，PCP 相关的 block table 操作需验证；(5) vllm/v1/attention/backend.py 与 selector.py - vllm-ascend 有自己的 attention backend，supports_pcp 接口需实现；(6) vllm/model_executor/layers/attention/mla_attention.py - DeepSeek V3/R1 在 Ascend 上使用 MLA，use_pcp 字段与 PCP+DCP 组合的 all-gather/LSE reduce 需验证；(7) vllm/distributed/parallel_state.py 与 vllm/config/parallel.py - 通用分布式与配置路径，PCP group 初始化需验证。vllm-ascend 必须评估是否需要在 NPUModelRunner 中集成 PCPManager、是否需要在 Ascend attention backend 中实现 supports_pcp、以及 MLA + PCP 在 Ascend 通信库（HCCL）下的 all-gather/LSE reduce 正确性。",
+        "testing": "必须验证 - 建议测试：(1) DeepSeek V3/R1 在 Ascend 上启用 PCP 的功能正确性；(2) PCP+DCP 组合在 Ascend 上的通信正确性；(3) Ascend attention backend 的 supports_pcp 接口实现；(4) NPUModelRunner 子类是否需要重写 PCP 相关方法；(5) block_table_patch 在 PCP 启用时的行为",
+        "needs_test_update": true,
+        "suggested_test_areas": [
+          "DeepSeek V3/R1 PCP 功能验证",
+          "MLA + PCP 通信正确性（HCCL all-gather/LSE reduce）",
+          "Ascend attention backend supports_pcp 接口实现",
+          "NPUModelRunner PCPManager 集成验证",
+          "block_table_patch 在 PCP 启用时的行为",
+          "PCP+DCP 组合在 Ascend 上的正确性"
+        ]
+      }
+    },
+    {
+      "sha": "9243e0124e5c5396213258b2fb6d6401ee8965e9",
+      "pr_number": "49046",
+      "title_en": "[Multimodal] Automatically fallback to ViT DP when TP is unavailable",
+      "title_zh": "[多模态] 当 TP 不可用时自动回退到 ViT 数据并行",
+      "tags": [
+        "feature",
+        "low-risk",
+        "multimodal",
+        "vision",
+        "distributed"
+      ],
+      "comment": "【变更概述】当张量并行（TP）无法覆盖视觉编码器（ViT）时，自动回退到数据并行（DP）模式。修改 vllm/model_executor/models/vision.py（+13/-1）增加自动回退判断逻辑，调整 kimi_k25.py 与 kimi_k25_vit.py 的 ViT 配置。该变更提升了多模态模型在非标准 TP 配置下的鲁棒性，避免因 TP 不能整除 ViT 维度而启动失败。\n【PR号】#49046\n【变更类型】feature - 多模态 ViT 并行回退\n【变更文件】vllm/model_executor/models/vision.py (+13/-1)、vllm/model_executor/models/kimi_k25.py (+3/-3)、vllm/model_executor/models/kimi_k25_vit.py (+1/-1)\n【统计数据】+17/-5，共 3 个文件\n【风险评估】低风险 - 变更范围小，仅在 TP 不可用时启用回退路径\n【涉及模块】multimodal, vision, distributed\n【作用说明】该 commit 通过自动回退机制提升多模态视觉编码器的部署灵活性，避免在非标准 TP 配置下启动失败。Kimi K25 等模型可在更多并行配置下运行。",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/model_executor/models/vision.py 是多模态视觉编码器的通用路径，vllm-ascend 支持多模态模型（Qwen3-VL 等）。需验证 ViT DP 回退在 Ascend 上的行为，以及 HCCL 通信在 DP 模式下的正确性",
+        "testing": "建议测试多模态模型（Qwen3-VL/Kimi K25）在 Ascend 上 TP 不可用时的 ViT DP 回退行为",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "Qwen3-VL ViT DP 回退",
+          "Kimi K25 ViT DP 回退"
+        ]
+      }
+    },
+    {
+      "sha": "df362b2d6d091771dbcc364b2fc96d17a78df274",
+      "pr_number": "49055",
+      "title_en": "[ROCm][CI] Ensure sliding window tests release GPU memory",
+      "title_zh": "[ROCm][CI] 确保 sliding window 测试释放 GPU 内存",
+      "tags": [
+        "chore",
+        "low-risk",
+        "rocm",
+        "ci",
+        "tests"
+      ],
+      "comment": "【变更概述】修复 ROCm 平台 sliding window 测试的 GPU 内存泄漏问题。修改 tests/v1/e2e/general/test_correctness_sliding_window.py（+32/-27），在每个测试用例结束后显式清理 GPU 内存，避免后续测试因 OOM 失败。该变更仅影响 ROCm CI 测试，不涉及运行时功能代码。\n【PR号】#49055\n【变更类型】chore - CI 测试内存清理\n【变更文件】tests/v1/e2e/general/test_correctness_sliding_window.py (+32/-27)\n【统计数据】+32/-27，共 1 个文件\n【风险评估】低风险 - 仅测试代码变更\n【涉及模块】rocm, ci, tests\n【作用说明】该 commit 通过显式清理 GPU 内存解决 ROCm CI 测试间的内存泄漏问题，提升 CI 稳定性。",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - ROCm 专用 CI 测试修复，不涉及运行时代码",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7c2acd38b72de4a4177f2a4c2b80b216da7d55b0",
+      "pr_number": "49015",
+      "title_en": "[Bugfix] Qwen3-VL/Qwen-Omni: honor max_pixels/min_pixels for video prompts",
+      "title_zh": "[Bugfix] Qwen3-VL/Qwen-Omni: 遵循视频提示的 max_pixels/min_pixels 参数",
+      "tags": [
+        "bugfix",
+        "low-risk",
+        "multimodal",
+        "qwen",
+        "video"
+      ],
+      "comment": "【变更概述】修复 Qwen3-VL 与 Qwen2.5-Omni 在处理视频提示时未遵循 max_pixels/min_pixels 参数的 bug。修改 vllm/model_executor/models/qwen3_vl.py（+13/-0）与 vllm/model_executor/models/qwen2_5_omni_thinker.py（+17/-0），在视频帧分辨率计算时正确应用像素上下限约束。修复前用户设置 max_pixels/min_pixels 对视频无效，可能导致显存溢出或分辨率异常。\n【PR号】#49015\n【变更类型】bugfix - 多模态视频像素参数修复\n【变更文件】vllm/model_executor/models/qwen3_vl.py (+13/-0)、vllm/model_executor/models/qwen2_5_omni_thinker.py (+17/-0)\n【统计数据】+30/-0，共 2 个文件\n【风险评估】低风险 - 变更范围小，仅修复视频像素参数处理\n【涉及模块】multimodal, qwen, video\n【作用说明】该 commit 修复 Qwen3-VL/Qwen-Omni 视频提示的像素参数处理 bug，确保 max_pixels/min_pixels 对视频帧生效，避免显存溢出。",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - Qwen3-VL 是 vllm-ascend 支持的模型，视频像素参数修复影响视频处理路径。需验证在 Ascend 上 Qwen3-VL 视频推理的像素约束行为",
+        "testing": "建议测试 Qwen3-VL 在 Ascend 上视频推理的 max_pixels/min_pixels 行为",
+        "needs_test_update": false,
+        "suggested_test_areas": [
+          "Qwen3-VL 视频像素约束",
+          "Qwen2.5-Omni 视频像素约束"
+        ]
+      }
+    },
+    {
+      "sha": "a287eb163fb6f8f007a4a78411fb54c8dde64cc7",
+      "pr_number": "48535",
+      "title_en": "[Front-end] [Messages] Populate num_cache_creation_tokens",
+      "title_zh": "[前端][Messages] 填充 num_cache_creation_tokens 字段",
+      "tags": [
+        "feature",
+        "low-risk",
+        "entrypoints",
+        "anthropic",
+        "kv-cache"
+      ],
+      "comment": "【变更概述】为 Anthropic API 兼容性新增 num_cache_creation_tokens 字段填充。修改 rust/src/engine-core-client/src/protocol/stats.rs（+3/-0）、rust/src/llm/src/request_metrics.rs（+1/-0），在前端协议层填充该字段以便客户端追踪 KV cache 创建的 token 数量。同时调整 tests/entrypoints/anthropic/test_anthropic_messages_conversion.py（+25/-60）与 test_messages.py（+52/-0）以覆盖新字段。\n【PR号】#48535\n【变更类型】feature - Anthropic API 兼容性增强\n【变更文件】rust/src/engine-core-client/src/protocol/stats.rs (+3/-0)、rust/src/llm/src/request_metrics.rs (+1/-0)、tests/entrypoints/anthropic/test_anthropic_messages_conversion.py (+25/-60)、tests/entrypoints/anthropic/test_messages.py (+52/-0)、tests/entrypoints/openai/chat_completion/test_serving_chat.py (+12/-5) 等 15 个文件\n【统计数据】+201/-127，共 15 个文件\n【风险评估】低风险 - 仅前端协议层字段填充与测试调整\n【涉及模块】entrypoints, anthropic, kv-cache, tests\n【作用说明】该 commit 为 Anthropic API 兼容性新增 num_cache_creation_tokens 字段，使客户端能够追踪 KV cache 创建的 token 数量，提升可观测性。",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 前端协议层与 Rust 客户端变更，不涉及 vllm-ascend 的运行时路径",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "e94243893dd30256f58644ad4ecf779be757dff8",
+      "pr_number": "46832",
+      "title_en": "[ROCm][DSv3.2][Perf] Cap sparse MLA decode KV-splits with a work-per-split heuristic",
+      "title_zh": "[ROCm][DSv3.2][性能] 限制 sparse MLA decode KV-splits 的工作量启发式",
+      "tags": [
+        "performance",
+        "low-risk",
+        "rocm",
+        "attention",
+        "mla"
+      ],
+      "comment": "【变更概述】为 ROCm 平台的 DeepSeek V3.2 sparse MLA decode 添加 KV-splits 工作量上限启发式。修改 vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py（+21/-0），根据每个 split 的工作量动态调整 KV-splits 数量，避免在长上下文下因 split 过多导致性能下降。该优化仅影响 ROCm 平台。\n【PR号】#46832\n【变更类型】performance - ROCm MLA decode 性能优化\n【变更文件】vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py (+21/-0)\n【统计数据】+21/-0，共 1 个文件\n【风险评估】低风险 - 仅 ROCm 专用 attention backend 优化\n【涉及模块】rocm, attention, mla\n【作用说明】该 commit 通过工作量启发式限制 ROCm sparse MLA decode 的 KV-splits 数量，避免长上下文下性能下降。",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - ROCm 专用 attention backend，vllm-ascend 不使用 rocm_aiter_mla_sparse",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}

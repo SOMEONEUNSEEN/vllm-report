@@ -1,0 +1,66 @@
+{
+  "date": "2026-07-12",
+  "repo": "vllm-project/vllm-ascend",
+  "generated_at": "2026-07-13T21:01:49.802582+08:00",
+  "daily_summary": "当日共 3 个 commits，包含 2 个 bugfix。风险分布：2 个中风险。",
+  "commits": [
+    {
+      "sha": "2b41938debcac5666bd8783fa406dad7d8db0871",
+      "comment": "变更：[Ops][BugFix] revert \"get torch_reserved_memory\" in model forward (#11845)",
+      "tags": [
+        "worker",
+        "ascend",
+        "medium-risk",
+        "bugfix"
+      ],
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "核心代码变更，建议补充或更新相应测试用例以保证质量。",
+        "suggested_test_areas": [
+          "vllm_ascend/worker/worker.py"
+        ]
+      }
+    },
+    {
+      "sha": "32c22bb93d0d41808d4669b437247bfeea1cfb26",
+      "comment": "测试用例更新或基线调整。",
+      "tags": [
+        "test",
+        "low-risk"
+      ],
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "核心代码变更，建议补充或更新相应测试用例以保证质量。",
+        "suggested_test_areas": [
+          ".github/workflows/configs/nightly_config.yaml"
+        ]
+      }
+    },
+    {
+      "sha": "d19628a1b292cba1ef33593a6446d3777f28574e",
+      "comment": "变更：[BugFix]Added the store_kv_block_metadata ascendC operator (#11865)",
+      "tags": [
+        "kernels",
+        "spec-decode",
+        "bugfix",
+        "model-runner",
+        "medium-risk",
+        "ascend",
+        "attention",
+        "worker"
+      ],
+      "test_impact": {
+        "needs_test_update": true,
+        "reason": "核心代码变更，建议补充或更新相应测试用例以保证质量。",
+        "suggested_test_areas": [
+          "csrc/attention/store_kv_block/op_host/CMakeLists.txt",
+          "csrc/attention/store_kv_block/op_host/store_kv_block_infershape.cpp",
+          "csrc/attention/store_kv_block/op_host/store_kv_block_tiling.cpp",
+          "csrc/attention/store_kv_block/op_kernel/store_kv_block.h",
+          "csrc/attention/store_kv_block/store_kv_block_torch_adpt.h"
+        ]
+      }
+    }
+  ],
+  "test_impact_summary": "当日 3 个 commits 涉及核心代码变更，建议更新测试用例。重点关注新功能（如 ShortRequestFirst 调度、Ascend 950 CPU binding）的测试覆盖。"
+}

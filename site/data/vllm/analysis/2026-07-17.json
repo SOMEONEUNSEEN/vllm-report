@@ -1,0 +1,639 @@
+{
+  "date": "2026-07-17",
+  "repo": "vllm-project/vllm",
+  "generated_at": "2026-07-18T09:30:00+08:00",
+  "daily_summary": "2026-07-17 vllm 仓库共合入 42 个 commits，整体活动密集，覆盖 bugfix、性能优化、新模型支持、KV offload/offloading 增强、Inkling 系列功能、XPU/ROCm 适配、Rust 前端、CI/文档等方向。其中最值得关注的是 MRV2（Model Runner V2）相关 4 个 commits：#13 (69d4f5ef) 修复 Qwen3-Omni 多模态 use_audio_in_video，在 gpu_model_runner.py 增加 set_mm_embedding_modality/copy_mm_embedding_modality 接口；#16 (fb1d8cca) 引入 Stateful Trainer Send 新抽象（RL 训练权重传输引擎），重构 async_llm.py 中的 init_weight_transfer_engine/update_weights；#20 (3b6c96a1) 修复 torch.compile 下 chunked prefill pooling 得分错误，在 gpu_model_runner.py 设置 pooler_output 为 None 前加 _sync_device()；#40 (251f7e47) 为 Inkling 增加 PW（Piecewise）CUDA graph 支持，重构 cudagraph_utils.py 的 CudaGraphManager 初始化顺序并启用 PIECEWISE+breakable padding。这 4 个 MRV2 改动均修改了 vllm-ascend 关键覆盖路径（gpu_model_runner.py、async_llm.py、cudagraph_utils.py、model_states/default.py），需要 vllm-ascend 同步适配。此外 KV offload 系列有 4 个 commits（#4/#14/#19/#41）增强 offloading 调度、tier locality、blocks_per_chunk 配置和 metrics 拆分，对 vllm-ascend 的 kv-cache 子系统有潜在影响。MLA 相关 3 个 commits（#9/#18/#27）涉及 Mistral Small 4 head dim、post-load tensor 保留、fp8_ds_mla dense prefill。Inkling 系列有 4 个 commits（#24/#34/#38/#40）推进 LoRA/MTP/FA4/PW CUDA graph 支持。XPU/ROCm 专用 commits 共 8 个不影响 Ascend。整体风险评估：4 个 MRV2 commits 为高风险（涉及核心 model runner 路径），6 个 commits 为中风险（KV offload、MLA、quantization 等通用路径变更），其余为低风险。",
+  "ascend_impact_summary": "42 个 commits 中约 22 个对 vllm-ascend 有潜在或直接影响。直接影响（ascend_affected=true，需重点关注）：4 个 MRV2 commits（#13/#16/#20/#40）修改了 vllm-ascend 的覆盖路径 gpu_model_runner.py、async_llm.py、cudagraph_utils.py、model_states/default.py，必须同步适配否则会导致编译或运行时错误。潜在影响（ascend_affected=true，需验证）：#2 config/parallel.py 的 data_parallel_size 条件、#4 KV offloading scheduler/worker、#6 transformers/base.py weight_loader、#9 MLA flash_attn Mistral Small 4 head dims、#14 KV offload events tier locality、#15 chat_utils TranslateGemma extra fields、#18 MLA post-load tensor 保留、#19 KV offloading blocks_per_chunk 配置、#24 Inkling LoRA enable_moe_shared_loras、#26 envs.py 删除孤儿环境变量、#27 MLA seq_starts 参数、#28 clamp_ 性能优化、#31 DSpark Gemma4 draft model、#33 WNA4Int/WNA8Int 量化 dispatch、#34 Inkling MTP=1、#37 Quark mxfp4 MoE 子层忽略、#39 fla 移至 third_party（路径变更）、#41 KV offload tiering metrics 拆分。不受影响（ascend_affected=false）：8 个 XPU/ROCm 专用 commits（#5/#7/#8/#10/#29/#42 等）、4 个 CUDA/SM100 专用 commits（#25/#32/#38 等）、3 个纯 Rust commits（#17）、3 个纯 CI/docs/tests commits（#11/#12/#21/#22/#23/#30）、3 个 kernels 专用 commits（#36 等）、1 个 MoRIIO 自定义 connector（#35）。建议 vllm-ascend 团队优先验证 4 个 MRV2 commits 与 ACL graph 的兼容性，其次是 KV offload 系列和 MLA 系列的回归测试。",
+  "commits": [
+    {
+      "sha": "877dae9c",
+      "comment": "【变更概述】[Refactor] 清理 deepseek 相关死代码\n【PR号】#48780\n【变更类型】重构 - 删除无用代码\n【变更文件】删除 deepseek_eagle3/mtp/v4_mhc_warmup/renderers/tokenizers 中未被引用的死代码\n【统计数据】+3/-387，files=多\n【风险评估】低风险 - 仅删除死代码，无功能影响\n【涉及模块】model-runner, refactor",
+      "tags": ["refactor", "low-risk", "model-runner"],
+      "pr_number": "48780",
+      "title_en": "[Refactor] Remove deepseek dead code",
+      "title_zh": "[重构] 移除 deepseek 死代码",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 仅删除 deepseek 专用死代码，不影响通用路径",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "c4dd6d78",
+      "comment": "【变更概述】[Bugfix] 修复 use_sequence_parallel_moe 在 data_parallel_size > 1 时的条件判断\n【PR号】#48849\n【变更类型】bugfix - 增加 data_parallel_size > 1 条件\n【变更文件】vllm/config/parallel.py (+1/-0)\n【统计数据】+1/-0\n【风险评估】低风险 - 单行条件修复\n【涉及模块】distributed, config",
+      "tags": ["bugfix", "low-risk", "distributed"],
+      "pr_number": "48849",
+      "title_en": "Fix data_parallel_size > 1 for use_sequence_parallel_moe",
+      "title_zh": "[修复] 修复 use_sequence_parallel_moe 在 data_parallel_size > 1 时的条件",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/config/parallel.py 是通用配置路径，vllm-ascend 的 MoE 序列并行可能受此条件影响",
+        "testing": "建议测试 data_parallel_size > 1 + use_sequence_parallel_moe 组合",
+        "needs_test_update": false,
+        "suggested_test_areas": ["MoE 序列并行 DP>1 场景"]
+      }
+    },
+    {
+      "sha": "ce2aecc4",
+      "comment": "【变更概述】[Performance] 为 FlashInfer MXFP4 量化添加 CuTe-DSL backend\n【PR号】#48417\n【变更类型】performance - 增加 backend 参数\n【变更文件】flashinfer.py (+6/-2)\n【统计数据】+6/-2\n【风险评估】低风险 - 仅影响 flashinfer 后端\n【涉及模块】quantization, attention",
+      "tags": ["performance", "low-risk", "quantization"],
+      "pr_number": "48417",
+      "title_en": "[Performance] CuTe-DSL for FlashInfer MXFP4 quant",
+      "title_zh": "[性能] 为 FlashInfer MXFP4 量化添加 CuTe-DSL 后端",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - flashinfer 是 CUDA 专用，vllm-ascend 不使用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f38f3d11",
+      "comment": "【变更概述】[Bugfix][KV Offloading] 在请求完成时 offload 最后一个 block\n【PR号】#48596\n【变更类型】bugfix - 保留 req_status，处理 jobs_to_flush\n【变更文件】vllm/v1/core/kv_offload/offloading_scheduler.py、vllm/v1/worker/worker.py 等 (+116/-31)\n【统计数据】+116/-31\n【风险评估】中风险 - 涉及 KV offloading 调度逻辑变更\n【涉及模块】kv-cache, scheduler",
+      "tags": ["bugfix", "medium-risk", "kv-cache"],
+      "pr_number": "48596",
+      "title_en": "[Bugfix][KV Offloading] Offload last block at request finish",
+      "title_zh": "[修复][KV 卸载] 请求完成时卸载最后一个 block",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - KV offloading scheduler 和 worker 路径 vllm-ascend 也会使用，需验证 req_status 保留和 jobs_to_flush 处理逻辑",
+        "testing": "建议测试 KV offloading 请求完成场景",
+        "needs_test_update": false,
+        "suggested_test_areas": ["KV offloading 请求完成", "jobs_to_flush 处理"]
+      }
+    },
+    {
+      "sha": "d4b45629",
+      "comment": "【变更概述】[XPU] 升级 vllm_xpu_kernels 到 v0.1.11.1\n【PR号】#48942\n【变更类型】chore - 依赖版本升级\n【变更文件】requirements/xpu.txt (+1/-1)\n【统计数据】+1/-1\n【风险评估】低风险 - 仅 XPU 依赖\n【涉及模块】chore",
+      "tags": ["chore", "low-risk"],
+      "pr_number": "48942",
+      "title_en": "[XPU] Bump vllm_xpu_kernels to v0.1.11.1",
+      "title_zh": "[XPU] 升级 vllm_xpu_kernels 到 v0.1.11.1",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - XPU 专用依赖",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "7b319252",
+      "comment": "【变更概述】[Bugfix] 修复 transformer backend 的 Parameter weight_loader\n【PR号】#48699\n【变更类型】bugfix - 修复初始化参数\n【变更文件】vllm/model_executor/layers/transformers/base.py (+13/-12)\n【统计数据】+13/-12\n【风险评估】中风险 - 涉及模型权重加载通用路径\n【涉及模块】model-runner",
+      "tags": ["bugfix", "medium-risk", "model-runner"],
+      "pr_number": "48699",
+      "title_en": "[Bugfix] Fix transformer backend Parameter weight_loader",
+      "title_zh": "[修复] 修复 transformer 后端 Parameter weight_loader",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - transformers/base.py 是通用模型加载路径，vllm-ascend 也会使用，需验证权重加载正确性",
+        "testing": "建议测试 transformer backend 模型加载",
+        "needs_test_update": false,
+        "suggested_test_areas": ["transformer backend 权重加载"]
+      }
+    },
+    {
+      "sha": "4c6e2e4b",
+      "comment": "【变更概述】[XPU][UT] 修复 XPU 上 _POSSIBLE_KERNELS 错误\n【PR号】#47516\n【变更类型】bugfix - 改为 .get() 避免 KeyError\n【变更文件】vllm/model_executor/layers/linear/__init__.py (+2/-2)\n【统计数据】+2/-2\n【风险评估】低风险 - XPU 专用修复\n【涉及模块】model-runner",
+      "tags": ["bugfix", "low-risk", "model-runner"],
+      "pr_number": "47516",
+      "title_en": "[XPU][UT] fix _POSSIBLE_KERNELS error on XPU",
+      "title_zh": "[XPU][单元测试] 修复 XPU 上 _POSSIBLE_KERNELS 错误",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - XPU 专用，但 linear/__init__.py 通用，需确认 .get() 改动不影响其他后端",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "85029588",
+      "comment": "【变更概述】[XPU] 支持 HND layout\n【PR号】#47975\n【变更类型】feature - 删除强制 NHD 设置\n【变更文件】vllm/platforms/xpu.py (+0/-8)\n【统计数据】+0/-8\n【风险评估】低风险 - XPU 专用\n【涉及模块】attention",
+      "tags": ["feature", "low-risk", "attention"],
+      "pr_number": "47975",
+      "title_en": "[XPU] support HND layout",
+      "title_zh": "[XPU] 支持 HND 布局",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - XPU 专用平台路径",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ce4bdcbd",
+      "comment": "【变更概述】[Bugfix] 为 Mistral Small 4 head dims 启用 FlashAttention MLA prefill\n【PR号】#48855\n【变更类型】bugfix - 增加 dims_mistral_s4 维度支持\n【变更文件】vllm/v1/attention/mla/prefill/flash_attn.py (+10/-5)\n【统计数据】+10/-5\n【风险评估】中风险 - 涉及 MLA prefill 路径\n【涉及模块】attention, mla",
+      "tags": ["bugfix", "medium-risk", "attention"],
+      "pr_number": "48855",
+      "title_en": "[Bugfix] Enable FlashAttention MLA prefill for Mistral Small 4 head dims",
+      "title_zh": "[修复] 为 Mistral Small 4 head dims 启用 FlashAttention MLA prefill",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - MLA prefill 路径通用，vllm-ascend 的 MLA 实现可能需要同步支持 Mistral Small 4 head dims",
+        "testing": "建议测试 Mistral Small 4 head dims MLA prefill",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Mistral Small 4 head dims MLA prefill"]
+      }
+    },
+    {
+      "sha": "d5b1ec26",
+      "comment": "【变更概述】[XPU] 允许强制使用 flash attn 用于 mm_prefix\n【PR号】#48828\n【变更类型】feature - XPU 平台修改\n【变更文件】vllm/platforms/xpu.py (+12/-6)\n【统计数据】+12/-6\n【风险评估】低风险 - XPU 专用\n【涉及模块】attention",
+      "tags": ["feature", "low-risk", "attention"],
+      "pr_number": "48828",
+      "title_en": "[XPU] allow forcing flash attn for mm_prefix",
+      "title_zh": "[XPU] 允许强制使用 flash attn 用于 mm_prefix",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - XPU 专用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "867ff697",
+      "comment": "【变更概述】[CI] 对非默认 release wheel 构建进行门控\n【PR号】#48772\n【变更类型】ci - 构建流程调整\n【变更文件】.buildkite/release-pipeline.yaml (+69/-30)\n【统计数据】+69/-30\n【风险评估】低风险 - 仅 CI 配置\n【涉及模块】ci",
+      "tags": ["ci", "low-risk"],
+      "pr_number": "48772",
+      "title_en": "[CI] Gate non-default release wheel builds",
+      "title_zh": "[CI] 对非默认 release wheel 构建进行门控",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - CI 配置",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "109b736b",
+      "comment": "【变更概述】[docs] 在 stable-docs 中保留页面路径\n【PR号】#48839\n【变更类型】docs - 文档修复\n【变更文件】docs/mkdocs/overrides/main.html (+1/-1)\n【统计数据】+1/-1\n【风险评估】低风险 - 仅文档\n【涉及模块】docs",
+      "tags": ["docs", "low-risk"],
+      "pr_number": "48839",
+      "title_en": "[docs] preserve page path in stable-docs",
+      "title_zh": "[文档] 在 stable-docs 中保留页面路径",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 文档",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "69d4f5ef",
+      "comment": "【变更概述】【MRV2】[Bugfix][Multimodal] 修复 Qwen3-Omni 在混合图像/视频输入下的 use_audio_in_video\n【PR号】#46213\n【变更类型】bugfix - 多模态嵌入模态管理\n【变更文件】vllm/v1/worker/gpu_model_runner.py 新增 set_mm_embedding_modality/copy_mm_embedding_modality；mm_pruning.py/encoder_runner.py/qwen3_omni_moe_thinker.py 修改 (+266/-83)\n【统计数据】+266/-83\n【风险评估】高风险 - MRV2 核心 gpu_model_runner.py 接口变更\n【涉及模块】model-runner, mrv2, multimodal",
+      "tags": ["bugfix", "high-risk", "model-runner", "mrv2", "multimodal"],
+      "pr_number": "46213",
+      "title_en": "[Bugfix][Multimodal] Fix Qwen3-Omni use_audio_in_video",
+      "title_zh": "【MRV2】[修复][多模态] 修复 Qwen3-Omni 在混合图像/视频输入下的 use_audio_in_video",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - vllm-ascend 的 gpu_model_runner.py 覆盖路径需要同步增加 set_mm_embedding_modality/copy_mm_embedding_modality 接口，否则 Qwen3-Omni 多模态处理会失败",
+        "testing": "建议测试 Qwen3-Omni 混合图像/视频输入 use_audio_in_video 场景",
+        "needs_test_update": true,
+        "suggested_test_areas": ["Qwen3-Omni use_audio_in_video", "多模态嵌入模态管理", "mm_pruning 路径"]
+      }
+    },
+    {
+      "sha": "426d48bf",
+      "comment": "【变更概述】[KV Offload] 为 FS/OBJ KV 事件添加可选 tier locality\n【PR号】#48281\n【变更类型】feature - 新增 Locality 枚举和事件扩展\n【变更文件】vllm/v1/kv_offload/、events.py (+326/-10)\n【统计数据】+326/-10\n【风险评估】中风险 - KV offload 事件路径扩展\n【涉及模块】kv-cache, distributed",
+      "tags": ["feature", "medium-risk", "kv-cache", "distributed"],
+      "pr_number": "48281",
+      "title_en": "[KV Offload] Add optional tier locality to FS/OBJ KV events",
+      "title_zh": "[KV 卸载] 为 FS/OBJ KV 事件添加可选 tier locality",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - KV offload 事件路径通用，vllm-ascend 如果使用 FS/OBJ KV events 需同步 Locality 枚举",
+        "testing": "建议测试 KV offload FS/OBJ 事件 tier locality",
+        "needs_test_update": false,
+        "suggested_test_areas": ["KV offload FS/OBJ 事件", "tier locality"]
+      }
+    },
+    {
+      "sha": "26c909ed",
+      "comment": "【变更概述】[Model] 支持 TranslateGemma-12b-it\n【PR号】#41599\n【变更类型】feature - 处理 extra content fields\n【变更文件】vllm/transformers_utils/chat_utils.py 新增 _collect_extra_fields (+174/-3)\n【统计数据】+174/-3\n【风险评估】中风险 - chat_utils 通用路径变更\n【涉及模块】model-runner",
+      "tags": ["feature", "medium-risk", "model-runner"],
+      "pr_number": "41599",
+      "title_en": "[Model] Support TranslateGemma-12b-it",
+      "title_zh": "[模型] 支持 TranslateGemma-12b-it",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - chat_utils.py 是通用对话处理路径，vllm-ascend 也会使用，需验证 _collect_extra_fields 不影响现有模型",
+        "testing": "建议测试 TranslateGemma-12b-it 模型加载和对话",
+        "needs_test_update": false,
+        "suggested_test_areas": ["TranslateGemma-12b-it", "chat_utils extra fields"]
+      }
+    },
+    {
+      "sha": "fb1d8cca",
+      "comment": "【变更概述】【MRV2】[rl] Stateful Trainer Send: 新抽象 [1/N]\n【PR号】#48042\n【变更类型】feature - 引入 RL 训练权重传输引擎新抽象\n【变更文件】vllm/v1/engine/async_llm.py 简化 init_weight_transfer_engine/update_weights 直接使用 request.init_info；新增 clients.py、TrainerWeightTransferEngine 等 (+644/-24)\n【统计数据】+644/-24\n【风险评估】高风险 - MRV2 核心 async_llm.py 接口重构\n【涉及模块】model-runner, mrv2, distributed",
+      "tags": ["feature", "high-risk", "model-runner", "mrv2", "distributed"],
+      "pr_number": "48042",
+      "title_en": "[rl] Stateful Trainer Send: New Abstractions [1/N]",
+      "title_zh": "【MRV2】[RL] Stateful Trainer Send: 新抽象 [1/N]",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - vllm-ascend 的 async_llm.py 覆盖路径需要同步简化 init_weight_transfer_engine/update_weights 接口，使用 request.init_info 模式",
+        "testing": "建议测试 RL 训练权重传输场景",
+        "needs_test_update": true,
+        "suggested_test_areas": ["RL 权重传输引擎", "async_llm init_weight_transfer_engine", "TrainerWeightTransferEngine"]
+      }
+    },
+    {
+      "sha": "9354f222",
+      "comment": "【变更概述】[Rust][Benchmark] 移植 vllm-bench 到 Rust\n【PR号】#48107\n【变更类型】feature - 新增完整 Rust 基准测试客户端\n【变更文件】rust/src/bench/ 新增 (+16926/-2)\n【统计数据】+16926/-2\n【风险评估】低风险 - 纯 Rust 新增\n【涉及模块】chore",
+      "tags": ["feature", "low-risk"],
+      "pr_number": "48107",
+      "title_en": "[Rust][Benchmark] Port in vllm-bench",
+      "title_zh": "[Rust][基准测试] 移植 vllm-bench 到 Rust",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 纯 Rust 基准测试客户端",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "17fdd421",
+      "comment": "【变更概述】[Bugfix][Attention] 在权重重载时保留 post-load tensors\n【PR号】#48251\n【变更类型】bugfix - 使用 replace_parameter，保留 _sinks_source\n【变更文件】vllm/v1/attention/mla_attention.py (+80/-4)；flashinfer.py 保留 _sinks_source\n【统计数据】+80/-4\n【风险评估】中风险 - MLA attention 权重重载路径\n【涉及模块】attention, mla",
+      "tags": ["bugfix", "medium-risk", "attention"],
+      "pr_number": "48251",
+      "title_en": "[Bugfix][Attention] Preserve post-load tensors across weight reloads",
+      "title_zh": "[修复][注意力] 权重重载时保留 post-load tensors",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - mla_attention.py 通用路径，vllm-ascend 的 MLA 实现需要同步保留 post-load tensors 逻辑（flashinfer 部分不影响）",
+        "testing": "建议测试 MLA 权重重载场景",
+        "needs_test_update": false,
+        "suggested_test_areas": ["MLA 权重重载", "post-load tensors 保留"]
+      }
+    },
+    {
+      "sha": "472d330c",
+      "comment": "【变更概述】为 KV offloading 添加 blocks_per_chunk 配置\n【PR号】#48878\n【变更类型】feature - 新增配置参数\n【变更文件】vllm/v1/core/kv_offload/offloading/config.py (+55/-1)\n【统计数据】+55/-1\n【风险评估】中风险 - KV offloading 配置扩展\n【涉及模块】kv-cache, config",
+      "tags": ["feature", "medium-risk", "kv-cache"],
+      "pr_number": "48878",
+      "title_en": "Add blocks_per_chunk configuration for KV offloading",
+      "title_zh": "为 KV offloading 添加 blocks_per_chunk 配置",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - KV offloading config 通用路径，vllm-ascend 如使用 offloading 需同步 blocks_per_chunk 配置",
+        "testing": "建议测试 KV offloading blocks_per_chunk 不同值",
+        "needs_test_update": false,
+        "suggested_test_areas": ["KV offloading blocks_per_chunk 配置"]
+      }
+    },
+    {
+      "sha": "3b6c96a1",
+      "comment": "【变更概述】【MRV2】[Bugfix][Pooling] 修复 torch.compile 下 chunked prefill pooling 得分错误\n【PR号】#48901\n【变更类型】bugfix - 增加设备同步\n【变更文件】vllm/v1/worker/gpu_model_runner.py 在设置 pooler_output 为 None 之前加 self._sync_device() (+52/-0)\n【统计数据】+52/-0\n【风险评估】高风险 - MRV2 核心 gpu_model_runner.py 修改\n【涉及模块】model-runner, mrv2, compilation",
+      "tags": ["bugfix", "high-risk", "model-runner", "mrv2", "compilation"],
+      "pr_number": "48901",
+      "title_en": "[Bugfix][Pooling] Fix wrong scores for chunked prefill under torch.compile",
+      "title_zh": "【MRV2】[修复][Pooling] 修复 torch.compile 下 chunked prefill 得分错误",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - vllm-ascend 的 gpu_model_runner.py 覆盖路径需要同步增加 _sync_device() 调用，否则 torch.compile 下 pooling 得分会错误",
+        "testing": "建议测试 torch.compile + chunked prefill pooling 场景",
+        "needs_test_update": true,
+        "suggested_test_areas": ["torch.compile chunked prefill pooling", "pooler_output 同步"]
+      }
+    },
+    {
+      "sha": "4d4e04f4",
+      "comment": "【变更概述】[Render] 为 derender 添加往返一致性测试和文档\n【PR号】#48617\n【变更类型】test - 新增测试和文档\n【变更文件】新增 docs/derenderer.md、test_derender_parity.py (+397/-2)\n【统计数据】+397/-2\n【风险评估】低风险 - 仅测试和文档\n【涉及模块】tests",
+      "tags": ["test", "low-risk", "tests"],
+      "pr_number": "48617",
+      "title_en": "[Render] Add round trip parity test and docs for derender",
+      "title_zh": "[Render] 为 derender 添加往返一致性测试和文档",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 仅测试和文档",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "67fe73b2",
+      "comment": "【变更概述】[CI] 扩展 test_parsable_context 的 max-model-len\n【PR号】#48873\n【变更类型】ci - 测试参数调整\n【变更文件】测试参数 5000→6000 (+1/-1)\n【统计数据】+1/-1\n【风险评估】低风险 - 测试参数调整\n【涉及模块】ci",
+      "tags": ["ci", "low-risk"],
+      "pr_number": "48873",
+      "title_en": "[CI] Extend max-model-len for test_parsable_context",
+      "title_zh": "[CI] 扩展 test_parsable_context 的 max-model-len",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 测试参数",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ee8f36d0",
+      "comment": "【变更概述】[Warmup] 显示 CuTeDSL 编译进度\n【PR号】#48881\n【变更类型】feature - 增加 tqdm 进度条\n【变更文件】cutedsl_warmup.py (+4/-0)\n【统计数据】+4/-0\n【风险评估】低风险 - 仅进度显示\n【涉及模块】compilation",
+      "tags": ["feature", "low-risk", "compilation"],
+      "pr_number": "48881",
+      "title_en": "[Warmup] Show CuTeDSL compilation progress",
+      "title_zh": "[Warmup] 显示 CuTeDSL 编译进度",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - CuTeDSL 是 CUDA 专用，vllm-ascend 不使用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "f3e9497e",
+      "comment": "【变更概述】[Model] 添加 Inkling LoRA 支持 [4/N]\n【PR号】#48884\n【变更类型】feature - 新增 enable_moe_shared_loras\n【变更文件】vllm/lora/、vllm/models/inkling/ 多文件 (+338/-48)\n【统计数据】+338/-48\n【风险评估】中风险 - LoRA 子系统扩展\n【涉及模块】model-runner, lora",
+      "tags": ["feature", "medium-risk", "model-runner"],
+      "pr_number": "48884",
+      "title_en": "[Model] Add Inkling LoRA support [4/N]",
+      "title_zh": "[模型] 添加 Inkling LoRA 支持 [4/N]",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/lora/ 通用路径，vllm-ascend 如使用 LoRA 需同步 enable_moe_shared_loras 接口",
+        "testing": "建议测试 Inkling LoRA + MoE shared 场景",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Inkling LoRA", "MoE shared loras"]
+      }
+    },
+    {
+      "sha": "fe784ff2",
+      "comment": "【变更概述】[M3] 改进长上下文 decode 索引器 (sm100)\n【PR号】#48582\n【变更类型】performance - 新增 CuteDSL decode score kernel\n【变更文件】新增 CuteDSL decode score kernel；cute_utils 加 mma_sync (+756/-63)\n【统计数据】+756/-63\n【风险评估】低风险 - SM100 专用\n【涉及模块】attention, performance",
+      "tags": ["performance", "low-risk", "attention"],
+      "pr_number": "48582",
+      "title_en": "[M3] Improve indexer for long-context decode (sm100)",
+      "title_zh": "[M3] 改进长上下文 decode 索引器 (sm100)",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - SM100 (Blackwell) 专用 CuteDSL kernel",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "b88abb50",
+      "comment": "【变更概述】[Misc] 移除孤儿环境变量和过期环境变量引用\n【PR号】#44749\n【变更类型】refactor - 删除 VLLM_ROCM_USE_AITER_PAGED_ATTN 等过期变量\n【变更文件】vllm/envs.py (+1/-33)\n【统计数据】+1/-33\n【风险评估】中风险 - 环境变量清理\n【涉及模块】config",
+      "tags": ["refactor", "medium-risk", "config"],
+      "pr_number": "44749",
+      "title_en": "[Misc] Remove orphaned env vars and stale env-var references",
+      "title_zh": "[杂项] 移除孤儿环境变量和过期环境变量引用",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm/envs.py 通用路径，vllm-ascend 可能引用了被删除的环境变量，需检查是否有依赖",
+        "testing": "建议验证 vllm-ascend 使用的环境变量未被删除",
+        "needs_test_update": false,
+        "suggested_test_areas": ["环境变量依赖检查"]
+      }
+    },
+    {
+      "sha": "67f9046e",
+      "comment": "【变更概述】[Bugfix] Sparse MLA: 启用 fp8_ds_mla dense prefill\n【PR号】#48642\n【变更类型】bugfix - 增加 seq_starts 参数\n【变更文件】csrc/cache.h、csrc/libtorch_stable/cache_kernels.cu、vllm/v1/attention/mla_attention.py (+516/-85)\n【统计数据】+516/-85\n【风险评估】中风险 - MLA attention 路径变更\n【涉及模块】attention, mla",
+      "tags": ["bugfix", "medium-risk", "attention"],
+      "pr_number": "48642",
+      "title_en": "[Bugfix] Sparse MLA: enable fp8_ds_mla dense prefill",
+      "title_zh": "[修复] Sparse MLA: 启用 fp8_ds_mla dense prefill",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - mla_attention.py 通用路径，vllm-ascend 的 MLA 实现需同步 seq_starts 参数（csrc 部分不影响 Ascend）",
+        "testing": "建议测试 Sparse MLA fp8 dense prefill",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Sparse MLA fp8 dense prefill", "seq_starts 参数"]
+      }
+    },
+    {
+      "sha": "f17be06f",
+      "comment": "【变更概述】[Perf] 优化 clamp 为 clamp_ (in-place)\n【PR号】#48143\n【变更类型】performance - 改为原地操作\n【变更文件】mla_attention.py、mamba_attn.py、ngram_proposer_gpu.py、step3p5.py 等 (+48/-32)\n【统计数据】+48/-32\n【风险评估】低风险 - 性能优化\n【涉及模块】attention, performance",
+      "tags": ["performance", "low-risk", "attention"],
+      "pr_number": "48143",
+      "title_en": "[Perf] Optimize clamp to clamp_",
+      "title_zh": "[性能] 优化 clamp 为 clamp_ (原地操作)",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - mla_attention.py 等通用路径，vllm-ascend 同步使用 clamp_ 即可",
+        "testing": "建议验证 clamp_ 在 NPU 上的行为一致性",
+        "needs_test_update": false,
+        "suggested_test_areas": ["clamp_ 行为验证"]
+      }
+    },
+    {
+      "sha": "2cab53dd",
+      "comment": "【变更概述】[Model][Hardware][AMD] 为 ROCM 上的 Qwen3-30B-A3B 添加 QK Norm + RoPE + KV Cache fusion\n【PR号】#42749\n【变更类型】feature - ROCm 专用 fusion pass\n【变更文件】ROCm 专用 fusion pass (+1361/-4)\n【统计数据】+1361/-4\n【风险评估】低风险 - ROCm 专用\n【涉及模块】attention, performance",
+      "tags": ["feature", "low-risk", "attention"],
+      "pr_number": "42749",
+      "title_en": "[Model][Hardware][AMD] QK Norm + RoPE + KV Cache fusion for Qwen3-30B-A3B on ROCM",
+      "title_zh": "[模型][硬件][AMD] ROCM 上 Qwen3-30B-A3B 的 QK Norm + RoPE + KV Cache 融合",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - ROCm 专用 fusion pass",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ab0a20d1",
+      "comment": "【变更概述】[Docs] 将 Phi-3.5-mini-instruct 添加到 batch invariance\n【PR号】#46396\n【变更类型】docs - 文档更新\n【变更文件】docs/features/batch_invariance.md (+1/-0)\n【统计数据】+1/-0\n【风险评估】低风险 - 仅文档\n【涉及模块】docs",
+      "tags": ["docs", "low-risk"],
+      "pr_number": "46396",
+      "title_en": "[Docs] Add Phi-3.5-mini-instruct to batch invariance",
+      "title_zh": "[文档] 将 Phi-3.5-mini-instruct 添加到 batch invariance",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - 文档",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "4a394bfc",
+      "comment": "【变更概述】[Spec Decode][DSpark] 添加 Gemma4-12B DSpark draft model\n【PR号】#47216\n【变更类型】feature - 新增 draft 模型\n【变更文件】新增 gemma4_dspark.py (+417/-4)\n【统计数据】+417/-4\n【风险评估】中风险 - 新增 spec decode 模型\n【涉及模块】spec-decode",
+      "tags": ["feature", "medium-risk", "spec-decode"],
+      "pr_number": "47216",
+      "title_en": "[Spec Decode][DSpark] Add Gemma4-12B DSpark draft model",
+      "title_zh": "[投机解码][DSpark] 添加 Gemma4-12B DSpark draft 模型",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm-ascend 如支持 DSpark 投机解码需同步此 draft 模型",
+        "testing": "建议测试 Gemma4-12B DSpark 投机解码",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Gemma4-12B DSpark 投机解码"]
+      }
+    },
+    {
+      "sha": "c95c6630",
+      "comment": "【变更概述】[Quant] 添加 nvfp4_per_token online MoE 量化\n【PR号】#48538\n【变更类型】feature - 新增 online/nvfp4.py\n【变更文件】新增 online/nvfp4.py，Blackwell 专用 (+285/-5)\n【统计数据】+285/-5\n【风险评估】低风险 - SM100 专用\n【涉及模块】quantization",
+      "tags": ["feature", "low-risk", "quantization"],
+      "pr_number": "48538",
+      "title_en": "[Quant] Add nvfp4_per_token online MoE quantization",
+      "title_zh": "[量化] 添加 nvfp4_per_token online MoE 量化",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - SM100 (Blackwell) 专用 nvfp4 量化",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "ab3c1aed",
+      "comment": "【变更概述】[Bugfix] 修复 WNA4Int/WNA8Int 的激活量化 dispatch\n【PR号】#48785\n【变更类型】bugfix - 修复 dispatch 逻辑\n【变更文件】humming_utils.py、compressed_tensors_wNa4/8.py (+13/-6)\n【统计数据】+13/-6\n【风险评估】中风险 - 量化 dispatch 路径\n【涉及模块】quantization",
+      "tags": ["bugfix", "medium-risk", "quantization"],
+      "pr_number": "48785",
+      "title_en": "[Bugfix] Fix activation quantization dispatch for WNA4Int/WNA8Int",
+      "title_zh": "[修复] 修复 WNA4Int/WNA8Int 的激活量化 dispatch",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - 量化 dispatch 通用路径，vllm-ascend 如使用 WNA4Int/WNA8Int 量化需同步修复",
+        "testing": "建议测试 WNA4Int/WNA8Int 激活量化",
+        "needs_test_update": false,
+        "suggested_test_areas": ["WNA4Int/WNA8Int 激活量化 dispatch"]
+      }
+    },
+    {
+      "sha": "fb5ec0dc",
+      "comment": "【变更概述】[Model] 添加 Inkling MTP=1 支持 [3/N]\n【PR号】#48869\n【变更类型】feature - 新增 MTP 模块\n【变更文件】新增 vllm/models/inkling/nvidia/mtp.py；speculative.py 加 inkling_mtp 类型 (+710/-6)\n【统计数据】+710/-6\n【风险评估】中风险 - 新增 MTP 模型\n【涉及模块】spec-decode",
+      "tags": ["feature", "medium-risk", "spec-decode"],
+      "pr_number": "48869",
+      "title_en": "[Model] Add Inkling MTP=1 support [3/N]",
+      "title_zh": "[模型] 添加 Inkling MTP=1 支持 [3/N]",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm-ascend 如支持 Inkling MTP 需同步此模块",
+        "testing": "建议测试 Inkling MTP=1 投机解码",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Inkling MTP=1 投机解码"]
+      }
+    },
+    {
+      "sha": "971dac2c",
+      "comment": "【变更概述】[Bugfix][KV-transfer] MoRIIO: 在 RDMA send-queue-full 背压时重试而非失败读取\n【PR号】#47495\n【变更类型】bugfix - 增加 _pending_unmapped_acks 缓冲，处理 notify 竞态\n【变更文件】vllm/distributed/kv_transfer/kv_connector/v1/moriio/moriio_connector.py、moriio_layout.py；测试 (+91/-14)\n【统计数据】+91/-14\n【风险评估】中风险 - MoRIIO connector 竞态处理\n【涉及模块】distributed, kv-cache",
+      "tags": ["bugfix", "medium-risk", "distributed", "kv-cache"],
+      "pr_number": "47495",
+      "title_en": "[Bugfix][KV-transfer] MoRIIO: retry RDMA send-queue-full backpressure instead of failing the read",
+      "title_zh": "[修复][KV 传输] MoRIIO: RDMA 发送队列满时重试背压而非失败读取",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - MoRIIO 是自定义 RDMA connector，vllm-ascend 使用自己的 kv-transfer 实现",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "efa2e424",
+      "comment": "【变更概述】[Helion] 修复 kernel input generators 中退化的 scale_ub\n【PR号】#48868\n【变更类型】bugfix - 修复 scale_ub 退化导致输出饱和\n【变更文件】vllm/kernels/helion/ops/ 下 4 个文件 (+35/-4)\n【统计数据】+35/-4\n【风险评估】低风险 - Helion kernel 测试输入生成\n【涉及模块】quantization",
+      "tags": ["bugfix", "low-risk", "quantization"],
+      "pr_number": "48868",
+      "title_en": "[Helion] Fix degenerate scale_ub in kernel input generators",
+      "title_zh": "[Helion] 修复 kernel input generators 中退化的 scale_ub",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - vllm/kernels/helion/ 是 CUDA 专用 kernel",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "02bf9c79",
+      "comment": "【变更概述】修复 mtp 下 Quark mxfp4 量化模型加载问题\n【PR号】#46757\n【变更类型】bugfix - MoE 子层忽略检查，返回 UnquantizedFusedMoEMethod\n【变更文件】vllm/model_executor/layers/quantization/quark/quark.py、utils.py (+26/-2)\n【统计数据】+26/-2\n【风险评估】中风险 - Quark 量化加载路径\n【涉及模块】quantization",
+      "tags": ["bugfix", "medium-risk", "quantization"],
+      "pr_number": "46757",
+      "title_en": "Fix Quark mxfp4 quantized model loading issue under mtp",
+      "title_zh": "修复 mtp 下 Quark mxfp4 量化模型加载问题",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - Quark 量化通用路径，vllm-ascend 如使用 Quark mxfp4 量化需同步 should_ignore_layer 的 check_children 参数",
+        "testing": "建议测试 Quark mxfp4 + MTP 模型加载",
+        "needs_test_update": false,
+        "suggested_test_areas": ["Quark mxfp4 MTP 模型加载", "MoE 子层忽略检查"]
+      }
+    },
+    {
+      "sha": "f61163e6",
+      "comment": "【变更概述】[Model] 为 Inkling 添加 Hopper FA4 relative attention\n【PR号】#48858\n【变更类型】feature - 增加 _use_sheared_bias 和 Hopper 支持\n【变更文件】vllm/models/inkling/nvidia/ops/fa4_rel_attention.py (+109/-5)\n【统计数据】+109/-5\n【风险评估】低风险 - CUDA 专用\n【涉及模块】attention",
+      "tags": ["feature", "low-risk", "attention"],
+      "pr_number": "48858",
+      "title_en": "[Model] Add Hopper FA4 relative attention for Inkling",
+      "title_zh": "[模型] 为 Inkling 添加 Hopper FA4 relative attention",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - Hopper (SM90) FA4 专用，使用 cutlass.cute，vllm-ascend 不使用",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    },
+    {
+      "sha": "626c90b2",
+      "comment": "【变更概述】[Refactor] 将 fla 移至 third party\n【PR号】#48500\n【变更类型】refactor - 路径迁移\n【变更文件】vllm/model_executor/layers/fla/ → vllm/third_party/flash_linear_attention/ (+86/-61)\n【统计数据】+86/-61\n【风险评估】中风险 - 路径变更\n【涉及模块】attention, refactor",
+      "tags": ["refactor", "medium-risk", "attention"],
+      "pr_number": "48500",
+      "title_en": "[Refactor] Move fla to third party",
+      "title_zh": "[重构] 将 fla 移至 third party",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - vllm-ascend 如果引用了 vllm/model_executor/layers/fla/ 路径需要更新导入到 vllm/third_party/flash_linear_attention/",
+        "testing": "建议验证 vllm-ascend 中 fla 相关导入路径",
+        "needs_test_update": false,
+        "suggested_test_areas": ["fla 路径导入检查"]
+      }
+    },
+    {
+      "sha": "251f7e47",
+      "comment": "【变更概述】【MRV2】[Model] 为 Inkling 添加 PW CUDA graph 支持 [2/N]\n【PR号】#48822\n【变更类型】feature - Piecewise CUDA graph 支持\n【变更文件】vllm/v1/worker/gpu/cudagraph_utils.py 重构 CudaGraphManager init 顺序，PIECEWISE+breakable_cg 处理 num_reqs；vllm/v1/worker/gpu/model_states/default.py 启用 PIECEWISE+breakable padding (+98/-32)\n【统计数据】+98/-32\n【风险评估】高风险 - MRV2 核心 cudagraph_utils.py 和 model_states/default.py 变更\n【涉及模块】model-runner, mrv2, compilation",
+      "tags": ["feature", "high-risk", "model-runner", "mrv2", "compilation"],
+      "pr_number": "48822",
+      "title_en": "[Model] Add PW CUDA graph support for Inkling [2/N]",
+      "title_zh": "【MRV2】[模型] 为 Inkling 添加 PW CUDA graph 支持 [2/N]",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "直接影响 - vllm-ascend 的 ModelAclGraphManager 继承自 vllm 的 ModelCudaGraphManager，cudagraph_utils.py 的 init 顺序重构和 PIECEWISE+breakable_cg 处理需要同步适配 ACL graph 机制，model_states/default.py 也需要同步 padding 逻辑",
+        "testing": "建议测试 Inkling PW CUDA graph + ACL graph 兼容性",
+        "needs_test_update": true,
+        "suggested_test_areas": ["Inkling PW CUDA graph", "PIECEWISE+breakable padding", "ACL graph 兼容性", "CudaGraphManager init 顺序"]
+      }
+    },
+    {
+      "sha": "ce653856",
+      "comment": "【变更概述】[KV Offload] 将 tiering_lookup_delay 拆分为 sync/async 直方图\n【PR号】#47679\n【变更类型】feature - 新增 TieringOffloadingMetrics\n【变更文件】vllm/v1/core/kv_offload/tiering/manager.py、base.py、spec.py (+208/-5)\n【统计数据】+208/-5\n【风险评估】中风险 - KV offload metrics 扩展\n【涉及模块】kv-cache",
+      "tags": ["feature", "medium-risk", "kv-cache"],
+      "pr_number": "47679",
+      "title_en": "[KV Offload] Split tiering_lookup_delay into sync/async histograms",
+      "title_zh": "[KV 卸载] 将 tiering_lookup_delay 拆分为 sync/async 直方图",
+      "ascend_impact": {
+        "ascend_affected": true,
+        "functionality": "潜在影响 - KV offload tiering metrics 通用路径，vllm-ascend 如使用 tiering 需同步 TieringOffloadingMetrics",
+        "testing": "建议测试 KV offload tiering metrics",
+        "needs_test_update": false,
+        "suggested_test_areas": ["KV offload tiering metrics", "sync/async histograms"]
+      }
+    },
+    {
+      "sha": "7d56fe2a",
+      "comment": "【变更概述】[ROCm][CI] 通过延迟 aiter 导入避免 config 时 HIP 初始化\n【PR号】#48015\n【变更类型】performance - 延迟导入\n【变更文件】vllm/model_executor/layers/quantization/quark/quark_ocp_mx.py (+29/-21)\n【统计数据】+29/-21\n【风险评估】低风险 - ROCm 专用延迟导入\n【涉及模块】quantization, ci",
+      "tags": ["performance", "low-risk", "quantization"],
+      "pr_number": "48015",
+      "title_en": "[ROCm][CI] Avoid HIP init at config time via lazy aiter import",
+      "title_zh": "[ROCm][CI] 通过延迟 aiter 导入避免 config 时 HIP 初始化",
+      "ascend_impact": {
+        "ascend_affected": false,
+        "functionality": "无影响 - ROCm 专用 aiter 延迟导入",
+        "testing": "无影响",
+        "needs_test_update": false,
+        "suggested_test_areas": []
+      }
+    }
+  ]
+}
