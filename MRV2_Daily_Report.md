@@ -1,10 +1,50 @@
 # MRV2 每日报告
-生成时间: 2026-07-23 10:34:56
+生成时间: 2026-07-24 09:56:03
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 125
+MRV2 相关 commits 总数: 122
+
+## 2026-07-23
+### vllm
+- **[ac36a7a1](https://github.com/vllm-project/vllm/commit/ac36a7a1e7eb8f03f9ec2b6bf643f1002b205794)** ([#48630](https://github.com/vllm-project/vllm/pull/48630)) [Spec Decode] 通过分块避免拒绝采样器 OOM
+  - 标签: `feature`, `mrv2`, `high-risk`, `spec-decode`, `model-runner`, `sampler`, `tests`
+  - 变更文件（共 12 个）:
+  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+62/-0)
+  - 修改 `tests/v1/test_outputs.py` (+26/-1)
+  - 新增 `tests/v1/worker/test_gpu_rejection_sampler_chunking.py` (+109/-0)
+  - 修改 `vllm/config/model.py` (+4/-0)
+  - 修改 `vllm/v1/outputs.py` (+27/-0)
+  - 修改 `vllm/v1/sample/ops/topk_topp_sampler.py` (+8/-12)
+  - 修改 `vllm/v1/sample/rejection_sampler.py` (+2/-4)
+  - 修改 `vllm/v1/worker/gpu/sample/prompt_logprob.py` (+1/-9)
+  - 修改 `vllm/v1/worker/gpu/sample/sampler.py` (+3/-6)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler.py` (+142/-31)
+  - ... 及其他 2 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu_model_runner.py（vllm-ascend 的 NPUModelRunner 继承自 GPUModelRunner）以及 vllm/v1/worker/gpu/spec_decode/ 与 gpu/sample/ 路径。vllm-ascend 有自己的 spec_decode 实现（vllm_ascend/spec_decode/llm_base_proposer.py），但 rejection sampler 的分块逻辑若在父类 GPUModelRunner 中执行，可能传递到 Ascend 子类。需验证：(1) NPUModelRunner 的采样流程是否触发分块逻辑；(2) Ascend 上 rejection sampler 的内存行为是否符合预期；(3) 分块配置参数对 Ascend 的适用性。
+    - 建议测试区域: `Ascend 投机解码 rejection sampler 分块行为`, `NPUModelRunner 采样流程分块兼容性`, `大 batch 投机解码 NPU 内存占用`
+
+- **[521aa80f](https://github.com/vllm-project/vllm/commit/521aa80f719bb11bf973d2d51873ca966afe373d)** ([#48399](https://github.com/vllm-project/vllm/pull/48399)) [Core] 简化 KVBlockZeroen 索引张量处理
+  - 标签: `refactor`, `mrv2`, `low-risk`, `model-runner`, `kv-cache`
+  - 变更文件:
+  - 修改 `tests/v1/worker/test_kv_block_zeroer.py` (+4/-7)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+1/-3)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+0/-2)
+  - 修改 `vllm/v1/worker/utils.py` (+1/-43)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/model_runner.py，vllm-ascend 的 NPUModelRunner 继承自 GPUModelRunner。KVBlockZeroen 的索引张量处理简化可能影响 Ascend 上的 KV cache 块清零行为。需验证 NPUModelRunner 子类是否依赖原有的索引张量处理方式。
+
+### vllm-ascend
+- **[c88d7a0a](https://github.com/vllm-project/vllm-ascend/commit/c88d7a0a2473329377c9bb2d15429a2145d9ac4f)** ([#12536](https://github.com/vllm-project/vllm-ascend/pull/12536)) [性能] 移除 DSA_CP 的 QLIMetadata builder 中的 D2H 同步
+  - 标签: `perf`, `low-risk`, `attention`, `context-parallel`
+  - 变更文件:
+  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+2/-1)
+  - 修改 `vllm_ascend/attention/context_parallel/dsa_cp.py` (+11/-11)
+  - Ascend 影响: ✓ 无影响
+
+---
 
 ## 2026-07-22
 ### vllm
@@ -1426,82 +1466,6 @@ MRV2 相关 commits 总数: 125
   - 变更文件:
   - 修改 `vllm_ascend/ops/gdn.py` (+7/-0)
   - 修改 `vllm_ascend/worker/model_runner_v1.py` (+5/-0)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-06-24
-### vllm
-- **[84c62e1c](https://github.com/vllm-project/vllm/commit/84c62e1cbdef4250fbfda83782fd250e07ad0256)** 该 commit 为多模态模型（特别是 Qwen2.5-VL、Qwen3-VL 等支持 EVS 的模型）添加了 Efficient Video Sampling（EVS）支持。核心变更包括：1) 新增 vllm/v1/worker/gpu/model_states/mm_pruning.py 文件，实现 MultiModalPruner 类，用于处理 M-RoPE 位置重计算和嵌入修剪；2) 修改 ModelState 接口（interface.py），新增 gather_mm_embeddings 默认方法，并将 get_mm_embeddings 方法签名增加 req_states 参数；3) 修改 DefaultModelState（default.py），集成 MultiModalPruner 的 recompute 和 strip 逻辑；4) 修改 GPUModelRunner（model_runner.py），简化 gather_mm_embeddings 调用，将参数传递改为直接传递 input_batch；5) 修改 Qwen2.5-VL 和 Qwen3-VL 模型的 recompute_mrope_positions 方法，支持 input_ids 为 torch.Tensor 类型；6) 修改 RopeState（rope.py），新增 read_prefill_positions 和 update_prefill_positions 方法用于读写分阶段 prefill 位置。该变更对多模态模型的视频处理性能有显著提升，但涉及多个接口变更，需要确保所有 ModelState 子类同步更新。
-  - 标签: `feature`, `medium-risk`, `model-runner`, `multimodal`
-  - 变更文件:
-  - 修改 `vllm/model_executor/models/diffusion_gemma.py` (+9/-9)
-  - 修改 `vllm/model_executor/models/interfaces.py` (+6/-5)
-  - 修改 `vllm/model_executor/models/qwen2_5_vl.py` (+10/-6)
-  - 修改 `vllm/model_executor/models/qwen3_vl.py` (+14/-10)
-  - 修改 `vllm/v1/worker/gpu/mm/rope.py` (+17/-0)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+4/-10)
-  - 修改 `vllm/v1/worker/gpu/model_states/default.py` (+25/-8)
-  - 修改 `vllm/v1/worker/gpu/model_states/encoder_decoder.py` (+4/-1)
-  - 修改 `vllm/v1/worker/gpu/model_states/interface.py` (+21/-1)
-  - 新增 `vllm/v1/worker/gpu/model_states/mm_pruning.py` (+135/-0)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 ModelState 接口（vllm/v1/worker/gpu/model_states/interface.py）中的 get_mm_embeddings 方法签名，新增 req_states 参数。vllm-ascend 的 NPUModelRunner 继承自 GPUModelRunner，其 get_mm_embeddings 方法在 default.py 中被重写，但 vllm-ascend 的 NPUModelRunner 也重写了 get_mm_embeddings 方法（在 vllm_ascend/worker/model_runner_v1.py 中），需要检查是否适配了新的 req_states 参数。同时，ModelState 接口新增了 gather_mm_embeddings 默认方法，vllm-ascend 的 DefaultModelState 重写了该方法，需要确认是否兼容。此外，RopeState 新增了 read_prefill_positions 和 update_prefill_positions 方法，vllm-ascend 如果使用了 RopeState 则需要同步更新。
-
-- **[7ee4d220](https://github.com/vllm-project/vllm/commit/7ee4d220097db4b397e55fd4ad58caf6a7977c5b)** 修复 rejection sampler 中 placeholder draft token (-1) 的处理。在 rejection_greedy_sample_kernel 和 rejection_random_sample_kernel 中，添加了对 draft_token_id < 0 的检查，确保 placeholder token 被拒绝而不是被采样。同时修复了 _rejection_kernel 中可能的 OOB 指针访问。这是一个 Bug 修复，风险较低。
-  - 标签: `bugfix`, `low-risk`, `spec-decode`, `sampler`
-  - 变更文件:
-  - 修改 `tests/v1/sample/test_rejection_sampler.py` (+33/-0)
-  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+29/-0)
-  - 修改 `vllm/v1/sample/rejection_sampler.py` (+6/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+7/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 RejectionSampler 的 Triton kernel 和 rejection_sampler_utils 中的 _rejection_kernel。vllm-ascend 的 AscendSampler 需要同步更新 placeholder draft token 的处理逻辑。
-    - 建议测试区域: `vllm_ascend/sample/`, `vllm_ascend/spec_decode/`
-
-- **[e2bdc246](https://github.com/vllm-project/vllm/commit/e2bdc24612ab0b7bf7a1bc67c955fd244e8660c4)** 修复 ROCm 平台在 Ray driver 线程中使用 use_v2_model_runner 的问题。将 CUDA_VISIBLE_DEVICES 的环境变量检查改为根据平台选择 HIP_VISIBLE_DEVICES 或 CUDA_VISIBLE_DEVICES。这是一个跨平台兼容性修复，风险较低。
-  - 标签: `bugfix`, `low-risk`, `rocm`
-  - 变更文件:
-  - 修改 `.buildkite/test_areas/distributed.yaml` (+13/-1)
-  - 修改 `vllm/triton_utils/importing.py` (+10/-3)
-  - Ascend 影响: ✓ 无影响
-
-- **[0a3e2dbc](https://github.com/vllm-project/vllm/commit/0a3e2dbc09c8a70dfd18f728bb829bf29ffa7da6)** 在 MoE 中跳过 DP padding tokens。新增 VLLM_MOE_SKIP_PADDING 环境变量（默认关闭），当启用时，在 modular_kernel._prepare 和 DeepSeek V4 的 forward 中，将 padding tokens 的 expert id 设为 -1，使其被 MoE 内核跳过。同时修改了 InputBatch 和 CUDA Graph 捕获逻辑，添加 is_padding 标记。这是一个性能优化，风险中等。
-  - 标签: `performance`, `medium-risk`, `moe`
-  - 变更文件:
-  - 修改 `tests/models/test_deepseek_v4_mega_moe.py` (+80/-1)
-  - 修改 `vllm/envs.py` (+6/-0)
-  - 修改 `vllm/forward_context.py` (+9/-0)
-  - 修改 `vllm/model_executor/layers/fused_moe/modular_kernel.py` (+17/-0)
-  - 修改 `vllm/models/deepseek_v4/nvidia/model.py` (+10/-0)
-  - 修改 `vllm/models/deepseek_v4/nvidia/ops/prepare_megamoe.py` (+11/-0)
-  - 修改 `vllm/v1/worker/gpu/cudagraph_utils.py` (+4/-0)
-  - 修改 `vllm/v1/worker/gpu/input_batch.py` (+7/-0)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+10/-0)
-  - Ascend 影响: ✓ 无影响
-
-### vllm-ascend
-- **[ed8e8b77](https://github.com/vllm-project/vllm-ascend/commit/ed8e8b77c00362ed55d40107e41cd7f224006b81)** 修复PP+MTP流水线中的气泡问题，并修复PD分离场景下PP的验证。在PD分离+PP+MTP场景中，通过跳过P节点的broadcast来避免同步并消除气泡。同时修复了MooncakeConnector中PP感知的handshake metadata设置，以及PP模式下transfer engine的设备名称设置。潜在风险：跳过broadcast可能影响PP其他rank的数据同步，需要验证在非PD分离场景下的行为是否正确。
-  - 标签: `bugfix`, `medium-risk`, `distributed`, `model-runner`
-  - 变更文件:
-  - 修改 `vllm_ascend/distributed/kv_transfer/kv_p2p/mooncake_connector.py` (+14/-1)
-  - 修改 `vllm_ascend/worker/model_runner_v1.py` (+4/-3)
-  - Ascend 影响: ✓ 无影响
-
-- **[edcae83d](https://github.com/vllm-project/vllm-ascend/commit/edcae83da32af8e1f1b7b97c7e19e8114e0535a5)** 将vllm-ascend的默认vLLM版本从v0.22.1升级到v0.23.0。主要变更包括：更新所有Dockerfile中的VLLM_TAG、恢复release-tag CI测试、添加v2 model runner兼容性处理(在v0.23.0上自动回退到v1)、更新文档和README。潜在风险：版本升级可能引入与v0.23.0 API不兼容的问题，虽然已通过补丁和回退机制处理，但仍需全面测试。v2 model runner在v0.23.0上不支持，相关测试已标记skip。
-  - 标签: `chore`, `high-risk`, `ci`
-  - 变更文件（共 23 个）:
-  - 修改 `.github/vllm-release-tag.commit` (+1/-1)
-  - 修改 `.github/workflows/pr_e2e_command.yml` (+1/-4)
-  - 修改 `.github/workflows/pr_test.yaml` (+1/-4)
-  - 修改 `.github/workflows/schedule_update_estimated_times.yaml` (+10/-14)
-  - 修改 `.github/workflows/schedule_vllm_e2e_test.yaml` (+2/-8)
-  - 修改 `Dockerfile` (+1/-1)
-  - 修改 `Dockerfile.310p` (+1/-1)
-  - 修改 `Dockerfile.310p.openEuler` (+1/-1)
-  - 修改 `Dockerfile.a3` (+1/-1)
-  - 修改 `Dockerfile.a3.openEuler` (+1/-1)
-  - ... 及其他 13 个文件
   - Ascend 影响: ✓ 无影响
 
 ---
