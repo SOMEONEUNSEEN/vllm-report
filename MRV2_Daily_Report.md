@@ -1,10 +1,54 @@
 # MRV2 每日报告
-生成时间: 2026-07-24 09:56:03
+生成时间: 2026-07-25 09:02:49
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 122
+MRV2 相关 commits 总数: 123
+
+## 2026-07-24
+### vllm
+- **[7b40fb96](https://github.com/vllm-project/vllm/commit/7b40fb96450e1deef40ebc383ff549bea35b9b8f)** ([#49247](https://github.com/vllm-project/vllm/pull/49247)) [UX] 拒绝不兼容的嵌套运行时覆盖
+  - 标签: `refactor`, `low-risk`, `config`, `model-runner`
+  - 变更文件:
+  - 修改 `tests/test_config.py` (+18/-3)
+  - 修改 `tests/v1/worker/test_gpu_model_runner.py` (+1/-1)
+  - 修改 `vllm/config/utils.py` (+31/-15)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+6/-4)
+  - Ascend 影响: ✓ 无影响
+
+- **[833483f3](https://github.com/vllm-project/vllm/commit/833483f3578a2c4766977d0fe431bd32a01ce250)** ([#48218](https://github.com/vllm-project/vllm/pull/48218)) 编码器缓存扩展钩子
+  - 标签: `feature`, `medium-risk`, `model-runner`, `multimodal`, `encoder-cache`, `scheduler`
+  - 变更文件:
+  - 修改 `tests/v1/worker/test_gpu_model_runner_mm_gather.py` (+1/-0)
+  - 修改 `vllm/config/__init__.py` (+3/-0)
+  - 新增 `vllm/config/ec_manager_config.py` (+29/-0)
+  - 修改 `vllm/config/vllm.py` (+5/-0)
+  - 修改 `vllm/v1/core/encoder_cache_manager.py` (+4/-0)
+  - 修改 `vllm/v1/core/sched/output.py` (+4/-1)
+  - 修改 `vllm/v1/core/sched/scheduler.py` (+10/-6)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+50/-8)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - GPUModelRunner 新增 _on_request_state_removed/_process_encoder_cache_scheduler_output/_cache_encoder_output/_get_encoder_output_from_cache 等可重写钩子，NPUModelRunner 继承自此，多模态编码器缓存路径会经过这些钩子；EncoderCacheManagerConfig 经 VllmConfig 注入，Ascend 可借此扩展自定义管理器。需验证 Ascend 多模态编码器缓存生命周期不变。
+
+- **[dd72658e](https://github.com/vllm-project/vllm/commit/dd72658e7db0c6a674f473f6f9f0f5c2ebe7e523)** ([#48597](https://github.com/vllm-project/vllm/pull/48597)) [Perf][GLM-5.2] Blackwell 解码优化
+  - 标签: `feature`, `mrv2`, `high-risk`, `performance`, `spec-decode`, `mla`, `blackwell`, `model-runner`, `kernels`
+  - 变更文件（共 29 个）:
+  - 修改 `CMakeLists.txt` (+17/-0)
+  - 新增 `csrc/libtorch_stable/bf16_skinny_gemm.cu` (+262/-0)
+  - 新增 `csrc/libtorch_stable/bf16_skinny_gemm_entry.cu` (+170/-0)
+  - 修改 `csrc/libtorch_stable/dsv3_fused_a_gemm.cu` (+112/-36)
+  - 修改 `csrc/libtorch_stable/quantization/fp4/nvfp4_quant_kernels.cu` (+42/-10)
+  - 修改 `csrc/libtorch_stable/torch_bindings.cpp` (+4/-0)
+  - 新增 `recipes/glm5.2-ll-b300-tp8-mtp5.md` (+41/-0)
+  - 新增 `tests/kernels/test_bf16_skinny_gemm.py` (+70/-0)
+  - 修改 `tests/kernels/test_fused_deepseek_v32_norm_rope.py` (+77/-0)
+  - 修改 `tests/models/registry.py` (+4/-0)
+  - ... 及其他 19 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改 MRV2 spec decode 基类 vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py、mtp/speculator.py 与 vllm/v1/spec_decode/llm_base_proposer.py，vllm-ascend 的 dspark/eagle spec decode 继承或参考这些基类；MLA flashinfer_mla_sparse.py 属 MLA 路径。CUDA 内核为 NVIDIA 专用，但 speculator 基类接口变更需 Ascend 侧对齐回归。
+
+---
 
 ## 2026-07-23
 ### vllm
@@ -1445,27 +1489,6 @@ MRV2 相关 commits 总数: 122
   - 标签: `performance`, `low-risk`, `spec-decode`
   - 变更文件:
   - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+7/-5)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-06-25
-### vllm-ascend
-- **[b9a12d96](https://github.com/vllm-project/vllm-ascend/commit/b9a12d96bac03cb747b2d31e6e2081b5f38fe2b2)** 优化异步投机解码模式下seq_lens的CPU校正。之前通过额外的NPU->CPU拷贝seq_lens并同步事件来校正optimistic_seq_lens_cpu，现在直接使用已异步拷贝的valid_sampled_token_count_cpu在CPU上校正，避免不必要的NPU->CPU同步。新增correct_optimistic_seq_lens_cpu函数和_correct_optimistic_seq_lens_cpu方法，并添加单元测试。同时更新了310P的model_runner。风险中等，因为校正逻辑变更可能影响投机解码的精度，但新增的单元测试覆盖了主要场景。
-  - 标签: `performance`, `bugfix`, `medium-risk`, `spec_decode`, `model-runner`
-  - 变更文件:
-  - 新增 `tests/ut/spec_decode/test_utils.py` (+186/-0)
-  - 修改 `tests/ut/worker/a2/test_model_runner_v1.py` (+57/-0)
-  - 修改 `vllm_ascend/_310p/model_runner_310p.py` (+9/-8)
-  - 修改 `vllm_ascend/spec_decode/utils.py` (+42/-0)
-  - 修改 `vllm_ascend/worker/model_runner_v1.py` (+59/-60)
-  - Ascend 影响: ✓ 无影响
-
-- **[5270d846](https://github.com/vllm-project/vllm-ascend/commit/5270d84675dc122273bb7ac16688046b6b208614)** 修复Qwen3.5在ACL Graph、MTP和DP同时启用时的精度问题。两个修复：1) dummy graph运行时未经过_prepare_inputs()，但GDN/Mamba attention metadata仍读取block_table，导致读取到stale block id。修复在_dummy_run中同步block_table。2) 当MTP+DP+ACL Graph时，captured的GDN spec conv1d graph task可能在无runtime spec sequence的rank上重放，导致cache_indices为空，kernel使用默认batch-indexed state writes损坏conv_state。修复在无spec sequence时传递-1作为cache_indices。风险中等，涉及GDN状态管理。
-  - 标签: `bugfix`, `medium-risk`, `model-runner`, `spec_decode`, `ops`
-  - 变更文件:
-  - 修改 `vllm_ascend/ops/gdn.py` (+7/-0)
-  - 修改 `vllm_ascend/worker/model_runner_v1.py` (+5/-0)
   - Ascend 影响: ✓ 无影响
 
 ---
