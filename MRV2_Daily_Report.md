@@ -1,10 +1,85 @@
 # MRV2 每日报告
-生成时间: 2026-07-27 09:02:30
+生成时间: 2026-07-28 09:56:42
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 114
+MRV2 相关 commits 总数: 115
+
+## 2026-07-27
+### vllm
+- **[d2ca3002](https://github.com/vllm-project/vllm/commit/d2ca3002d93314a08bbddf9c6eb6ee78b1343407)** ([#47711](https://github.com/vllm-project/vllm/pull/47711)) [性能] 跳过无操作的 FP32 logits 物化
+  - 标签: `performance`, `mrv2`, `medium-risk`, `model-runner`, `sampler`
+  - 变更文件:
+  - 修改 `vllm/v1/worker/gpu/sample/sampler.py` (+21/-0)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - vllm/v1/worker/gpu/sample/sampler.py 是 MRV2 GPU 采样器核心路径，vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner 并使用同一 Sampler。跳过 FP32 logits 物化的优化会传递到 Ascend 平台
+
+- **[29fdeab2](https://github.com/vllm-project/vllm/commit/29fdeab2548fdb5cd61ec3613e5e72200c695ef0)** ([#49422](https://github.com/vllm-project/vllm/pull/49422)) [XPU][CI] 在 Intel GPU CI 中添加更多测试用例
+  - 标签: `chore`, `low-risk`, `xpu`, `ci`, `tests`
+  - 变更文件:
+  - 新增 `.buildkite/intel_jobs/benchmarks_intel.yaml` (+26/-0)
+  - 修改 `.buildkite/intel_jobs/engine_intel.yaml` (+76/-0)
+  - 新增 `.buildkite/intel_jobs/model_executor_intel.yaml` (+33/-0)
+  - 修改 `.buildkite/intel_jobs/model_runner_v2_intel.yaml` (+55/-1)
+  - 新增 `.buildkite/intel_jobs/samplers_intel.yaml` (+29/-0)
+  - Ascend 影响: ✓ 无影响
+
+- **[439f3362](https://github.com/vllm-project/vllm/commit/439f336212227833e126526d3c5f3ef3968dfbf5)** ([#49736](https://github.com/vllm-project/vllm/pull/49736)) [核心] 修复 MRV2 mamba_hybrid.py 中的 GPU<->CPU 同步
+  - 标签: `bugfix`, `mrv2`, `low-risk`, `model-runner`, `mamba`, `model-states`
+  - 变更文件:
+  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+4/-4)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - vllm/v1/worker/gpu/model_states/mamba_hybrid.py 是 MRV2 GPU model_states 路径，vllm-ascend 的 NPUModelRunner 可能继承 MambaHybridModelState
+
+- **[50aa8304](https://github.com/vllm-project/vllm/commit/50aa83048219b70a3a68adf2fc8cd860ccc3e238)** ([#49751](https://github.com/vllm-project/vllm/pull/49751)) [BugFix] 不要创建超过 max_model_len 的 dummy 请求
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `model-runner`, `input-batch`, `cudagraph`
+  - 变更文件:
+  - 新增 `tests/v1/worker/test_gpu_input_batch_v2.py` (+52/-0)
+  - 修改 `vllm/v1/worker/gpu/input_batch.py` (+9/-4)
+  - 修改 `vllm/v1/worker/gpu/lora_utils.py` (+5/-1)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+6/-2)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 该 commit 修改了 vllm/v1/worker/gpu/model_runner.py（vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner），dummy 请求创建逻辑的变更会影响 Ascend 上的 CUDA graph 捕获
+    - 建议测试区域: `Ascend CUDA graph 捕获 dummy 请求 seq_len 验证`, `NPUModelRunner dummy 请求 token 分布正确性`
+
+- **[fdaa0d9e](https://github.com/vllm-project/vllm/commit/fdaa0d9e59238b6884f9515fa3245dea118edc66)** ([#49331](https://github.com/vllm-project/vllm/pull/49331)) [ModelRunner V2] 支持 encoder-only attention
+  - 标签: `feature`, `mrv2`, `high-risk`, `model-runner`, `attention`, `encoder-only`, `model-states`
+  - 变更文件:
+  - 修改 `tests/models/language/pooling/test_embedding.py` (+54/-0)
+  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+12/-0)
+  - 修改 `vllm/v1/worker/gpu/block_table.py` (+1/-1)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+3/-0)
+  - 修改 `vllm/v1/worker/gpu/model_states/__init__.py` (+7/-1)
+  - 新增 `vllm/v1/worker/gpu/model_states/encoder_only.py` (+182/-0)
+  - 修改 `vllm/v1/worker/gpu/model_states/interface.py` (+10/-0)
+  - 修改 `vllm/v1/worker/gpu/warmup.py` (+7/-2)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 该 commit 修改了 vllm-ascend 的多个核心覆盖路径：(1) vllm/v1/worker/gpu/attn_utils.py - vllm-ascend 有自己的 attn_utils 实现，encoder-only attention 支持需在 Ascend backend 中实现；(2) vllm/v1/worker/gpu/block_table.py - vllm-ascend 通过 block_table_patch 打补丁；(3) vllm/v1/worker/gpu/model_runner.py - vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner，EncoderOnlyModelState 选择逻辑会传递到 Ascend。vllm-ascend 必须评估是否需要在 Ascend attention backend 中实现 encoder-only 支持
+    - 建议测试区域: `Ascend encoder-only/pooling 模型端到端推理`, `Ascend attention backend encoder-only 支持`, `NPUModelRunner EncoderOnlyModelState 集成验证`, `block_table_patch 在 encoder-only 模式下的行为`
+
+### vllm-ascend
+- **[80431747](https://github.com/vllm-project/vllm-ascend/commit/804317471ca4406451b04f3eb2b3cec431117f79)** ([#12944](https://github.com/vllm-project/vllm-ascend/pull/12944)) [BugFix] 避免 ACL graph replay 的全局同步
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `model-runner`, `aclgraph`
+  - 变更文件:
+  - 修改 `vllm_ascend/worker/v2/aclgraph_utils.py` (+6/-1)
+  - 修改 `vllm_ascend/worker/v2/model_runner.py` (+0/-5)
+  - Ascend 影响: ✓ 无影响
+
+- **[1ae2a6e9](https://github.com/vllm-project/vllm-ascend/commit/1ae2a6e9583db3627ac19049a8ad3217fa863e45)** ([#12810](https://github.com/vllm-project/vllm-ascend/pull/12810)) [Feature] 在 MRV2 中支持 MTP eager 模式
+  - 标签: `feature`, `mrv2`, `high-risk`, `model-runner`, `spec-decode`, `mtp`
+  - 变更文件:
+  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+43/-0)
+  - 修改 `vllm_ascend/worker/v2/input_batch.py` (+6/-4)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/__init__.py` (+10/-0)
+  - 新增 `vllm_ascend/worker/v2/spec_decode/autoregressive/__init__.py` (+6/-0)
+  - 新增 `vllm_ascend/worker/v2/spec_decode/autoregressive/speculator.py` (+420/-0)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/eagle/speculator.py` (+5/-385)
+  - 新增 `vllm_ascend/worker/v2/spec_decode/mtp/__init__.py` (+16/-0)
+  - 新增 `vllm_ascend/worker/v2/spec_decode/mtp/speculator.py` (+89/-0)
+  - Ascend 影响: ✓ 无影响
+
+---
 
 ## 2026-07-26
 ### vllm
@@ -1389,62 +1464,6 @@ MRV2 相关 commits 总数: 114
   - 标签: `performance`, `low-risk`, `spec-decode`
   - 变更文件:
   - 修改 `vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py` (+4/-1)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-06-28
-### vllm
-- **[5c91039c](https://github.com/vllm-project/vllm/commit/5c91039c41bc0b6a4a4ab2dc5f62115946e38a30)** 将 DeepSeek-V2 模型的 MoE all-reduce 替换为 reduce-scatter，以提升 3.1%~3.2% 的端到端吞吐。实现方式：在 `DeepseekV2DecoderLayer` 中新增 `use_sequence_parallel_moe` 标志，当启用时，在 attention 输出后执行 reduce-scatter 将 hidden states 分散到各 TP rank，MoE 在分散后的数据上计算，最后通过 all-gather 恢复完整结果。这减少了 MoE 计算前的 all-reduce 通信开销。同时修改了 `DeepseekV2MoE` 的 `forward` 方法以支持 `already_sequence_parallel` 参数。
-  - 标签: `performance`, `high-risk`, `distributed`, `model-runner`
-  - 变更文件:
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+86/-12)
-  - Ascend 影响: ✓ 无影响
-
-- **[6eb63a1d](https://github.com/vllm-project/vllm/commit/6eb63a1da6996abad00323dc7e845dc868996524)** 修复 DeepSeek-V3.2 模型中索引器权重加载的问题。当 `index_topk_freq>1` 时，只有部分层构建了 indexer，但 checkpoint 中所有层都包含 indexer 权重。变更在 `load_weights` 中检查当前层是否实际构建了 indexer，如果没有则跳过加载对应的 checkpoint 权重，避免 KeyError 或错误加载。
-  - 标签: `bugfix`, `low-risk`, `model-runner`
-  - 变更文件:
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+10/-0)
-  - Ascend 影响: ✓ 无影响
-
-- **[c7ca0bcc](https://github.com/vllm-project/vllm/commit/c7ca0bccae667934c29c654544131cdab046adfd)** 为 GLM-4.5/6/7 模型添加 Fused Shared Expert (FSE) 支持。当 AITER 的 fused MoE 和 fusion shared experts 都启用时，将 shared experts 的权重合并到 routed experts 中，通过 FusedMoE 统一处理。变更涉及 `glm4_moe.py` 和 `glm4_moe_mtp.py` 中的权重加载逻辑，将 `mlp.shared_experts` 的权重按 `n_shared_experts` 切分后映射为额外的 routed expert 权重。
-  - 标签: `feature`, `high-risk`, `model-runner`, `rocm`
-  - 变更文件:
-  - 修改 `vllm/model_executor/models/glm4_moe.py` (+138/-63)
-  - 修改 `vllm/model_executor/models/glm4_moe_mtp.py` (+116/-42)
-  - Ascend 影响: ✓ 无影响
-
-- **[c6741b2a](https://github.com/vllm-project/vllm/commit/c6741b2ad48a46e87d2cce35d113c4ae0950af91)** 新增 Unlimited-OCR 模型支持。该模型基于 DeepSeek-OCR 架构，但使用 DeepSeek-V2 MoE 语言骨干（64 routed + 2 shared experts）和 plain MHA（非 MLA）。核心特性：1) 使用 Reference Sliding Window Attention (R-SWA) 进行注意力计算，通过 FA4 的 mask_mod 或 FlexAttention 实现；2) 支持最多 32 个 local crops（vs DeepSeek-OCR 的 6 个）；3) 多图像请求时禁用 crop 模式。变更涉及模型定义、配置、处理器、tokenizer、KV cache 管理（新增 `RSWASpec` 和 `RSWAManager`）、注意力后端（FA4 和 FlexAttention 的 R-SWA mask_mod）等多个模块。
-  - 标签: `feature`, `high-risk`, `model-runner`, `attention`, `multimodal`
-  - 变更文件（共 35 个）:
-  - 修改 `docs/models/supported_models.md` (+1/-0)
-  - 修改 `tests/models/registry.py` (+3/-0)
-  - 修改 `tests/v1/core/test_single_type_kv_cache_manager.py` (+51/-1)
-  - 修改 `vllm/config/model.py` (+4/-0)
-  - 修改 `vllm/config/model_arch.py` (+3/-0)
-  - 修改 `vllm/model_executor/layers/attention/__init__.py` (+2/-0)
-  - 新增 `vllm/model_executor/layers/attention/rswa_attention.py` (+37/-0)
-  - 修改 `vllm/model_executor/models/config.py` (+134/-0)
-  - 修改 `vllm/model_executor/models/deepseek_ocr.py` (+4/-2)
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+25/-12)
-  - ... 及其他 25 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) `vllm/v1/attention/backend.py` 中 `CommonAttentionMetadata` 新增 `rswa_prefix_lens` 字段，所有注意力后端（包括 AscendAttentionBackend）的元数据结构需要适配。2) `vllm/v1/core/single_type_kv_cache_manager.py` 中 `remove_skipped_blocks` 方法签名变更（新增 `num_prompt_tokens` 参数），影响 Ascend 的 KV cache manager patch。3) `vllm/v1/worker/gpu/input_batch.py` 中 `InputBatch` 新增 `rswa_prefix_lens` 字段，影响 Ascend 的 input batch 处理。4) `vllm/v1/kv_cache_interface.py` 新增 `RSWASpec`，如果 Ascend 需要支持 R-SWA 则需要实现对应的 spec 和 manager。
-
-- **[11a12305](https://github.com/vllm-project/vllm/commit/11a12305c0522c5c1ed273d7d3dc2304ac0cd495)** 修复 Model Runner V2 中 MTP draft 模型的 hidden states 处理。将 `AutoRegressiveSpeculator` 的 `model_returns_tuple` 属性移除，改为在 `_run_model` 中通过 `isinstance(ret_hidden_states, tuple)` 动态判断返回值类型。这样 MTP 模型（如 DeepSeek）可以返回 `(logits_hidden, feedback_hidden)` 元组，而无需声明 `model_returns_tuple=True`。同时移除了 `Gemma4Speculator` 和 `MTPSpeculator` 中的 `model_returns_tuple` 属性。
-  - 标签: `bugfix`, `low-risk`, `spec-decode`
-  - 变更文件:
-  - 新增 `tests/v1/worker/test_gpu_autoregressive_speculator.py` (+82/-0)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py` (+3/-11)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/gemma4/speculator.py` (+0/-7)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/mtp/speculator.py` (+0/-4)
-  - Ascend 影响: ✓ 无影响
-
-- **[b6caeb5a](https://github.com/vllm-project/vllm/commit/b6caeb5a0966103c6df22f019270d66233e1b687)** 修复 Spec Decode 中 rejection sampling 的随机数精度问题。将 `tl_rand64`（64-bit 随机数）替换为 `tl_rand32`（32-bit 随机数），并使用 fp32 均匀分布阈值进行 acceptance 判断。这避免了 fp64 随机数生成的开销，同时保持足够的精度。
-  - 标签: `performance`, `low-risk`, `spec-decode`, `kernels`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/sample/gumbel.py` (+9/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+3/-3)
   - Ascend 影响: ✓ 无影响
 
 ---
