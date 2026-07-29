@@ -1,10 +1,52 @@
 # MRV2 每日报告
-生成时间: 2026-07-28 09:56:42
+生成时间: 2026-07-29 13:29:54
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 115
+MRV2 相关 commits 总数: 117
+
+## 2026-07-28
+### vllm
+- **[0d0504b5](https://github.com/vllm-project/vllm/commit/0d0504b54c73119ed643c80b4ed56ef3cf80e209)** ([#49903](https://github.com/vllm-project/vllm/pull/49903)) [Core] 在首个请求前预热 runner 拥有的 Triton 内核
+  - 标签: `feature`, `mrv2`, `medium-risk`, `model-runner`, `warmup`, `kernels`
+  - 变更文件:
+  - 修改 `tests/v1/worker/test_kv_block_zeroer.py` (+65/-1)
+  - 修改 `vllm/model_executor/warmup/kernel_warmup.py` (+10/-6)
+  - 修改 `vllm/model_executor/warmup/qwen_triton_warmup.py` (+0/-114)
+  - 修改 `vllm/model_executor/warmup/v1_block_table_warmup.py` (+14/-28)
+  - 修改 `vllm/v1/worker/gpu/warmup.py` (+85/-36)
+  - 修改 `vllm/v1/worker/mamba_utils.py` (+3/-3)
+  - 修改 `vllm/v1/worker/utils.py` (+6/-1)
+  - Ascend 影响: ✓ 无影响
+
+- **[90245f41](https://github.com/vllm-project/vllm/commit/90245f4190a35593a625e4bc349485c39c774d39)** ([#50073](https://github.com/vllm-project/vllm/pull/50073)) [Bugfix] 修复 CPU MRV2 上的多模态支持
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `multimodal`, `model-states`, `cpu`
+  - 变更文件:
+  - 修改 `vllm/multimodal/inputs.py` (+2/-0)
+  - 修改 `vllm/v1/worker/cpu/shm.py` (+12/-0)
+  - 修改 `vllm/v1/worker/gpu/model_states/encoder_decoder.py` (+4/-1)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/model_states/encoder_decoder.py，该文件位于 vllm-ascend 覆盖的 model_states/ 目录。vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner，若 Ascend 上使用 MRV2 + 多模态，encoder_decoder 的多模态输入处理逻辑需验证。
+
+- **[60417b4b](https://github.com/vllm-project/vllm/commit/60417b4b744c371453eddcf5c8fa0f184418c957)** ([#50034](https://github.com/vllm-project/vllm/pull/50034)) [Core][PCP] 当 PCP 启用时选择 MRV2
+  - 标签: `feature`, `mrv2`, `medium-risk`, `config`, `pcp`
+  - 变更文件:
+  - 修改 `vllm/config/vllm.py` (+9/-0)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改 vllm/config/vllm.py 的运行时选择逻辑。PCP 启用时强制选择 MRV2，vllm-ascend 的 NPUModelRunner 基于 MRV2，此配置联动可能影响 Ascend 上 PCP 的使用。需验证 Ascend 上 PCP+MRV2 的行为。
+
+- **[272abd5f](https://github.com/vllm-project/vllm/commit/272abd5f486967f1fb9db7ca7504f8c34235ef50)** ([#47920](https://github.com/vllm-project/vllm/pull/47920)) [Tests][Spec Decode] 添加 gemma4 MTP 接受率测试
+  - 标签: `test`, `mrv2`, `low-risk`, `spec-decode`, `gemma4`
+  - 变更文件:
+  - 修改 `.buildkite/test_areas/spec_decode.yaml` (+12/-0)
+  - 修改 `tests/v1/e2e/spec_decode/test_spec_decode.py` (+73/-42)
+  - 修改 `vllm/v1/spec_decode/gemma4.py` (+24/-0)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py` (+11/-6)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py，该文件位于 MRV2 的 gpu/spec_decode/ 目录。vllm-ascend 若使用 MRV2 spec decode，需验证 speculator 变更不影响 Ascend 上的推测解码。
+
+---
 
 ## 2026-07-27
 ### vllm
@@ -1437,33 +1479,5 @@ MRV2 相关 commits 总数: 115
   - Ascend 影响: ⚠️ 影响 Ascend
     - 影响描述: 影响 Ascend 的 model runner 和 mamba 模块。`MambaHybridModelState` 新增 `preprocess_state` 和 `postprocess_state` 方法，`ModelSpecificState` 接口新增 `preprocess_state` 方法。`postprocess_state` 的签名已更改，新增 `num_computed_tokens` 参数。`MambaSpecDecodeGPUContext` 新增 `run_fused_precopy` 和 `run_fused_postprocess_align` 方法。vllm-ascend 的 `NPUModelRunner` 如果使用了 mamba 模型，需要同步更新。
     - 建议测试区域: `vllm_ascend/worker/`, `vllm_ascend/ops/mamba/`
-
----
-
-## 2026-06-29
-### vllm
-- **[a2abce64](https://github.com/vllm-project/vllm/commit/a2abce646f7db07f2169dfc59433d4128bc404de)** 修复EPLB负载记录中的padding token问题。核心变更：1) 在`EplbState`中新增`num_unpadded_tokens_tensors`列表，记录每个ubatch中真实（非padding）token的数量；2) 在`base_router.py`的Triton kernel中新增`HAS_NUM_UNPADDED`常量，当提供时跳过padding token的负载记录；3) 新增`EplbState.prepare_forward`方法，在每次前向传播前更新unpadded token计数；4) 在`GPUModelRunner`和spec decode的多个speculator中调用`prepare_forward`；5) 新增`compute_hash_cached`工具函数缓存config hash；6) 更新测试用例。
-  - 标签: `bugfix`, `medium-risk`, `distributed`
-  - 变更文件（共 17 个）:
-  - 修改 `tests/distributed/test_eplb_fused_moe_layer_dep_nvfp4.py` (+6/-0)
-  - 修改 `tests/kernels/moe/test_moe_layer.py` (+3/-0)
-  - 修改 `tests/kernels/moe/test_routing.py` (+66/-0)
-  - 修改 `tests/model_executor/test_routed_experts_capture.py` (+1/-0)
-  - 修改 `vllm/config/utils.py` (+20/-0)
-  - 修改 `vllm/distributed/elastic_ep/elastic_execute.py` (+3/-1)
-  - 修改 `vllm/distributed/eplb/eplb_state.py` (+68/-5)
-  - 修改 `vllm/model_executor/layers/fused_moe/router/base_router.py` (+35/-8)
-  - 修改 `vllm/models/deepseek_v4/nvidia/model.py` (+6/-0)
-  - 修改 `vllm/v1/spec_decode/extract_hidden_states.py` (+13/-0)
-  - ... 及其他 7 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) `EplbLayerState`新增`num_unpadded_tokens_tensors`字段，影响所有使用EPLB的MoE层。vllm-ascend中如果有自定义EPLB实现，需要同步更新。2) `eplb_map_to_physical_and_record`函数新增`num_unpadded_tokens`参数，影响路由器的EPLB映射调用。3) `EplbState`新增`prepare_forward`方法，影响EPLB状态管理。4) `GPUModelRunner`新增`eplb.prepare_forward`调用，影响模型执行流程。5) spec decode的多个speculator新增`_prepare_eplb_forward`调用，影响推测解码流程。
-    - 建议测试区域: `vllm_ascend/tests/test_eplb.py`, `vllm_ascend/tests/test_routing.py`
-
-- **[04724365](https://github.com/vllm-project/vllm/commit/0472436541c842ecda6d249411f1d35649291a79)** 优化推测解码中draft prefill的hidden states收集逻辑。当`last_hidden_states is hidden_states`时（即模型返回了与输入相同的张量对象），直接使用`sample_hidden_states`而非通过索引`hidden_states[last_token_indices]`收集，避免冗余的gather操作。
-  - 标签: `performance`, `low-risk`, `spec-decode`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/spec_decode/autoregressive/speculator.py` (+4/-1)
-  - Ascend 影响: ✓ 无影响
 
 ---
