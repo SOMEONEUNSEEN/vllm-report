@@ -1,10 +1,76 @@
 # MRV2 每日报告
-生成时间: 2026-07-29 13:29:54
+生成时间: 2026-07-30 09:02:25
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 117
+MRV2 相关 commits 总数: 118
+
+## 2026-07-29
+### vllm
+- **[43eaefba](https://github.com/vllm-project/vllm/commit/43eaefba5a5dbccb71d2404e4bf28e21bb74fce6)** ([#48791](https://github.com/vllm-project/vllm/pull/48791)) [ModelRunner V2] 为 embedding 和分类模型启用序列池化
+  - 标签: `feature`, `mrv2`, `medium-risk`, `model-runner`, `pooling`
+  - 变更文件:
+  - 修改 `tests/models/language/pooling/test_all_pooling_plus_chunked_prefill.py` (+44/-1)
+  - 修改 `tests/models/language/pooling/test_classification.py` (+57/-0)
+  - 修改 `tests/models/language/pooling/test_embedding.py` (+76/-0)
+  - 修改 `tests/models/language/pooling/test_splade_sparse_pooler.py` (+75/-0)
+  - 修改 `tests/v1/streaming_input/test_gpu_model_runner_v2_streaming.py` (+1/-0)
+  - 修改 `vllm/v1/worker/gpu/async_utils.py` (+27/-14)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+13/-3)
+  - 修改 `vllm/v1/worker/gpu/model_states/encoder_only.py` (+49/-1)
+  - 修改 `vllm/v1/worker/gpu/pool/pooling_runner.py` (+162/-17)
+  - 修改 `vllm/v1/worker/gpu/warmup.py` (+5/-1)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改 vllm/v1/worker/gpu/model_runner.py（vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner）及 gpu/pool/pooling_runner.py、gpu/model_states/encoder_only.py。若 vllm-ascend 支持 MRV2 与 pooling 模型，需验证 NPUModelRunner 子类中池化流程与 encoder_only 状态适配；若 vllm-ascend 暂未启用 MRV2 则影响有限
+
+- **[f51193b9](https://github.com/vllm-project/vllm/commit/f51193b9aefe665904d793ca782002320224d27a)** ([#49291](https://github.com/vllm-project/vllm/pull/49291)) [Kernel][Mamba] 为 align-mode DS-conv 状态迁移在 num_accepted_tokens > 1 时提供融合内核支持
+  - 标签: `feature`, `mrv2`, `medium-risk`, `mamba`, `model-runner`
+  - 变更文件:
+  - 修改 `tests/kernels/mamba/test_precopy_mamba_align.py` (+257/-20)
+  - 修改 `tests/v1/e2e/general/test_mamba_prefix_cache.py` (+38/-6)
+  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+5/-12)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-0)
+  - 修改 `vllm/v1/worker/mamba_utils.py` (+108/-26)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改 vllm/v1/worker/gpu_model_runner.py（旧路径，vllm-ascend 的 NPUModelRunner 曾继承）与 gpu/model_states/mamba_hybrid.py（MRV2 路径）、mamba_utils.py。若 vllm-ascend 支持 Mamba 混合模型与投机解码，需验证 Ascend 上多 token DS-conv 状态迁移融合逻辑的正确性；mamba_utils 是通用工具路径
+
+### vllm-ascend
+- **[2a607f09](https://github.com/vllm-project/vllm-ascend/commit/2a607f094951ea55eda2bd26486ccd9d27940633)** ([#12195](https://github.com/vllm-project/vllm-ascend/pull/12195)) [BugFix] 修复 eager 模式下的数据并行问题
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `platform`, `distributed`
+  - 变更文件:
+  - 修改 `vllm_ascend/platform.py` (+9/-5)
+  - Ascend 影响: ✓ 无影响
+
+- **[0838ce8d](https://github.com/vllm-project/vllm-ascend/commit/0838ce8d099a09176cb7aa669f3ea36187b6d396)** ([#12731](https://github.com/vllm-project/vllm-ascend/pull/12731)) [Misc] 将 V2 Model Runner 与上游对齐
+  - 标签: `refactor`, `mrv2`, `medium-risk`, `model-runner`, `spec-decode`, `sampler`
+  - 变更文件:
+  - 修改 `vllm_ascend/worker/v2/model_runner.py` (+40/-34)
+  - 修改 `vllm_ascend/worker/worker.py` (+1/-0)
+  - Ascend 影响: ✓ 无影响
+
+- **[261a3e9f](https://github.com/vllm-project/vllm-ascend/commit/261a3e9f9ef0276ef36e5a57b3759c071c86a4fb)** ([#12648](https://github.com/vllm-project/vllm-ascend/pull/12648)) [Misc] 与上游同步 0724 续
+  - 标签: `refactor`, `mrv2`, `medium-risk`, `spec-decode`, `distributed`, `config`
+  - 变更文件:
+  - 修改 `.github/vllm-main-verified.commit` (+1/-1)
+  - 修改 `vllm_ascend/_310p/model_runner_310p.py` (+5/-1)
+  - 修改 `vllm_ascend/core/recompute_scheduler.py` (+6/-1)
+  - 修改 `vllm_ascend/worker/v2/attn_utils.py` (+5/-2)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/autoregressive/speculator.py` (+16/-8)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/dflash/aclgraph.py` (+4/-1)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/dflash/speculator.py` (+9/-1)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/dspark/speculator.py` (+14/-1)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/eagle/aclgraph.py` (+6/-0)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/mtp/speculator.py` (+18/-3)
+  - Ascend 影响: ✓ 无影响
+
+- **[f731be8a](https://github.com/vllm-project/vllm-ascend/commit/f731be8a5f0741228ef87a800167f23257f2dde8)** ([#12981](https://github.com/vllm-project/vllm-ascend/pull/12981)) [Feature] GQA C8 ModelRunnerV2 适配
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `attention`
+  - 变更文件:
+  - 修改 `vllm_ascend/attention/attention_v1.py` (+7/-4)
+  - Ascend 影响: ✓ 无影响
+
+---
 
 ## 2026-07-28
 ### vllm
@@ -1399,85 +1465,5 @@ MRV2 相关 commits 总数: 117
   - 修改 `vllm_ascend/worker/v2/attn_utils.py` (+2/-0)
   - 修改 `vllm_ascend/worker/v2/model_runner.py` (+1/-0)
   - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-06-30
-### vllm
-- **[e840f0d3](https://github.com/vllm-project/vllm/commit/e840f0d3f5d26803e907d64a84be521d9568900a)** 将项目中所有 `torch.cuda.Event` 替换为 `torch.Event`，并添加 pre-commit 检查禁止新的 `torch.cuda.Event` 使用。这是平台抽象化工作的一部分，使代码能在非 CUDA 设备上运行。变更涉及 130 个文件，包括 benchmarks、测试、分布式 KV 传输、LoRA、模型层、采样器、spec decode 等多个模块。
-  - 标签: `refactor`, `platform`, `low-risk`
-  - 变更文件（共 31 个）:
-  - 修改 `benchmarks/benchmark_topk_topp.py` (+2/-4)
-  - 修改 `benchmarks/kernels/benchmark_moe_defaults.py` (+2/-2)
-  - 修改 `benchmarks/kernels/benchmark_selective_state_update.py` (+2/-2)
-  - 修改 `tests/v1/kv_connector/unit/test_hf3fs_connector.py` (+1/-1)
-  - 修改 `tools/pre_commit/check_torch_cuda.py` (+9/-1)
-  - 修改 `vllm/distributed/eplb/eplb_state.py` (+2/-2)
-  - 修改 `vllm/distributed/eplb/eplb_utils.py` (+2/-2)
-  - 修改 `vllm/distributed/kv_transfer/kv_connector/v1/example_hidden_states_connector.py` (+4/-4)
-  - 修改 `vllm/distributed/kv_transfer/kv_connector/v1/hf3fs/hf3fs_client.py` (+1/-1)
-  - 修改 `vllm/distributed/kv_transfer/kv_connector/v1/hf3fs/hf3fs_connector.py` (+3/-3)
-  - ... 及其他 21 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 直接影响 Ascend 平台。vllm-ascend 的 `vllm/v1/worker/xpu_model_runner.py` 中原本有 `torch.cuda.Event = torch.Event` 的 patch，该 patch 需要移除。同时 vllm-ascend 的 worker 和 attention 模块中如果使用了 `torch.cuda.Event`，需要替换为 `torch.Event`。
-    - 建议测试区域: `vllm_ascend/worker/`, `vllm_ascend/attention/`, `vllm_ascend/patch/`
-
-- **[db808b39](https://github.com/vllm-project/vllm/commit/db808b39614384a0349378268a46a1a0feabcec3)** 实现 block verification 拒绝采样方法（Sun et al., 2024）。新增 `use_block_verification` 参数，在 `rejection_sample` 中实现 block verification 逻辑：1) 计算累积联合比率 `cumulative_log_p`；2) 计算残差质量 `residual_mass`；3) 使用 block verification 阈值 `h` 决定接受长度；4) 在 resample 阶段根据 block verification 调整目标分布。新增多个 Triton kernel 支持这些计算。同时更新 `SpeculativeConfig` 支持 `"block"` 作为 `rejection_sample_method`。
-  - 标签: `feature`, `spec-decode`, `sampler`, `high-risk`
-  - 变更文件:
-  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+103/-0)
-  - 修改 `vllm/config/speculative.py` (+4/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler.py` (+6/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+528/-81)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 Ascend 的投机解码模块。vllm-ascend 的 `vllm_ascend/spec_decode/` 模块实现了投机解码的 Ascend 适配，新增的 block verification 方法需要 Ascend 实现对应的 Triton kernel 或使用 CPU fallback。`RejectionSampleMethod` 类型新增 `"block"` 值，影响 `SpeculativeConfig` 的解析。
-    - 建议测试区域: `vllm_ascend/spec_decode/`, `vllm_ascend/sample/`
-
-- **[8cc24233](https://github.com/vllm-project/vllm/commit/8cc242335de805cac390580f0dcd9e69b6ed86c0)** 优化XPU Worker的关闭逻辑，防止资源泄漏。主要变更包括：1) 在XPUPlatform.check_and_update_config中，当shutdown_timeout为0时自动设置为5秒，确保oneCCL/Level Zero资源有足够时间释放；2) 在GPUModelRunner.shutdown()中，将ROCm特定的内存清理逻辑扩展为同时适用于ROCm和XPU；3) 在GPUWorker.shutdown()中，将CuMemAllocator的release_pools调用限制在cuda_alike平台，避免XPU平台错误调用；4) 新增XPUWorker.shutdown()方法，调用父类shutdown后释放XpuMemAllocator的内存池；5) 更新测试工具以支持XPU平台的内存查询；6) 调整CI配置以包含新的测试。这是一个低风险的优化，主要影响XPU平台的资源管理。
-  - 标签: `performance`, `low-risk`, `worker`, `xpu`, `resource-management`
-  - 变更文件:
-  - 修改 `.buildkite/intel_jobs/basic_correctness.yaml` (+1/-0)
-  - 修改 `.buildkite/intel_jobs/lora_intel.yaml` (+1/-1)
-  - 修改 `tests/utils.py` (+7/-0)
-  - 修改 `vllm/platforms/xpu.py` (+10/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-1)
-  - 修改 `vllm/v1/worker/gpu_worker.py` (+4/-3)
-  - 修改 `vllm/v1/worker/xpu_worker.py` (+17/-0)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响GPUModelRunner.shutdown()和GPUWorker.shutdown()方法。GPUModelRunner.shutdown()中增加了对XPU平台的内存清理逻辑（gc.collect + empty_cache + synchronize），NPUModelRunner继承自GPUModelRunner，需要确认Ascend平台是否也需要类似的清理。GPUWorker.shutdown()中将CuMemAllocator.release_pools()限制在cuda_alike平台，NPUWorker继承自WorkerBase而非GPUWorker，但NPUWorker有自己的shutdown逻辑，需要确认是否也需要类似的平台条件判断。
-
-- **[fb42e521](https://github.com/vllm-project/vllm/commit/fb42e5219edcbce66fb1e758c004e610e618f70a)** 将 `torch.cuda.mem_get_info` 替换为 `torch.accelerator.get_memory_info`。这是平台抽象化工作的一部分，使内存查询代码能在非 CUDA 设备上运行。变更涉及测试、模型层、worker、内存工具等多个模块。同时更新 pre-commit 检查，禁止新的 `torch.cuda.mem_get_info` 和 `current_platform.mem_get_info` 使用。从 CPU 平台类中移除 `mem_get_info` 方法。
-  - 标签: `refactor`, `platform`, `medium-risk`
-  - 变更文件（共 17 个）:
-  - 修改 `tests/basic_correctness/test_mem.py` (+13/-13)
-  - 修改 `tests/kernels/moe/test_moe.py` (+1/-1)
-  - 修改 `tests/models/multimodal/generation/test_memory_leak.py` (+1/-1)
-  - 修改 `tests/utils_/test_mem_utils.py` (+11/-9)
-  - 修改 `tests/v1/kv_connector/unit/test_rixl_gpu_mem_diag.py` (+1/-2)
-  - 修改 `tests/v1/sample/test_logprobs.py` (+1/-1)
-  - 修改 `tests/v1/sample/test_topk_topp_sampler.py` (+1/-1)
-  - 修改 `tools/pre_commit/check_torch_cuda.py` (+2/-1)
-  - 修改 `vllm/model_executor/models/gemma4_mm.py` (+2/-3)
-  - 修改 `vllm/platforms/cpu.py` (+0/-5)
-  - ... 及其他 7 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 直接影响 Ascend 平台。vllm-ascend 的 `vllm/v1/worker/xpu_model_runner.py` 中原本有 `torch.cuda.mem_get_info = torch.xpu.mem_get_info` 的 patch，该 patch 需要移除。同时 vllm-ascend 中如果使用了 `current_platform.mem_get_info`，需要替换为 `torch.accelerator.get_memory_info`。
-    - 建议测试区域: `vllm_ascend/worker/`, `vllm_ascend/patch/`
-
-- **[61ab70ec](https://github.com/vllm-project/vllm/commit/61ab70ec3bd13dd422b86f3b80207d322994a5e7)** V2 Model Runner 支持 mamba hybrid 模型的 align prefix cache。主要变更：1) 移除 V2 runner 对 align mamba cache mode 的限制；2) 在 `MambaHybridModelState` 中添加 `preprocess_state` 和 `postprocess_state` 方法，实现 GPU 上的 align 状态迁移；3) 新增 `preprocess_mamba_align_fused_kernel` 和 `precopy_mamba_align_fused_kernel` Triton kernel；4) 重构 `postprocess_mamba_fused_kernel` 支持 V2 的 idx_mapping 和预计算的新 computed tokens；5) 更新 `MambaSpecDecodeGPUContext` 添加 `run_fused_precopy` 和 `run_fused_postprocess_align` 方法；6) 更新 warmup 逻辑为 align 模式预留额外 block。
-  - 标签: `feature`, `model-runner`, `mamba`, `spec-decode`, `high-risk`
-  - 变更文件:
-  - 新增 `tests/kernels/mamba/test_precopy_mamba_align.py` (+180/-0)
-  - 修改 `tests/v1/e2e/general/test_mamba_prefix_cache.py` (+280/-16)
-  - 修改 `vllm/config/vllm.py` (+0/-11)
-  - 修改 `vllm/model_executor/models/diffusion_gemma.py` (+3/-1)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+13/-1)
-  - 修改 `vllm/v1/worker/gpu/model_states/interface.py` (+16/-1)
-  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+174/-8)
-  - 修改 `vllm/v1/worker/gpu/warmup.py` (+12/-3)
-  - 修改 `vllm/v1/worker/mamba_utils.py` (+367/-91)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 Ascend 的 model runner 和 mamba 模块。`MambaHybridModelState` 新增 `preprocess_state` 和 `postprocess_state` 方法，`ModelSpecificState` 接口新增 `preprocess_state` 方法。`postprocess_state` 的签名已更改，新增 `num_computed_tokens` 参数。`MambaSpecDecodeGPUContext` 新增 `run_fused_precopy` 和 `run_fused_postprocess_align` 方法。vllm-ascend 的 `NPUModelRunner` 如果使用了 mamba 模型，需要同步更新。
-    - 建议测试区域: `vllm_ascend/worker/`, `vllm_ascend/ops/mamba/`
 
 ---
