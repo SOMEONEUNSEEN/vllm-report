@@ -1,10 +1,32 @@
 # MRV2 每日报告
-生成时间: 2026-07-30 09:02:25
+生成时间: 2026-07-31 09:02:42
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 118
+MRV2 相关 commits 总数: 113
+
+## 2026-07-30
+### vllm
+- **[aeeb36b1](https://github.com/vllm-project/vllm/commit/aeeb36b1f17145975c6713242f2447bb8b98782b)** ([#50000](https://github.com/vllm-project/vllm/pull/50000)) [新模型] Kimi K3
+  - 标签: `feature`, `mrv2`, `high-risk`, `new-model`, `kimi-k3`, `mla`, `moe`, `spec-decode`, `attention`, `distributed`, `tests`
+  - 变更文件（共 82 个）:
+  - 修改 `cmake/external_projects/deepgemm.cmake` (+3/-3)
+  - 修改 `docs/models/supported_models.md` (+1/-0)
+  - 修改 `pyproject.toml` (+2/-0)
+  - 修改 `requirements/cuda.txt` (+2/-2)
+  - 修改 `requirements/test/cuda.txt` (+1/-1)
+  - 修改 `tests/kernels/moe/test_deepgemm.py` (+32/-0)
+  - 修改 `tests/models/registry.py` (+18/-0)
+  - 新增 `tests/models/test_dspark_mla.py` (+143/-0)
+  - 修改 `tests/test_config.py` (+20/-0)
+  - 新增 `tests/transformers_utils/test_dspark_mla_config.py` (+165/-0)
+  - ... 及其他 72 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 命中 vllm/model_executor/layers/attention/mla_attention.py 与 vllm/config/parallel.py 核心覆盖路径，并修改 MRV2 路径 vllm/v1/worker/gpu/spec_decode/dflash/speculator.py。Kimi K3 使用 MLA + DeepGMM MoE + dspark/dflash 推测解码，vllm-ascend 若要支持 Kimi K3 需实现 Ascend 版 MLA backend、MoE 算子与 dspark speculator，并适配 config/parallel.py 新增配置。
+    - 建议测试区域: `Kimi K3 Ascend 可行性评估`, `Ascend MLA backend 与 mla_attention.py 回归`, `dspark speculator Ascend 适配`, `config/parallel.py 新增配置对 Ascend 并行的影响`
+
+---
 
 ## 2026-07-29
 ### vllm
@@ -1379,91 +1401,5 @@ MRV2 相关 commits 总数: 118
   - 修改 `vllm/v1/worker/gpu/spec_decode/dspark/speculator.py` (+48/-11)
   - Ascend 影响: ⚠️ 影响 Ascend
     - 影响描述: 修改了vllm/v1/worker/gpu/spec_decode/dspark/speculator.py和多个模型文件。vllm-ascend的推测解码补丁（vllm_ascend.patch.worker.spec_decode_patch）需同步更新DSparkSpeculator的实现，特别是：1) load_draft_model中的d2t scatter逻辑；2) _sample_sequential中的compute_draft_logits和map_draft_to_target调用；3) dspark_bonus_anchor配置处理。
-
----
-
-## 2026-07-01
-### vllm
-- **[f5a8d733](https://github.com/vllm-project/vllm/commit/f5a8d73377d0f0a4e00cba172f9fbd0d50471b07)** 新增 DSpark 推测解码支持，这是一种半自回归并行草稿生成方法。DSpark 在单个并行前向中生成整个 token 块（类似 DFlash），然后通过轻量级顺序 Markov 头注入块内依赖。变更涉及多个模块：1) 配置层新增 'dspark' 方法类型和 use_dspark() 方法；2) 新增 Qwen3DSparkModel 和 DSparkDeepseekV4ForCausalLM 模型实现；3) Scheduler 中 num_lookahead_tokens 计算逻辑调整；4) GPUModelRunner 中 speculative_config.method 检查新增 'dspark'；5) 新增 DSparkSpeculator 类，继承自 DFlashSpeculator；6) 稀疏 SWA 注意力构建器支持非因果索引；7) 模型注册表新增 DSparkDraftModel 和 Qwen3DSparkModel 条目。这是一个高风险的大规模 feature 变更，涉及推测解码核心流程。
-  - 标签: `feature`, `high-risk`, `spec_decode`, `scheduler`, `attention`, `model-runner`
-  - 变更文件（共 24 个）:
-  - 修改 `tests/models/registry.py` (+13/-0)
-  - 修改 `tests/models/test_registry.py` (+4/-0)
-  - 新增 `tests/v1/attention/test_dspark_noncausal_sparse_mla.py` (+529/-0)
-  - 修改 `tests/v1/e2e/spec_decode/test_spec_decode.py` (+61/-0)
-  - 修改 `vllm/benchmarks/datasets/datasets.py` (+1/-0)
-  - 修改 `vllm/config/speculative.py` (+36/-3)
-  - 修改 `vllm/config/vllm.py` (+24/-5)
-  - 修改 `vllm/model_executor/models/qwen3_dflash.py` (+9/-3)
-  - 新增 `vllm/model_executor/models/qwen3_dspark.py` (+153/-0)
-  - 修改 `vllm/model_executor/models/registry.py` (+2/-0)
-  - ... 及其他 14 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) Scheduler 中 num_lookahead_tokens 计算逻辑新增 DSpark 分支（self.num_lookahead_tokens = self.num_spec_tokens），vllm-ascend 的 scheduler_patch 需要同步更新。2) GPUModelRunner 中 speculative_config.method 检查新增 'dspark'，vllm-ascend 的 block_table_patch 需要更新。3) SpeculativeConfig 新增 use_dspark() 方法，vllm-ascend 的 spec_decode_patch 需要评估。4) SparseSWAMetadataBuilder 新增非因果索引构建逻辑和 is_dspark 标志，vllm-ascend 的 attention_backend_patch 需要评估。5) DFlashSpeculator 的 _prepare_dflash_inputs_kernel 新增 SAMPLE_FROM_ANCHOR 参数和 max_model_len 参数，vllm-ascend 的 spec_decode_patch 需要同步更新。
-    - 建议测试区域: `vllm_ascend/patch/platform/scheduler_patch`, `vllm_ascend/patch/worker/block_table_patch`, `vllm_ascend/patch/worker/spec_decode_patch`, `vllm_ascend/patch/worker/attention_backend_patch`
-
-- **[e7d0fcbc](https://github.com/vllm-project/vllm/commit/e7d0fcbc0954382f10fb4c9cee1df6f3a16113e8)** 修复 main 分支上的多个 CI 失败问题。包括：1) 权重传输测试中移除平台条件判断，始终设置 Ray 环境变量；2) Mamba prefix cache 测试中添加 load_format='dummy'；3) 修复 fused_moe 中 weight_loader 调用错误；4) DeepSeek-V2 模型中添加 residual 连续性保证；5) Gemma3 多模态编码器 CUDA Graph 捕获接口添加 path 参数。这是一个中等风险的 bugfix 集合。
-  - 标签: `bugfix`, `medium-risk`, `ci`, `distributed`, `model-runner`
-  - 变更文件:
-  - 修改 `tests/distributed/test_weight_transfer.py` (+8/-13)
-  - 修改 `tests/v1/e2e/general/test_mamba_prefix_cache.py` (+2/-0)
-  - 修改 `vllm/model_executor/layers/fused_moe/routed_experts.py` (+1/-1)
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+4/-0)
-  - 修改 `vllm/model_executor/models/gemma3_mm.py` (+3/-0)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) DeepSeek-V2 模型中新增 residual.contiguous() 调用，vllm-ascend 的 model_registry_patch 需要评估是否需要在 Ascend 实现中做同样处理。2) fused_moe 中 weight_loader 调用修复（self.weight_loader -> param.weight_loader），vllm-ascend 的 MoE 相关补丁需要评估。
-
-- **[77a9c5ae](https://github.com/vllm-project/vllm/commit/77a9c5ae28a3d054e6caf60c7e14082453b3ae47)** 权重同步系统重构。主要变更包括：1) 将稀疏 NCCL 引擎从密集 NCCL 引擎中分离为独立的 SparseNCCLWeightTransferEngine；2) 简化 WeightTransferEngine 基类，移除 receive_sparse_weights 和 trainer_send_sparse_weights 方法，将 layerwise reload 生命周期移到 start_weight_update/finish_weight_update 中；3) Worker 端的权重更新流程简化，移除稀疏补丁应用逻辑；4) 新增 nccl_common.py 共享 NCCL 初始化逻辑；5) 更新所有示例和文档。这是一个高风险的大规模 refactor。
-  - 标签: `refactor`, `high-risk`, `distributed`, `weight-transfer`
-  - 变更文件（共 32 个）:
-  - 修改 `docs/training/layerwise.md` (+1/-1)
-  - 修改 `docs/training/weight_transfer/README.md` (+3/-2)
-  - 修改 `docs/training/weight_transfer/base.md` (+28/-15)
-  - 修改 `docs/training/weight_transfer/ipc.md` (+2/-2)
-  - 修改 `docs/training/weight_transfer/nccl.md` (+14/-11)
-  - 修改 `examples/rl/rlhf_async_new_apis.py` (+1/-1)
-  - 修改 `examples/rl/rlhf_http_ipc.py` (+3/-7)
-  - 修改 `examples/rl/rlhf_http_nccl.py` (+3/-7)
-  - 修改 `examples/rl/rlhf_ipc.py` (+1/-1)
-  - 修改 `examples/rl/rlhf_ipc_fsdp_ep.py` (+3/-10)
-  - ... 及其他 22 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) WeightTransferEngine 基类构造函数签名变更：parallel_config 参数替换为 vllm_config + device，vllm-ascend 的 executor_patch 和 worker_base_patch 需要同步更新。2) WeightTransferEngine 新增 start_weight_update/finish_weight_update 抽象方法，vllm-ascend 的 worker_base_patch 需要实现这些方法。3) GPUModelRunner 中移除了 apply_sparse_weight_patches 方法，vllm-ascend 的 block_table_patch 需要移除相关引用。4) GPUWorker 中 update_weights/finish_weight_update 逻辑简化，vllm-ascend 的 worker_base_patch 需要同步更新。5) WeightTransferEngineFactory.create_engine 签名变更，vllm-ascend 的 executor_patch 需要更新。
-    - 建议测试区域: `vllm_ascend/patch/worker/worker_base_patch`, `vllm_ascend/patch/worker/executor_patch`, `vllm_ascend/patch/worker/block_table_patch`
-
-- **[9969466a](https://github.com/vllm-project/vllm/commit/9969466a597810db6e06b4942dd6cc2086885ee2)** 为 MiMo 模型添加 SWA（滑动窗口注意力）+ DFlash 推测解码支持。主要变更包括：1) qwen3_dflash.py 中新增 _resolve_layer_attention 函数，支持从配置中解析每层的滑动窗口和因果性；2) DFlashQwen3Attention 支持滑动窗口和 attention_sink_bias；3) DFlashQwen3Model 支持独立的 mask_embedding；4) MiMoV2Model 添加 EagleModelMixin 支持；5) FlashAttentionMetadata 新增 sliding_window 字段，支持非因果滑动窗口的对称化。这是一个中等风险的 feature。
-  - 标签: `feature`, `medium-risk`, `spec_decode`, `attention`, `model-runner`
-  - 变更文件:
-  - 修改 `tests/models/registry.py` (+1/-1)
-  - 修改 `vllm/model_executor/models/mimo_v2.py` (+16/-3)
-  - 修改 `vllm/model_executor/models/qwen3_dflash.py` (+193/-4)
-  - 修改 `vllm/v1/attention/backends/flash_attn.py` (+33/-17)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) FlashAttentionMetadata 新增 sliding_window 字段，vllm-ascend 的 attention_backend_patch 需要评估是否需要同步更新。2) FlashAttentionMetadataBuilder 中新增 _maybe_symmetrize_window 函数，vllm-ascend 的 attention_backend_patch 需要评估。3) DFlashQwen3ForCausalLM 中新增 _read_mask_embedding 方法，vllm-ascend 的 spec_decode_patch 需要评估。
-
-### vllm-ascend
-- **[1930088f](https://github.com/vllm-project/vllm-ascend/commit/1930088f960aba65eeaae82e9617d090283edc1f)** 此提交旨在支持 DeepSeek V4 的 MTP (Multi-Token Prediction) 图捕获。主要变更包括：1) 在 `llm_base_proposer` 的 `dummy_run` 中添加了正确的参数，特别是为不同 draft step 创建了独立的 RoPE 缓冲区，以解决低接受率问题。2) 修改了 `_pad_query_start_loc_for_fia` 方法，使其接受一个 `query_start_loc` 参数，从而允许目标模型和 draft 模型使用各自的变量，避免了 `copy_to_gpu` 时的竞态条件。3) 在 DSA attention 后端中，为 draft 步骤创建了独立的 `spec_sas_metadata` 缓冲区，并修改了 `get_cos_and_sin_dsa` 以支持按 draft 索引缓存 RoPE。4) 在 `llm_base_proposer` 的 `dummy_run` 和 `_propose` 方法中，增加了对 `block_table`、`slot_mapping`、`seq_lens` 和 `query_start_loc` 的按 draft 步骤复制逻辑，以确保图捕获时每个步骤的元数据独立。此变更涉及 `attention`、`spec_decode`、`ops` 和 `worker` 模块，风险较高，因为它修改了投机解码的核心数据流和图捕获逻辑。
-  - 标签: `feature`, `high-risk`, `spec_decode`, `attention`, `ops`, `model-runner`
-  - 变更文件:
-  - 修改 `tests/e2e/pull_request/four_card/test_deepseek_v4.py` (+1/-1)
-  - 修改 `tests/ut/spec_decode/a2/test_eagle_proposer.py` (+4/-1)
-  - 修改 `vllm_ascend/_310p/model_runner_310p.py` (+5/-4)
-  - 修改 `vllm_ascend/attention/dsa_v1.py` (+20/-2)
-  - 修改 `vllm_ascend/ops/rope_dsv4.py` (+41/-5)
-  - 修改 `vllm_ascend/spec_decode/llm_base_proposer.py` (+43/-9)
-  - 修改 `vllm_ascend/worker/model_runner_v1.py` (+18/-7)
-  - Ascend 影响: ✓ 无影响
-
-- **[801a6b41](https://github.com/vllm-project/vllm-ascend/commit/801a6b41d29d23399bd8c9ebc2ea8883e2beefae)** 此提交将 vLLM-Ascend 适配到上游 vLLM 的新版本 (a30addc7)。主要变更包括：1) 更新了 `test_extract_hidden_states.py` 以使用新的 `example_hidden_states_connector` API。2) 更新了 `test_patch_tool_choice_none_content.py` 以调用新的 `_extract_tool_calls` 方法。3) 在 `fused_moe.py` 中，更新了导入路径并简化了 `_needs_routed_expert_parameter_aliases` 逻辑，仅保留对 `gpt_oss` 的兼容。4) 在 `attn_utils.py` 中，为 `build_attn_metadata` 添加了 `causal` 参数。5) 在 `model_runner.py` 中，修复了 `decode_query_len` 的初始化方式。此变更是常规的版本升级适配，风险中等，涉及多个模块的接口适配。
-  - 标签: `chore`, `medium-risk`, `model-runner`, `ops`, `test`
-  - 变更文件:
-  - 修改 `.github/vllm-main-verified.commit` (+1/-1)
-  - 修改 `requirements-dev.txt` (+1/-1)
-  - 修改 `tests/e2e/pull_request/one_card/spec_decode/test_extract_hidden_states.py` (+27/-7)
-  - 修改 `tests/ut/patch/platform/test_patch_tool_choice_none_content.py` (+2/-2)
-  - 修改 `vllm_ascend/ops/fused_moe/fused_moe.py` (+6/-28)
-  - 修改 `vllm_ascend/worker/v2/attn_utils.py` (+2/-0)
-  - 修改 `vllm_ascend/worker/v2/model_runner.py` (+1/-0)
-  - Ascend 影响: ✓ 无影响
 
 ---
