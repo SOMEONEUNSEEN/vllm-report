@@ -1,10 +1,90 @@
 # MRV2 每日报告
-生成时间: 2026-07-31 09:02:42
+生成时间: 2026-08-03 09:02:23
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 113
+MRV2 相关 commits 总数: 107
+
+## 2026-08-01
+### vllm
+- **[652ba592](https://github.com/vllm-project/vllm/commit/652ba59229499eb65fc4115b7feadeddf9bcb75d)** ([#50574](https://github.com/vllm-project/vllm/pull/50574)) [Model Runner V2] 启用编码器 token 嵌入
+  - 标签: `feature`, `mrv2`, `medium-risk`, `model-runner`, `pooling`, `late-interaction`
+  - 变更文件:
+  - 修改 `tests/models/language/pooling/test_colbert.py` (+13/-2)
+  - 修改 `tests/models/language/pooling/test_splade_sparse_pooler.py` (+67/-1)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+6/-0)
+  - 修改 `vllm/v1/worker/gpu/pool/pooling_runner.py` (+20/-4)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/model_runner.py 中的 GPUModelRunner 类，vllm-ascend 的 NPUModelRunner 继承该类。新增的 reset_encoder_cache 中 pooling_runner.clear() 调用和 finish_requests 中 pooling_runner.on_requests_finished() 调用会传递到 Ascend 子类。如果 vllm-ascend 使用 pooling 功能（ColBERT/SPLADE 等晚期交互模型），需验证 NPUModelRunner 的 encoder cache 清理和请求完成流程是否正确处理 pooling_runner 的状态。pooling_runner.py 的变更（新增 LateInteractionRunner 和 token_embed 任务）也可能影响 Ascend 上的 pooling 推理。
+    - 建议测试区域: `ColBERT token_embed 在 Ascend 上的功能验证`, `NPUModelRunner reset_encoder_cache 中 pooling_runner.clear() 行为`, `NPUModelRunner finish_requests 中 pooling_runner.on_requests_finished() 行为`, `SPLADE sparse pooling 在 Ascend 上的正确性`
+
+- **[fcdc7c2e](https://github.com/vllm-project/vllm/commit/fcdc7c2e9c9b75c923751ea7d2dd79ef66572c81)** ([#50330](https://github.com/vllm-project/vllm/pull/50330)) [CI] 按覆盖范围重新组织推测解码 E2E 测试
+  - 标签: `chore`, `mrv2`, `low-risk`, `spec-decode`, `tests`, `ci`
+  - 变更文件（共 39 个）:
+  - 修改 `.buildkite/intel_jobs/engine_intel.yaml` (+4/-2)
+  - 修改 `.buildkite/intel_jobs/model_runner_v2_intel.yaml` (+0/-1)
+  - 修改 `.buildkite/test-amd.yaml` (+16/-23)
+  - 修改 `.buildkite/test_areas/engine.yaml` (+5/-30)
+  - 修改 `.buildkite/test_areas/misc.yaml` (+0/-27)
+  - 修改 `.buildkite/test_areas/model_runner_v2.yaml` (+4/-3)
+  - 修改 `.buildkite/test_areas/spec_decode.yaml` (+78/-32)
+  - 修改 `tests/models/registry.py` (+2/-2)
+  - 修改 `tests/utils.py` (+4/-1)
+  - 修改 `tests/v1/e2e/general/test_kv_sharing_fast_prefill.py` (+1/-1)
+  - ... 及其他 29 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/spec_decode/dspark/utils.py（DSpark 推测解码模型加载工具），新增 get_draft_quant_config 调用以修复 draft model 的 quant_config 被 post-init 恢复的问题。如果 vllm-ascend 支持 DSpark 推测解码（Kimi K3 等模型），此变更会影响 draft model 的量化配置加载。同时 gemma4_dspark.py 的因果掩码变更可能影响 Ascend 上的 DSpark 注意力计算。
+    - 建议测试区域: `DSpark draft model quant config 在 Ascend 上的加载验证`, `Gemma4 DSpark 因果掩码在 Ascend 上的行为`
+
+---
+
+## 2026-07-31
+### vllm
+- **[a0cd2b69](https://github.com/vllm-project/vllm/commit/a0cd2b69b3dac2b43be02fc16ff940b856d6791b)** ([#50302](https://github.com/vllm-project/vllm/pull/50302)) [Bugfix] 统一将 block table 宽度对齐到 128 tokens
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `kv-cache`, `attention`, `model-runner`, `block-table`, `mla`, `tests`
+  - 变更文件:
+  - 修改 `tests/v1/attention/test_indexer_deepseek_v4_slot_mapping.py` (+4/-0)
+  - 修改 `tests/v1/attention/test_mla_backends.py` (+3/-9)
+  - 修改 `tests/v1/worker/test_gpu_model_runner.py` (+28/-0)
+  - 修改 `vllm/v1/attention/backend.py` (+2/-0)
+  - 修改 `vllm/v1/attention/backends/mla/indexer.py` (+3/-11)
+  - 修改 `vllm/v1/worker/block_table.py` (+32/-4)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+6/-5)
+  - 修改 `vllm/v1/worker/utils.py` (+12/-1)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 该 commit 修改了 vllm-ascend 的多个核心覆盖路径：(1) vllm/v1/worker/gpu/model_runner.py - vllm-ascend 通过 NPUModelRunner 继承 GPUModelRunner，block table 宽度计算逻辑的变更会传递到 Ascend 子类；(2) vllm/v1/worker/block_table.py - vllm-ascend 通过 block_table_patch 打补丁，新增的 get_block_table_width 函数和 MultiGroupBlockTable 中的对齐逻辑变更需验证；(3) vllm/v1/attention/backend.py - 新增的 requires_block_table_width 接口需在 Ascend attention backend 中评估是否需要实现。vllm-ascend 需验证 block table 宽度对齐在 Ascend 上的正确性，特别是 MLA 模型和 Mamba 模型的差异处理。
+    - 建议测试区域: `Ascend block table 宽度对齐验证`, `MLA indexer block_table_width 在 Ascend 上的正确性`, `Mamba 模型 block table 不对齐在 Ascend 上的验证`, `NPUModelRunner 中 get_block_table_width 调用路径验证`
+
+- **[b2fb83e7](https://github.com/vllm-project/vllm/commit/b2fb83e7ffbc30a1aa4667b1dad7ca3e2c342bcf)** ([#50148](https://github.com/vllm-project/vllm/pull/50148)) [Attention] 为 AttentionMetadataBuilder 类型提示使用 KVCacheSpec
+  - 标签: `refactor`, `low-risk`, `attention`, `mrv2`, `mla`, `kv-cache`
+  - 变更文件（共 14 个）:
+  - 修改 `vllm/model_executor/layers/attention/chunked_local_attention.py` (+1/-2)
+  - 修改 `vllm/model_executor/layers/attention/mla_attention.py` (+2/-0)
+  - 修改 `vllm/v1/attention/backend.py` (+3/-3)
+  - 修改 `vllm/v1/attention/backends/flash_attn.py` (+2/-2)
+  - 修改 `vllm/v1/attention/backends/flashinfer.py` (+3/-1)
+  - 修改 `vllm/v1/attention/backends/gdn_attn.py` (+3/-3)
+  - 修改 `vllm/v1/attention/backends/hpc_attn.py` (+2/-2)
+  - 修改 `vllm/v1/attention/backends/linear_attn.py` (+5/-5)
+  - 修改 `vllm/v1/attention/backends/mamba2_attn.py` (+2/-2)
+  - 修改 `vllm/v1/attention/backends/mamba_attn.py` (+3/-3)
+  - ... 及其他 4 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm-ascend 的核心覆盖路径：(1) vllm/v1/attention/backend.py - AttentionMetadataBuilder 基类接口变更，vllm-ascend 的 attention backend 需确保与新的 KVCacheSpec 类型提示兼容；(2) vllm/v1/worker/gpu/attn_utils.py - vllm-ascend 有自己的 attn_utils 实现，cast 移除需确认 Ascend 路径不受影响；(3) vllm/model_executor/layers/attention/mla_attention.py - DeepSeek 等 MLA 模型在 Ascend 上使用，新增的 kv_cache_spec 类型声明需验证。由于是类型提示级别变更，实际运行时影响较小，但 vllm-ascend 需确认其 attention backend 子类与基类接口一致。
+
+- **[0f173945](https://github.com/vllm-project/vllm/commit/0f17394564fa2fccd332cf63321314884c15ee37)** ([#50293](https://github.com/vllm-project/vllm/pull/50293)) [Model Runner V2] 启用 encoder token 分类任务
+  - 标签: `feature`, `mrv2`, `medium-risk`, `model-runner`, `pooling`, `tests`
+  - 变更文件:
+  - 修改 `tests/models/language/pooling/test_splade_sparse_pooler.py` (+41/-0)
+  - 修改 `tests/models/language/pooling/test_token_classification.py` (+16/-6)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+3/-1)
+  - 修改 `vllm/v1/worker/gpu/pool/pooling_runner.py` (+31/-12)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/model_runner.py（GPUModelRunner.get_supported_tasks 调用 PoolingRunner.get_supported_tasks 时新增传入 self.model_config），vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner，该签名变更会传递到 Ascend 子类。PoolingRunner 的 _get_enabled_tasks 基于 attn_type 启用 token_classify，若 vllm-ascend 支持 encoder-only 模型则需验证该任务在 Ascend 上的正确性。
+    - 建议测试区域: `Ascend encoder-only 模型 token 分类 MRV2 路径`, `NPUModelRunner get_supported_tasks 签名兼容性`, `decoder 模型 token_classify 过滤在 Ascend 上的行为`
+
+---
 
 ## 2026-07-30
 ### vllm
@@ -1267,139 +1347,5 @@ MRV2 相关 commits 总数: 113
   - 修改 `vllm_ascend/_310p/ops/gdn_attn_builder_310.py` (+159/-3)
   - 修改 `vllm_ascend/patch/worker/patch_idex_310.py` (+4/-1)
   - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-04
-### vllm
-- **[07516fda](https://github.com/vllm-project/vllm/commit/07516fda67d2133e26c0fd7386c0b0c8641e2a6e)** 该 commit 使 Dynamic Speculative Decoding (DSD) 兼容 Full CUDA Graphs（MRv2）。主要变更：1) 在 CudaGraphManager._init_candidates 中，当使用 DSD 时，会为每个可能的 decode query length（来自 num_speculative_tokens_per_batch_size 调度表）捕获 FULL decode graph；2) 在 CompilationConfig.resolve_cudagraph_mode_and_sizes 中新增 use_v2_model_runner 参数，MRv2 不再调整 cudagraph capture sizes；3) 移除了 VllmConfig 中 DSD 对 MRv2 的限制；4) 更新了文档，说明 Full Cudagraph 仅支持 MRv2；5) 新增了全面的测试用例。潜在风险：变更涉及 CUDA Graph 捕获逻辑的核心部分，但测试覆盖了各种边界情况。
-  - 标签: `feature`, `high-risk`, `spec-decode`, `cuda-graph`, `model-runner`
-  - 变更文件:
-  - 修改 `docs/features/speculative_decoding/dynamic_speculative_decoding.md` (+2/-5)
-  - 修改 `tests/test_config.py` (+31/-0)
-  - 新增 `tests/v1/spec_decode/test_dynamic_sd_cug.py` (+328/-0)
-  - 修改 `vllm/config/compilation.py` (+6/-2)
-  - 修改 `vllm/config/vllm.py` (+3/-4)
-  - 修改 `vllm/v1/worker/gpu/cudagraph_utils.py` (+58/-19)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+4/-3)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+4/-3)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 vllm-ascend 的编译和模型运行模块。1) CompilationConfig.resolve_cudagraph_mode_and_sizes 新增了 use_v2_model_runner 参数，NPUModelRunner 在调用此方法时需要传递此参数（已在 MRv2 路径中传递 True）。2) CudaGraphManager._init_candidates 中 Dynamic SD 的 FULL graph 捕获逻辑发生变更，vllm-ascend 的 ACLGraphWrapper 需要同步更新其候选图生成逻辑以支持 DSD 的多个 decode query length。3) VllmConfig._maybe_override_dynamic_sd_cudagraph_mode 中新增了 use_v2_model_runner 检查，NPUPlatform 需要确认其编译配置是否受影响。
-    - 建议测试区域: `vllm_ascend/compilation/acl_graph.py`, `vllm_ascend/worker/model_runner_v1.py`
-
-- **[67ff0ae3](https://github.com/vllm-project/vllm/commit/67ff0ae30fe6b1ab1a912e10977d99ddb169c4b2)** 该 commit 支持了 nvfp4 KV cache 与 kv-cache-dtype-skip-layers 和 sliding_window 的组合使用。主要变更：1) 在 CacheConfig 中新增 skip_page_size_padded 字段；2) 在 AttentionLayer.get_kv_cache_spec 中，为 sliding window 层选择最大的 kernel block size 以适配 padded page；3) 在 Platform 基类中新增 _align_heterogeneous_kv_block_size 方法，用于对齐不同 KV dtype 的 block size；4) 在 GPUModelRunner 的 KV cache reshape 逻辑中，为 skip layers 使用 'auto' cache dtype；5) 更新了文档。潜在风险：变更涉及 KV cache 分配的核心逻辑，但通过 _align_heterogeneous_kv_block_size 方法进行了统一处理。
-  - 标签: `feature`, `medium-risk`, `kv-cache`, `quantization`, `attention`
-  - 变更文件:
-  - 修改 `docs/features/quantization/quantized_kvcache.md` (+26/-0)
-  - 修改 `vllm/config/cache.py` (+6/-0)
-  - 修改 `vllm/model_executor/layers/attention/attention.py` (+51/-1)
-  - 修改 `vllm/platforms/interface.py` (+117/-0)
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+18/-2)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+9/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 影响 vllm-ascend 的多个模块。1) Platform 基类新增了 _align_heterogeneous_kv_block_size 方法，NPUPlatform 需要检查是否需要覆盖此方法以支持 Ascend NPU 上的异构 KV cache block size 对齐。2) AttentionLayer.get_kv_cache_spec 中 sliding window 的 block_size 选择逻辑变更，AscendAttentionBackend 需要确认其 get_supported_kernel_block_sizes 返回的值是否兼容新的选择逻辑。3) GPUModelRunner._reshape_kv_cache_tensors 中新增了 per-layer cache_dtype 逻辑，NPUModelRunner 需要同步更新其 KV cache reshape 逻辑。4) attn_utils.py 中的 _reshape_kv_cache 和 _update_hybrid_attention_layout 也新增了 per-layer cache_dtype 逻辑，vllm-ascend 的 attention 相关 patch 需要检查。
-    - 建议测试区域: `vllm_ascend/platform.py`, `vllm_ascend/worker/model_runner_v1.py`, `vllm_ascend/attention/attention_v1.py`
-
-### vllm-ascend
-- **[8c28b0eb](https://github.com/vllm-project/vllm-ascend/commit/8c28b0eb1383c12635c78f2f00bcf0cd6f7a5417)** 此提交将 vLLM 主分支的验证提交从 `a30addc` 升级到 `b9a7cd4`，并适配了上游 API 变更。这是一个大规模的兼容性更新，涉及多个模块：1) 在 `__init__.py` 中为 v2 model runner 设置环境变量。2) 更新了调度器补丁以适配上游 `throttle_prefills` 参数。3) 更新了 Ngram 和 Suffix 投机解码 proposer 以适配上游 Dynamic SD 的签名变更。4) 更新了 encoder ACL Graph 以适配上游图集（graph set）存储。5) 更新了 fused_moe 以适配上游 `get_current_vllm_config`。6) 更新了 v2 model runner 的 ACL Graph 管理器以适配 LoRA 捕获参数。7) 更新了 Eagle ACL Graph 以适配上游注意力状态重命名。8) 由于上游解析器重构，跳过了 GLM4.7 和 MiniMax M2 的补丁和测试。这是一个高风险变更，因为涉及大量上游 API 适配，需要确保所有适配路径的正确性。
-  - 标签: `chore`, `high-risk`, `ci`, `compilation`, `spec_decode`, `scheduler`, `distributed`
-  - 变更文件（共 20 个）:
-  - 修改 `.github/vllm-main-verified.commit` (+1/-1)
-  - 修改 `tests/e2e/pull_request/one_card/test_guided_decoding.py` (+73/-31)
-  - 修改 `tests/ut/patch/platform/test_patch_glm47_tool_call_parser.py` (+16/-6)
-  - 修改 `tests/ut/patch/platform/test_patch_minimax_m2_tool_call_parser.py` (+13/-4)
-  - 修改 `tests/ut/patch/platform/test_patch_minimax_usage_accounting.py` (+11/-4)
-  - 修改 `vllm_ascend/core/scheduler_profiling_chunk.py` (+1/-1)
-  - 修改 `vllm_ascend/ops/fused_moe/fused_moe.py` (+8/-9)
-  - 修改 `vllm_ascend/patch/__init__.py` (+3/-1)
-  - 修改 `vllm_ascend/patch/platform/__init__.py` (+6/-3)
-  - 修改 `vllm_ascend/patch/platform/patch_balance_schedule.py` (+6/-2)
-  - ... 及其他 10 个文件
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-03
-### vllm
-- **[3775d5fc](https://github.com/vllm-project/vllm/commit/3775d5fcabf7bc5d4d92768485d860d132c6e1b6)** 为ROCm平台添加新的CI测试分组，包括MRCR评估、vLLM IR测试、KDA kernel测试、Model Runner V2系列测试（core/examples/distributed/PP/spec decode）、GGUF插件测试等。同时修复了Triton kernel在AMD后端上的num_stages兼容性问题（chunk_delta_h kernel在ROCm上不支持num_stages=4）。这是一个纯CI和ROCm平台适配的变更。
-  - 标签: `ci`, `test`, `rocm`
-  - 变更文件:
-  - 修改 `.buildkite/test-amd.yaml` (+186/-1)
-  - 修改 `vllm/model_executor/layers/fla/ops/chunk_delta_h.py` (+3/-1)
-  - Ascend 影响: ✓ 无影响
-
-- **[979f5511](https://github.com/vllm-project/vllm/commit/979f5511d78b317760d45df9290233c27793a0af)** 修复Gemma4模型中图像双向注意力超出滑动窗口的问题。主要变更：1) 在Attention类中添加mm_prefix_clamp_sliding_window属性；2) Gemma4模型在滑动层上设置此属性为True；3) Gemma4ForConditionalGeneration类设置mm_prefix_clamp_sliding_window=True；4) 在FlashAttention和TritonAttention后端中实现滑动窗口钳制逻辑；5) GPUModelRunner中根据此属性决定是否跳过超出滑动窗口的mm_prefix范围。
-  - 标签: `bugfix`, `attention`, `model`
-  - 变更文件:
-  - 修改 `vllm/model_executor/layers/attention/attention.py` (+4/-0)
-  - 修改 `vllm/model_executor/models/gemma4.py` (+7/-0)
-  - 修改 `vllm/model_executor/models/gemma4_mm.py` (+7/-0)
-  - 修改 `vllm/v1/attention/backends/flash_attn.py` (+32/-4)
-  - 修改 `vllm/v1/attention/backends/triton_attn.py` (+3/-0)
-  - 修改 `vllm/v1/attention/ops/triton_attention_helpers.py` (+13/-2)
-  - 修改 `vllm/v1/attention/ops/triton_unified_attention.py` (+9/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+14/-3)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: Attention类新增mm_prefix_clamp_sliding_window属性，AscendAttentionBackend需要处理此属性。GPUModelRunner中mm_prefix逻辑变更（新增_clamps_in_kernel判断），NPUModelRunner需要同步更新。FlashAttention和TritonAttention后端中的mm_prefix_clamp_sliding_window实现逻辑需要AscendAttentionBackend参考实现。
-    - 建议测试区域: `vllm_ascend/tests/models/test_gemma4.py`, `vllm_ascend/tests/attention/test_attention_backend.py`
-
-- **[276b837d](https://github.com/vllm-project/vllm/commit/276b837dc4d6a15ec7a82099dccd4c997eec916b)** 修复ModelRunner V2在shutdown时未释放所有模型引用的问题。在shutdown方法中添加了删除model_state和speculator引用的逻辑，确保模型权重被正确释放。
-  - 标签: `bugfix`, `model-runner`, `memory`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+4/-0)
-  - Ascend 影响: ✓ 无影响
-
-### vllm-ascend
-- **[7e5cfda3](https://github.com/vllm-project/vllm-ascend/commit/7e5cfda32ac08aefca46eb7d2df08384bbae7435)** 此commit修复了一个Bug，即当vLLM上游根据模型架构、Triton可用性等条件自动启用v2模型运行器时，Ascend NPU的v2路径可能不兼容，导致崩溃。修复方式是通过monkey-patch `VllmConfig.use_v2_model_runner`属性，使其仅读取`VLLM_USE_V2_MODEL_RUNNER`环境变量，忽略上游的自动启用逻辑。同时，更新了`worker.py`和`platform.py`中的相关代码，使其通过`vllm_config.use_v2_model_runner`访问此属性，从而受益于补丁逻辑。此变更确保了Ascend平台对v2模型运行器的控制权。
-  - 标签: `bugfix`, `medium-risk`, `patch`, `worker`
-  - 变更文件:
-  - 修改 `vllm_ascend/patch/__init__.py` (+23/-0)
-  - 修改 `vllm_ascend/patch/worker/__init__.py` (+6/-0)
-  - 新增 `vllm_ascend/patch/worker/patch_v2/patch_use_v2_model_runner.py` (+20/-0)
-  - 修改 `vllm_ascend/platform.py` (+1/-1)
-  - 修改 `vllm_ascend/worker/worker.py` (+1/-1)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-02
-### vllm
-- **[a47f38f8](https://github.com/vllm-project/vllm/commit/a47f38f82569c236d7d23b7ad0c8792ac6d62247)** 修复推测解码中block verification kernel的int32偏移溢出问题。当词表较大（如GLM约155k）时，logit_idx * vocab_stride会超过int32范围。变更将Triton kernel中的索引变量（req_state_idx, start_idx, logit_idx）显式转换为int64，避免乘法溢出。同时添加了测试用例验证高索引位置下的正确性。
-  - 标签: `bugfix`, `low-risk`, `spec-decode`, `kernel`
-  - 变更文件:
-  - 新增 `tests/v1/worker/test_gpu_rejection_sampler_i64.py` (+144/-0)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+4/-4)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py中的Triton kernel。vllm-ascend的推测解码补丁（vllm_ascend.patch.worker.spec_decode_patch）如果覆盖了此文件，需要同步更新kernel中的int64转换逻辑。
-
-- **[3e158ae6](https://github.com/vllm-project/vllm/commit/3e158ae62d1c227004fa9f702a51126e58ebbcb2)** 修复Mamba2模型在非推测解码模式下崩溃的问题。在prepare_attn方法中，num_accepted_tokens的创建逻辑仅在推测解码启用时（num_speculative_tokens > 0）才执行，避免了非推测解码场景下访问未初始化变量的错误。
-  - 标签: `bugfix`, `low-risk`, `model-runner`, `mamba`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+1/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu/model_states/mamba_hybrid.py。vllm-ascend的NPUModelRunner如果使用了MambaHybridModelState或相关逻辑，需确保此修复已同步。
-
-- **[a2f71300](https://github.com/vllm-project/vllm/commit/a2f713002df9fd08c0fe13272c76547421721f2d)** 默认启用V2 Model Runner（对所有dense模型）。变更修改了DEFAULT_V2_MODEL_RUNNER_ARCHITECTURES，移除了显式列出的架构（如LlamaForCausalLM），改为通过_is_default_v2_model_runner_model属性判断：非MoE、非hybrid、非attention-free的generate类型模型默认启用V2。同时更新了相关测试用例，处理V2下async scheduling的max_concurrent_batches计算差异，以及V2下resumed request作为NewRequestData而非cached request的调度行为变化。
-  - 标签: `feature`, `medium-risk`, `model-runner`, `config`
-  - 变更文件:
-  - 修改 `.buildkite/test_areas/model_runner_v2.yaml` (+1/-3)
-  - 修改 `tests/distributed/test_multiproc_executor.py` (+8/-3)
-  - 修改 `tests/distributed/test_ray_v2_executor.py` (+7/-1)
-  - 修改 `tests/test_config.py` (+23/-1)
-  - 修改 `tests/v1/kv_connector/unit/test_remote_prefill_lifecycle.py` (+8/-4)
-  - 修改 `vllm/config/vllm.py` (+8/-5)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: V2 Model Runner默认启用影响所有模型执行路径。vllm-ascend的NPUModelRunner继承自GPUModelRunner，需确保：1) V2下的输入准备、模型执行、采样流程兼容；2) async scheduling的max_concurrent_batches计算逻辑（V2下+1）已适配；3) scheduler中resumed request的处理方式（NewRequestData vs cached request）已同步。vllm-ascend的补丁（vllm_ascend.patch.worker.engine_core_patch, scheduler_patch等）需检查是否覆盖了这些变更。
-    - 建议测试区域: `vllm_ascend/tests/test_model_runner.py`, `vllm_ascend/tests/test_scheduler.py`
-
-- **[2b753ad2](https://github.com/vllm-project/vllm/commit/2b753ad200d52a2dc16e61ff3c92a45711e2750c)** 为DSpark推测器添加checkpoint支持。支持speculators格式的checkpoint，其中draft_vocab_size可以小于target vocab_size，并包含d2t/t2d remap表。修改了DSparkMarkovHead的markov_w2输出维度为draft_vocab_size，添加了compute_draft_logits和map_draft_to_target方法，以及d2t scatter逻辑用于probabilistic rejection sampling。同时添加了update_dspark配置转换函数。
-  - 标签: `feature`, `medium-risk`, `spec-decode`, `model`
-  - 变更文件:
-  - 修改 `vllm/model_executor/models/qwen3_dspark.py` (+37/-5)
-  - 修改 `vllm/models/deepseek_v4/nvidia/dspark.py` (+11/-0)
-  - 修改 `vllm/transformers_utils/configs/speculators/algos.py` (+44/-0)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dspark/speculator.py` (+48/-11)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu/spec_decode/dspark/speculator.py和多个模型文件。vllm-ascend的推测解码补丁（vllm_ascend.patch.worker.spec_decode_patch）需同步更新DSparkSpeculator的实现，特别是：1) load_draft_model中的d2t scatter逻辑；2) _sample_sequential中的compute_draft_logits和map_draft_to_target调用；3) dspark_bonus_anchor配置处理。
 
 ---
