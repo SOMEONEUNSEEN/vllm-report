@@ -1,10 +1,32 @@
 # MRV2 每日报告
-生成时间: 2026-08-03 09:02:23
+生成时间: 2026-08-04 09:01:50
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 107
+MRV2 相关 commits 总数: 104
+
+## 2026-08-03
+### vllm
+- **[dd11df04](https://github.com/vllm-project/vllm/commit/dd11df04f3b7046c40f13e586ac38a3725bc3c03)** ([#49389](https://github.com/vllm-project/vllm/pull/49389)) [Misc] 移除已废弃的 calculate_kv_scales 运行时 KV 缩放计算
+  - 标签: `refactor`, `medium-risk`, `kv-cache`, `quantization`, `attention`, `mla`
+  - 变更文件（共 19 个）:
+  - 修改 `.buildkite/test-amd.yaml` (+1/-1)
+  - 修改 `.buildkite/test_areas/compile.yaml` (+0/-3)
+  - 修改 `.buildkite/test_areas/pytorch.yaml` (+1/-2)
+  - 修改 `docs/design/metrics.md` (+1/-1)
+  - 修改 `docs/features/quantization/quantized_kvcache.md` (+3/-32)
+  - 修改 `tests/compile/fullgraph/test_full_graph.py` (+0/-32)
+  - 修改 `tests/models/quantization/test_per_token_kv_cache.py` (+0/-4)
+  - 修改 `tests/quantization/test_fp8.py` (+8/-20)
+  - 修改 `tests/quantization/test_per_token_kv_cache.py` (+0/-1)
+  - 修改 `vllm/config/cache.py` (+0/-17)
+  - ... 及其他 9 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/model_executor/layers/attention/mla_attention.py（vllm-ascend 覆盖路径），移除了 MLAAttention 类的 calculate_kv_scales 属性、calc_kv_scales 方法、q_range/k_range/v_range 初始化以及 forward 中的 maybe_calc_kv_scales 调用。DeepSeek V3/R1 等 MLA 模型在 Ascend 上使用 MLAAttention，若 vllm-ascend 的 MLA 实现引用了 calculate_kv_scales 或 calc_kv_scales 接口，需要同步移除相关引用以避免 AttributeError
+    - 建议测试区域: `DeepSeek V3/R1 FP8 KV cache 在 Ascend 上的功能验证`, `vllm-ascend MLAAttention 实现中 calculate_kv_scales 引用清理`
+
+---
 
 ## 2026-08-01
 ### vllm
@@ -1298,54 +1320,6 @@ MRV2 相关 commits 总数: 107
   - 修改 `vllm_ascend/patch/worker/patch_deepseek_v2.py` (+79/-0)
   - 修改 `vllm_ascend/patch/worker/patch_qwen3_dflash.py` (+17/-1)
   - ... 及其他 3 个文件
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-05
-### vllm
-- **[cc1d020d](https://github.com/vllm-project/vllm/commit/cc1d020d01949d11b7ef70dabb0eb196b3f39f53)** 该commit为MRV2（多模态推理V2）启用mm prefix双向注意力支持。核心变更包括：1) 在`vllm/v1/worker/gpu/attn_utils.py`中新增`compute_mm_prefix_ranges`函数，用于计算多模态token的PrefixLM双向注意力范围，并支持滑动窗口过滤；2) 修改`build_attn_metadata`函数，新增`mm_req_doc_ranges`参数，将多模态前缀范围传递给注意力元数据构建器；3) 在`vllm/v1/worker/gpu/model_states/default.py`的`prepare_attn`方法中，当模型支持多模态输入且为mm_prefix_lm时，调用`compute_mm_prefix_ranges`计算范围并传递给`build_attn_metadata`；4) 将`vllm/config/model.py`中的`is_mm_prefix_lm`属性从`@property`改为`@cached_property`，避免重复计算；5) 新增测试文件`tests/models/multimodal/generation/test_mm_prefix_lm.py`，验证Gemma3的prefix-LM mask正确性。实现方式是通过在注意力元数据构建时传入多模态token的文档范围，使注意力后端能够为这些token应用双向注意力mask。潜在风险：新增的`mm_req_doc_ranges`参数需要所有注意力后端的元数据构建器支持，否则可能导致兼容性问题。
-  - 标签: `feature`, `medium-risk`, `attention`, `model-runner`, `multimodal`
-  - 变更文件:
-  - 修改 `.buildkite/test_areas/models_multimodal.yaml` (+2/-1)
-  - 新增 `tests/models/multimodal/generation/test_mm_prefix_lm.py` (+119/-0)
-  - 修改 `vllm/config/model.py` (+1/-1)
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+27/-0)
-  - 修改 `vllm/v1/worker/gpu/model_states/default.py` (+16/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) `vllm/v1/worker/gpu/attn_utils.py`中`build_attn_metadata`函数新增`mm_req_doc_ranges`参数，AscendAttentionBackend的元数据构建器（`AscendAttentionMetadataBuilder`）需要支持该参数以正确处理多模态前缀双向注意力。2) `vllm/v1/worker/gpu/attn_utils.py`中新增`compute_mm_prefix_ranges`函数，NPUModelRunner在`prepare_attn`方法中需要调用此函数计算多模态前缀范围。3) `vllm/v1/worker/gpu/model_states/default.py`中`prepare_attn`方法新增对`compute_mm_prefix_ranges`的调用逻辑，NPUModelRunner需要同步更新其注意力准备逻辑。4) `vllm/config/model.py`中`is_mm_prefix_lm`从`@property`改为`@cached_property`，NPUPlatform或相关配置补丁需要确保缓存行为一致。
-    - 建议测试区域: `tests/models/multimodal/generation/test_mm_prefix_lm.py`
-
-- **[b6cc46ec](https://github.com/vllm-project/vllm/commit/b6cc46ec3b903c71405f4355c1e9ecb47ae54bb2)** 该commit支持无需数据并行（DP）的序列并行，实现1.9%~5.0%的端到端吞吐量提升。核心变更包括：1) 在`vllm/config/parallel.py`中移除`use_sequence_parallel_moe`对`data_parallel_size > 1`的依赖，使序列并行可以在无DP时独立启用；2) 在`vllm/distributed/device_communicators/base_device_communicator.py`中，all2all管理器的初始化条件扩展为包含`use_sequence_parallel_moe`，确保序列并行EP时也初始化all2all通信；3) 在`vllm/forward_context.py`中，DPMetadata的创建逻辑扩展为支持序列并行场景，当无DP时直接使用本地token数量；4) 在`vllm/model_executor/layers/fused_moe/config.py`和`runner/moe_runner.py`中，all2all kernel和naive dispatch/combine的条件扩展为包含序列并行；5) 在`vllm/model_executor/models/deepseek_v2.py`中优化了序列并行的padding逻辑，使用更简洁的`(-hidden_states.shape[0]) % tp_world_size`计算padding大小；6) 在`vllm/model_executor/models/gpt_oss.py`中，当使用LoRA时禁用序列并行。这是一个性能优化变更，涉及分布式通信、MoE层和模型执行等多个模块。潜在风险：序列并行与LoRA的兼容性需要额外关注。
-  - 标签: `performance`, `medium-risk`, `distributed`, `moe`, `model-runner`
-  - 变更文件:
-  - 修改 `vllm/config/parallel.py` (+2/-3)
-  - 修改 `vllm/distributed/device_communicators/base_device_communicator.py` (+5/-4)
-  - 修改 `vllm/forward_context.py` (+15/-3)
-  - 修改 `vllm/model_executor/layers/fused_moe/config.py` (+1/-1)
-  - 修改 `vllm/model_executor/layers/fused_moe/runner/moe_runner.py` (+2/-2)
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+4/-8)
-  - 修改 `vllm/model_executor/models/gpt_oss.py` (+4/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 1) `vllm/distributed/device_communicators/base_device_communicator.py`中all2all管理器初始化条件变更，NPUCommunicator的`__init__`方法需要同步更新，确保在`use_sequence_parallel_moe`为True时也初始化all2all通信。2) `vllm/forward_context.py`中DPMetadata创建逻辑变更，Ascend的分布式上下文设置（如`set_forward_context`的patch）需要支持无DP时的序列并行场景。3) `vllm/config/parallel.py`中`use_sequence_parallel_moe`属性变更，NPUPlatform或相关配置补丁需要确保序列并行可以在无DP时独立启用。4) `vllm/model_executor/layers/fused_moe/config.py`和`runner/moe_runner.py`中all2all和dispatch/combine条件变更，Ascend的MoE实现需要同步更新这些条件判断。
-    - 建议测试区域: `tests/distributed/test_sequence_parallel.py`, `tests/models/test_moe.py`
-
-- **[fa4321de](https://github.com/vllm-project/vllm/commit/fa4321de3d894c50c5ca0766dffa352d3fb07423)** 该commit修复TurboQuant注意力后端中KV cache dtype丢失的问题。变更内容：在`vllm/v1/worker/gpu/attn_utils.py`的`_reshape_kv_cache`和`_update_hybrid_attention_layout`函数中，当KV cache spec是`TQFullAttentionSpec`类型时，即使`kv_quant_mode`为`NONE`，也强制使用`cache_dtype`而非`"auto"`。这是因为TurboQuant后端需要明确的dtype信息来正确计算KV cache形状。这是一个低风险的bug修复，仅影响TurboQuant注意力后端。
-  - 标签: `bugfix`, `low-risk`, `attention`, `quantization`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+6/-1)
-  - Ascend 影响: ✓ 无影响
-
-### vllm-ascend
-- **[9154baad](https://github.com/vllm-project/vllm-ascend/commit/9154baadc9dbac857fe197d03bccb1731664f3df)** 此 commit 修复了 310P 设备上 Qwen3.5 模型使用 MTP 和 FULL ACLGraph 时的精度问题。根本原因是连续批处理导致运行时请求数小于 graph 捕获的固定 shape，而 310P 的 GDN 投机解码路径未能正确填充虚拟请求的元数据（如 spec_query_start_loc、state indices、num_accepted_tokens 和 conv1d 重放缓冲区），导致隐藏状态/ logits 被污染。修复方案包括：1) 在 `gdn_310.py` 中新增 `_zero_padded_tokens`、`_mask_padded_recurrent_accepted_tokens` 和 `_pad_spec_conv1d_host_args_shape_consistent_dummy_310p` 函数，用于填充和屏蔽虚拟请求；2) 在 `gdn_attn_builder_310.py` 中新增 `_pad_spec_decode_metadata` 和 `_pad_decode_metadata` 方法，在 graph 重放前将元数据填充到固定大小的 buffer 中；3) 在 `model_runner_310p.py` 中修改 `_model_forward` 方法，确保 MTP full-graph 重放前更新和同步 graph 参数；4) 在 `patch_idex_310.py` 中将 Qwen GDN 的 attention 后端替换为 310P 专用后端。潜在风险：此修复仅针对 310P 设备，不影响主线和其它设备。但新增的填充逻辑可能增加内存开销和延迟，需要性能测试验证。
-  - 标签: `bugfix`, `high-risk`, `model-runner`, `attention`, `spec_decode`, `compilation`
-  - 变更文件:
-  - 新增 `tests/ut/_310p/ops/test_gdn_310.py` (+107/-0)
-  - 修改 `tests/ut/_310p/test_model_runner_310p.py` (+40/-0)
-  - 修改 `vllm_ascend/_310p/model_runner_310p.py` (+46/-8)
-  - 修改 `vllm_ascend/_310p/ops/fla/gdn_310.py` (+111/-11)
-  - 修改 `vllm_ascend/_310p/ops/gdn_attn_builder_310.py` (+159/-3)
-  - 修改 `vllm_ascend/patch/worker/patch_idex_310.py` (+4/-1)
   - Ascend 影响: ✓ 无影响
 
 ---
