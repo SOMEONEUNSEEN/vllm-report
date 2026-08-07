@@ -1,10 +1,128 @@
 # MRV2 每日报告
-生成时间: 2026-08-05 09:01:58
+生成时间: 2026-08-07 09:01:44
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 101
+MRV2 相关 commits 总数: 98
+
+## 2026-08-06
+### vllm
+- **[81bc1969](https://github.com/vllm-project/vllm/commit/81bc196913653c9e06b957e39a606002a09db171)** ([#50910](https://github.com/vllm-project/vllm/pull/50910)) [Model Runner V2] 以模型 LM Head dtype 缓存 draft logits
+  - 标签: `feature`, `high-risk`, `mrv2`, `spec-decode`, `model-runner`
+  - 变更文件:
+  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+21/-7)
+  - 修改 `tests/v1/worker/test_gpu_gumbel_sample.py` (+66/-0)
+  - 修改 `vllm/v1/worker/gpu/sample/gumbel.py` (+33/-36)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/dspark/speculator.py` (+2/-2)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+44/-28)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/speculator.py` (+4/-3)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - vllm/v1/worker/gpu/ 为 MRV2 路径，vllm-ascend 通过 AscendEagleProposer/AscendRejectionSampler 等覆盖 spec decode；draft logits dtype 缓存逻辑需在 Ascend spec decode 实现中对齐验证
+    - 建议测试区域: `Ascend Eagle/DFlash draft logits dtype 验证`, `Ascend rejection sampler dtype 一致性`
+
+- **[b50fdebc](https://github.com/vllm-project/vllm/commit/b50fdebce0698c1f2d57ba7ff94211323655557e)** ([#39935](https://github.com/vllm-project/vllm/pull/39935)) [Bugfix] 修复 enable_lora=True 时 level-2 sleep/wake/reload
+  - 标签: `bugfix`, `high-risk`, `lora`, `model-runner`, `kv-cache`
+  - 变更文件（共 11 个）:
+  - 修改 `docs/features/sleep_mode.md` (+1/-1)
+  - 修改 `tests/basic_correctness/test_mem.py` (+93/-0)
+  - 修改 `tests/lora/test_layers.py` (+47/-0)
+  - 修改 `tests/lora/test_lora_manager.py` (+4/-0)
+  - 修改 `tests/v1/worker/test_gpu_worker_weight_transfer.py` (+40/-0)
+  - 修改 `vllm/lora/layers/base.py` (+13/-0)
+  - 修改 `vllm/lora/layers/logits_processor.py` (+12/-0)
+  - 修改 `vllm/lora/model_manager.py` (+2/-0)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+18/-3)
+  - 修改 `vllm/v1/worker/gpu_worker.py` (+6/-0)
+  - ... 及其他 1 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - vllm/v1/worker/gpu_model_runner.py（GPUModelRunner）为 vllm-ascend NPUModelRunner 的父类，sleep/wake/reload 与 LoRA 状态管理变更会传递到 Ascend 子类；vllm-ascend 有 SleepWakeupManager，需验证 LoRA 启用时的一致性
+    - 建议测试区域: `Ascend level-2 sleep/wake + LoRA 验证`, `NPUModelRunner LoRA 状态恢复`
+
+- **[47a4e410](https://github.com/vllm-project/vllm/commit/47a4e410ba3e027a69ec34ca03b3dd313b4350d2)** ([#50183](https://github.com/vllm-project/vllm/pull/50183)) [Bugfix][Spec Decode] 修复 rejection sampler tl.argmax 的 NaN 处理
+  - 标签: `bugfix`, `medium-risk`, `mrv2`, `spec-decode`
+  - 变更文件:
+  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+41/-0)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+10/-0)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - vllm/v1/worker/gpu/spec_decode/ 为 MRV2 路径，vllm-ascend 有 AscendRejectionSampler 覆盖，NaN 处理需在 Ascend 实现中对齐
+    - 建议测试区域: `Ascend rejection sampler NaN 处理`
+
+- **[811622c4](https://github.com/vllm-project/vllm/commit/811622c410c2f1baf2fa7056ca19753264b95815)** ([#50066](https://github.com/vllm-project/vllm/pull/50066)) [Refactor][PCP] 使 PCPManager 构造可扩展
+  - 标签: `refactor`, `medium-risk`, `mrv2`, `pcp`, `model-runner`
+  - 变更文件:
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+6/-0)
+  - 修改 `vllm/v1/worker/gpu/pcp_manager.py` (+3/-2)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - vllm/v1/worker/gpu/model_runner.py 与 gpu/pcp_manager.py 为 MRV2 路径，vllm-ascend 有 pcp_manager_v2，PCPManager 构造可扩展性变更需验证 Ascend PCP 集成
+
+### vllm-ascend
+- **[0703581e](https://github.com/vllm-project/vllm-ascend/commit/0703581e8d530d2ae8079a740ec70843883add5f)** ([#12804](https://github.com/vllm-project/vllm-ascend/pull/12804)) [Feature][EPLB] 将上游 EPLB 与 Model Runner V2 集成
+  - 标签: `feature`, `mrv2`, `high-risk`, `eplb`, `moe`, `distributed`, `model-runner`
+  - 变更文件（共 50 个）:
+  - 修改 `.github/workflows/scripts/test_config.yaml` (+11/-0)
+  - 修改 `docs/hooks/nav_titles.py` (+4/-0)
+  - 新增 `docs/source/developer_guide/Design_Documents/model_runner_v2_eplb.md` (+167/-0)
+  - 修改 `docs/source/user_guide/configuration/additional_config.md` (+22/-9)
+  - 修改 `docs/source/user_guide/feature_guide/expert_parallelism_load_balancer.md` (+133/-14)
+  - 修改 `docs/source/user_guide/support_matrix/feature_matrix.md` (+2/-2)
+  - 修改 `docs/source/user_guide/support_matrix/supported_features.md` (+2/-1)
+  - 修改 `mkdocs.yml` (+1/-0)
+  - 修改 `tests/e2e/conftest.py` (+6/-3)
+  - 新增 `tests/e2e/pull_request/four_card/test_qwen3_mrv2_eplb.py` (+92/-0)
+  - ... 及其他 40 个文件
+  - Ascend 影响: ✓ 无影响
+
+- **[bc226d48](https://github.com/vllm-project/vllm-ascend/commit/bc226d4867f0d50ae6ca51a88bb4451c4393a049)** ([#13684](https://github.com/vllm-project/vllm-ascend/pull/13684)) [BugFix] 修复 DeepSeek Overlay C8 启用 MTP 加载重权重集时的错误
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `deepseek`, `mtp`
+  - 变更文件:
+  - 修改 `vllm_ascend/patch/__init__.py` (+11/-1)
+  - 修改 `vllm_ascend/patch/worker/patch_deepseek_mtp.py` (+5/-0)
+  - 修改 `vllm_ascend/worker/v2/attn_utils.py` (+1/-4)
+  - Ascend 影响: ✓ 无影响
+
+- **[798ed122](https://github.com/vllm-project/vllm-ascend/commit/798ed122a4d93fcdc4a228d1707aa6e7185c877a)** ([#13479](https://github.com/vllm-project/vllm-ascend/pull/13479)) [Misc] 移除 model runner v2 中的死代码
+  - 标签: `refactor`, `mrv2`, `low-risk`, `model-runner`
+  - 变更文件:
+  - 修改 `vllm_ascend/attention/attention_v1.py` (+1/-5)
+  - 修改 `vllm_ascend/attention/dsa_v1.py` (+1/-5)
+  - 修改 `vllm_ascend/attention/fa3_v1.py` (+1/-2)
+  - 修改 `vllm_ascend/attention/mla_v1.py` (+1/-5)
+  - 修改 `vllm_ascend/attention/sfa_v1.py` (+1/-5)
+  - 修改 `vllm_ascend/worker/v2/attn_utils.py` (+0/-112)
+  - Ascend 影响: ✓ 无影响
+
+---
+
+## 2026-08-05
+### vllm
+- **[397094da](https://github.com/vllm-project/vllm/commit/397094da1768c7a6f29dfa4f70079d793ac747df)** ([#49990](https://github.com/vllm-project/vllm/pull/49990)) 通过 huggingface_hub 的 resolve_revision 在每次模型加载时解析 revision 为 commit_hash
+  - 标签: `refactor`, `low-risk`, `config`, `model-loading`
+  - 变更文件:
+  - 修改 `requirements/common.txt` (+1/-0)
+  - 修改 `requirements/test/cpu.txt` (+2/-1)
+  - 修改 `requirements/test/cuda.txt` (+3/-1)
+  - 修改 `requirements/test/rocm.txt` (+3/-1)
+  - 修改 `requirements/test/xpu.txt` (+3/-1)
+  - 修改 `vllm/config/model.py` (+27/-0)
+  - 修改 `vllm/model_executor/models/ultravox.py` (+4/-2)
+  - 修改 `vllm/transformers_utils/repo_utils.py` (+38/-0)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+3/-0)
+  - Ascend 影响: ✓ 无影响
+
+- **[12292d94](https://github.com/vllm-project/vllm/commit/12292d94b25869be2af6b6d4f8eea6c2445e935f)** ([#50323](https://github.com/vllm-project/vllm/pull/50323)) [CI] 在 logits 中出现 NaN 时检测并失败 evals
+  - 标签: `feature`, `mrv2`, `medium-risk`, `model-runner`, `ci`, `tests`
+  - 变更文件:
+  - 修改 `tests/basic_correctness/test_basic_correctness.py` (+31/-0)
+  - 修改 `tests/v1/worker/test_gpu_model_runner.py` (+2/-1)
+  - 修改 `vllm/envs.py` (+7/-0)
+  - 修改 `vllm/v1/worker/gpu/async_utils.py` (+4/-0)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+3/-1)
+  - 修改 `vllm/v1/worker/utils.py` (+13/-1)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 该 commit 修改了 vllm/v1/worker/gpu/async_utils.py (MRV2 核心路径) 和 vllm/v1/worker/utils.py (通用 worker 工具)。vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner，NaN 检测钩子会传递到 Ascend 子类。需验证 NaN 检测在 Ascend 上的行为是否正确，特别是 Ascend 上 logits 的 dtype 和数值范围可能不同于 NVIDIA GPU。
+
+---
 
 ## 2026-08-04
 ### vllm
@@ -1153,123 +1271,6 @@ MRV2 相关 commits 总数: 101
   - 修改 `tests/v1/worker/test_late_interaction_runner.py` (+1/-1)
   - 重命名 `vllm/v1/pool/late_interaction_runner.py` (+0/-0)
   - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-1)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-08
-### vllm
-- **[0d12618e](https://github.com/vllm-project/vllm/commit/0d12618e98ff2d21d36081e0e9b4eb23573b6d38)** [Spec Decode] Support hybrid (SWA + full attention) DFlash drafters (#47914)
-  - 变更文件:
-  - 修改 `vllm/config/vllm.py` (+17/-0)
-  - 修改 `vllm/model_executor/models/qwen3_dflash.py` (+17/-9)
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+5/-3)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dflash/cudagraph.py` (+4/-7)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dflash/speculator.py` (+15/-5)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dflash/utils.py` (+5/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dspark/utils.py` (+5/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/eagle/utils.py` (+9/-1)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/speculator.py` (+2/-1)
-  - Ascend 影响: ✓ 无影响
-
-- **[2afa3f7e](https://github.com/vllm-project/vllm/commit/2afa3f7e950264bb179d030c23a1ed1f46558fd9)** ([#47631](https://github.com/vllm-project/vllm/pull/47631)) [Perf] 新增：Minimax M3 - 支持 cross-layer allreduce-norm 融合
-  - 标签: `performance`, `medium-risk`, `model-runner`, `MoE`
-  - 变更文件:
-  - 修改 `vllm/model_executor/layers/fused_moe/layer.py` (+13/-0)
-  - 修改 `vllm/model_executor/layers/fused_moe/runner/moe_runner.py` (+7/-1)
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+2/-0)
-  - 修改 `vllm/models/deepseek_v32/nvidia/model.py` (+4/-4)
-  - 修改 `vllm/models/deepseek_v32/nvidia/mtp.py` (+1/-1)
-  - 修改 `vllm/models/minimax_m3/nvidia/model.py` (+37/-10)
-  - 修改 `vllm/v1/attention/backends/mla/prefill/selector.py` (+1/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: MiniMax-M3 和 DeepseekV2 模型的 MoE 层 all-reduce 逻辑发生变化，Ascend 侧的模型实现可能需要同步调整以支持 reduce_results 参数和 fused_allreduce_gemma_rms_norm 融合路径。
-    - 建议测试区域: `vllm/models/minimax_m3/`, `vllm/models/deepseek_v32/`, `tests/e2e/`
-
-- **[7bd15437](https://github.com/vllm-project/vllm/commit/7bd154375dc505046a6e59e6d8c884a9c6b8fc0f)** [Bugfix] Fix mamba+dflash for MRV2 (#47698)
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/spec_decode/dflash/speculator.py` (+1/-4)
-  - Ascend 影响: ✓ 无影响
-
-- **[dd127d82](https://github.com/vllm-project/vllm/commit/dd127d82ed29c40b7daf6e751add49ff371b1d9d)** [Core][Engine] only materialize tokens when thinking budget is in req (#47053)
-  - 变更文件:
-  - 修改 `tests/v1/worker/test_gpu_model_runner.py` (+26/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+3/-5)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-07
-### vllm
-- **[65dcde16](https://github.com/vllm-project/vllm/commit/65dcde16957c26cfd65f581b67787c871cea3206)** 修复PD分离+MTP在Qwen3.5(GDN)上的正确性问题。主要修改包括：1) 在combine_sampled_and_draft_tokens kernel中正确处理prompt-tail slots，只重写generated-token slots；2) 修复mamba_hybrid中spec-decode行的检测逻辑，使用num_scheduled_tokens == num_draft_tokens + 1判断decode行；3) 移除states.py中add_request对last_sampled_tokens的冗余写入。
-  - 标签: `bugfix`, `pd-disagg`, `mtp`, `high-risk`
-  - 变更文件:
-  - 修改 `tests/v1/kv_connector/nixl_integration/config_sweep_accuracy_test.sh` (+1/-0)
-  - 修改 `tests/v1/kv_connector/nixl_integration/run_accuracy_test.sh` (+7/-2)
-  - 修改 `vllm/v1/worker/gpu/input_batch.py` (+4/-2)
-  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+9/-4)
-  - 修改 `vllm/v1/worker/gpu/states.py` (+0/-10)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-4)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu/input_batch.py中_combine_sampled_and_draft_tokens_kernel的token写入逻辑，vllm/worker/gpu/model_states/mamba_hybrid.py中spec-decode行检测逻辑，以及vllm/v1/worker/gpu/states.py中add_request的last_sampled_tokens写入。vllm-ascend的NPUModelRunner如果重写了这些方法或依赖这些行为，需要同步更新。
-    - 建议测试区域: `vllm_ascend/worker/model_runner_v1.py`, `vllm_ascend/worker/worker.py`
-
-- **[d3e69fd6](https://github.com/vllm-project/vllm/commit/d3e69fd6714e9d1bb6e8e4f03157090dc32e7960)** 使用blocking CUDA events避免忙等CUDA driver lock。在async_utils.py、spec_decode/utils.py、gpu_model_runner.py中，将torch.cuda.Event()改为torch.cuda.Event(blocking=True)，使CPU线程在等待GPU事件时进入睡眠状态而不是忙等，减少CUDA driver锁竞争。
-  - 标签: `performance`, `cuda`, `medium-risk`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/async_utils.py` (+4/-2)
-  - 修改 `vllm/v1/worker/gpu/spec_decode/utils.py` (+2/-1)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+7/-3)
-  - Ascend 影响: ✓ 无影响
-
-- **[2f71b2bd](https://github.com/vllm-project/vllm/commit/2f71b2bd9f693f06973a8abf3823f095bd46ef69)** 在V2 runner中对齐混合encoder-decoder KV cache视图。当decoder self-attention（K/V-first布局）和cross-attention（blocks-first布局）共享同一raw allocation时，通过_align_mixed_attention_kv_cache_views函数重新调整blocks-first视图的stride，使其与K/V-first存储布局兼容。
-  - 标签: `bugfix`, `rocm`, `attention`, `medium-risk`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+82/-0)
-  - Ascend 影响: ✓ 无影响
-
-- **[69f31509](https://github.com/vllm-project/vllm/commit/69f3150981e4bc8a09439eb7cae0095605b964b4)** 修复XPU上PP（流水线并行）的精度问题。在broadcast方法中，在切换到broadcast stream之前同步main stream，确保所有操作在broadcast前完成。
-  - 标签: `bugfix`, `xpu`, `pipeline-parallel`, `low-risk`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/pp_utils.py` (+5/-0)
-  - Ascend 影响: ✓ 无影响
-
-- **[567a7843](https://github.com/vllm-project/vllm/commit/567a78432d8e00ac17e4288a4c15ca795c6a1bb4)** 修复DP+MTP hang问题。当DP各rank对input_fits_in_drafter判断不一致时，通过dummy_run防止hang。重构了draft proposal逻辑，将GPU token和CPU token的draft proposal路径分离，确保DP rank在drafter执行上保持一致。
-  - 标签: `bugfix`, `data-parallel`, `mtp`, `speculative-decoding`, `high-risk`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+45/-18)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu_model_runner.py中propose_draft_token_ids逻辑，新增了dummy_run调用和draft_after_bookkeeping路径。vllm-ascend的NPUModelRunner如果重写了draft proposal逻辑，需要同步更新以处理DP rank不一致的情况。
-    - 建议测试区域: `vllm_ascend/worker/model_runner_v1.py`, `vllm_ascend/patch/worker/spec_decode_patch.py`
-
-- **[04adc884](https://github.com/vllm-project/vllm/commit/04adc8843bbe0711fed8edf50d6d4cd4fca400e7)** 修复DeepSeek-V4 fp8_ds_mla KV cache reshape问题。在get_kv_cache_spec中传递kv_quant_mode参数，确保在_reshape_kv_cache_tensors中能正确获取cache_dtype_str。修复了当kv_cache_spec有cache_dtype_str属性时优先使用该值而不是self.cache_config.cache_dtype。
-  - 标签: `bugfix`, `deepseek`, `kv-cache`, `mla`, `medium-risk`
-  - 变更文件:
-  - 修改 `vllm/models/deepseek_v4/attention.py` (+6/-1)
-  - 修改 `vllm/v1/attention/backends/mla/sparse_swa.py` (+2/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+6/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 修改了vllm/v1/worker/gpu_model_runner.py中_reshape_kv_cache_tensors方法，优先使用kv_cache_spec的cache_dtype_str属性。vllm-ascend的NPUModelRunner如果重写了KV cache reshape逻辑，需要同步更新。同时修改了vllm/models/deepseek_v4/attention.py和vllm/v1/attention/backends/mla/sparse_swa.py中get_kv_cache_spec方法，新增kv_quant_mode参数。
-    - 建议测试区域: `vllm_ascend/worker/model_runner_v1.py`, `vllm_ascend/attention/attention_v1.py`
-
-### vllm-ascend
-- **[beb54c2a](https://github.com/vllm-project/vllm-ascend/commit/beb54c2ab96d628baef7eef09163156ec364c887)** 支持 V1 PP + MTP 混合部署，并修复 PP token handoff 的精度问题。核心变更：1) 将 PP 的 sampled token 传递从 GPU broadcast 改为通过 scheduler IPC (`CachedRequestData.new_token_ids`)；2) 非 last PP rank 从 IPC 重建本地 `prev_sampled_token_ids` 状态；3) PP+MTP 的 draft/spec token 通过 `ModelRunnerOutput.spec_token_ids` 回写到 scheduler；4) 添加 request 级别的 in-flight fence 防止 decode 请求被重复调度。这是一个大规模的功能变更，涉及 scheduler、model runner、patch 等多个模块，风险较高。
-  - 标签: `feature`, `high-risk`, `scheduler`, `model-runner`, `patch`, `pp_mtp`
-  - 变更文件:
-  - 修改 `tests/ut/patch/platform/test_patch_pp_mtp.py` (+266/-0)
-  - 修改 `tests/ut/test_platform.py` (+0/-42)
-  - 修改 `vllm_ascend/patch/__init__.py` (+70/-1)
-  - 修改 `vllm_ascend/patch/platform/patch_pp_mtp.py` (+263/-0)
-  - 修改 `vllm_ascend/platform.py` (+0/-29)
-  - 修改 `vllm_ascend/worker/model_runner_v1.py` (+126/-25)
-  - Ascend 影响: ✓ 无影响
-
-- **[ef74bd88](https://github.com/vllm-project/vllm-ascend/commit/ef74bd886cbf7efa77e71c01f17707224a8a8a59)** 修复 CI：跳过 MRV2 DFlash 端到端测试。由于 vLLM 新提交导致 DFlash 测试失败，暂时跳过。同时修复了 `test_w4a16_mxfp4.py` 中 `swiglu_limit` 的默认值问题。
-  - 标签: `ci`, `bugfix`, `low-risk`, `test`
-  - 变更文件:
-  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+1/-0)
-  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_uva.py` (+1/-0)
-  - 修改 `tests/ut/quantization/methods/test_w4a16_mxfp4.py` (+1/-1)
   - Ascend 影响: ✓ 无影响
 
 ---

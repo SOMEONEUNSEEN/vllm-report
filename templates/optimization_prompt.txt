@@ -1,0 +1,114 @@
+你是一个上游代码迁移分析专家。请基于以下上下文，对每个 commit 生成结构化的迁移分析记录。
+
+## 仓库信息
+- 仓库：{repo}
+- 统计周期：{period}
+
+## 架构上下文（必须基于此判断，不得猜测）
+{context_section}
+
+## Patch 影响映射（判定 patch_conflict 的依据）
+{patch_impact_map}
+
+## 待分析 commits（已过滤为 bugfix/performance 类型）
+{commits_json}
+
+## 分析要求
+
+对每个 commit 生成一条记录，严格遵循以下规则：
+
+### R1: 基于架构上下文判断
+- ascend_value 判定必须引用接口面规则（必然影响/可能影响/绝不影响路径）
+- 不得仅凭 commit 标题猜测
+
+### R2: ascend_value 判定流程
+1. 检查 affected_files 是否命中 patch_impact_map -> patch_conflict=true, ascend_value ≥ medium
+2. 检查是否属于公共路径（gpu_model_runner.py 等）-> ascend_value 视情况, patch_conflict=false
+3. 命中 not_used_by_ascend 路径 -> ascend_value=none, migration_method=skip
+4. 纯平台特定代码（csrc/, flashinfer, rocm）-> ascend_value=none, migration_method=skip
+
+### R3: priority 判定矩阵（必须严格遵循）
+- ascend_value=high 且 patch_conflict=true -> P0
+- ascend_value=high 且 change_type=bugfix -> P0
+- ascend_value=high 且 change_type=performance -> P1
+- ascend_value=medium 且 patch_conflict=true -> P1
+- ascend_value=medium 且 patch_conflict=false -> P2
+- ascend_value=low -> P3
+- ascend_value=none -> skip
+
+### R4: migration_method 选择
+- cherry-pick: 公共路径，Ascend 无 patch 覆盖
+- patch-sync: Ascend 通过 patch 覆盖的路径（查 patch_impact_map）
+- idea-copy: 平台特化但思路通用，需用 Ascend 算子重写
+- config-align: 配置默认值/新增参数/API 调整
+- auto-inherit: 父类方法，未被 patch 覆盖
+- skip: CUDA/ROCm 专用，Ascend 无对应场景
+
+### R5: 文本约束
+- optimization_point ≤100 字，格式：动词+对象+效果
+- migration_steps 每步必须可执行（含具体文件/模块/验证方法）
+- 禁止使用"可能""也许""不确定"等模糊词，不确定时设 low_confidence=true
+- skip 必须给出跳过理由（在 ascend_value_reason 中）
+
+### R6: category 分类
+根据 affected_files 路径匹配：
+- vllm/v1/worker/gpu_model_runner.py, vllm/engine/ -> core-engine
+- vllm/v1/attention/, vllm/v1/core/kv_cache* -> attention-kv-cache
+- vllm/model_executor/models/, vllm/models/ -> model-architecture
+- vllm/model_executor/layers/fused_moe/ -> moe-fusion
+- csrc/, vllm/_custom_ops.py -> operator-kernel
+- vllm/distributed/ -> distributed
+- vllm/v1/worker/gpu/spec_decode/ -> spec-decode
+- vllm/v1/kv_offload/ -> kv-offload
+- vllm/model_executor/layers/quantization/ -> quantization
+- vllm/lora/ -> lora
+- vllm/multimodal/ -> multimodal
+- vllm/config/ -> config
+- vllm/v1/core/sched/ -> scheduler
+- tests/, .buildkite/ -> test-ci
+- 其他 -> other
+
+## 输出格式
+严格输出以下 JSON，不要输出任何其他内容：
+```json
+{{
+  "period": "{period}",
+  "generated_at": "<当前时间UTC+8>",
+  "total_commits": {total_count},
+  "analyzed_commits": <实际分析数>,
+  "skipped_commits": <skip的数量>,
+  "summary": {{
+    "P0": <数量>, "P1": <数量>, "P2": <数量>, "P3": <数量>, "skip": <数量>
+  }},
+  "records": [
+    {{
+      "sha": "<8位>",
+      "full_sha": "<40位>",
+      "date": "YYYY-MM-DD",
+      "repo": "{repo}",
+      "title": "<首行message>",
+      "pr_number": "<PR号或null>",
+      "pr_url": "https://github.com/{repo}/commit/<full_sha>",
+      "category": "<枚举值>",
+      "change_type": "<bugfix|performance|feature|refactor>",
+      "optimization_point": "<≤100字>",
+      "affected_files": ["<path1>"],
+      "ascend_value": "<high|medium|low|none>",
+      "ascend_value_reason": "<≤80字，基于架构上下文>",
+      "migration_method": "<枚举值>",
+      "migration_steps": ["<可执行步骤>"],
+      "patch_conflict": <true|false>,
+      "patch_conflict_detail": "<冲突详情或空>",
+      "priority": "<P0|P1|P2|P3|skip>",
+      "priority_reason": "<≤60字>",
+      "effort_estimate": "<S|M|L>",
+      "risk_level": "<high-risk|medium-risk|low-risk>",
+      "test_verification": ["<验证场景>"],
+      "status": "pending",
+      "assignee": "",
+      "key_files": "<逗号分隔关键文件>",
+      "low_confidence": <false>
+    }}
+  ]
+}}
+```

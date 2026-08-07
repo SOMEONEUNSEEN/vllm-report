@@ -1,0 +1,615 @@
+﻿优先级,SHA,日期,分类,类型,优化内容,Ascend价值,迁移策略,Patch冲突,工作量,风险,关键文件,迁移步骤,验证场景
+P3,d35eba30,2026-07-08,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Avoid leaking Pydantic repr tool_choice error message
+【PR号】#47028
+【变更类型】此提交为问题修复类型",low,auto-inherit,否,S,low-risk,"tests/entrypoints/openai/chat_completion/test_serving_chat.py, vllm/renderers/online_renderer.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,5d5fab00,2026-07-08,test-ci,bugfix,"【变更概述】[Bugfix] 修复：前端 修复 http_requests_total metric recording some 4xx errors as 5xx
+【PR号】#44303
+【变更类",low,auto-inherit,否,S,low-risk,"tests/entrypoints/serve/instrumentator/test_http_status_metrics.py, vllm/entrypoints/openai/api_server.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,2afa3f7e,2026-07-08,moe-fusion,performance,"【变更概述】[Perf] 新增：Minimax M3 - 支持 cross-layer allreduce-norm 融合
+【PR号】#47631
+【变更类型】此提交为性能优化类型
+【变更文件】修改 ",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/layers/fused_moe/layer.py, vllm/model_executor/layers/fused_moe/runner/moe_runner.py, vllm/model_executor/models/deepseek_v2.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 moe-fusion 模块在 Ascend 行为一致
+P2,80eb01e9,2026-07-08,model-architecture,bugfix,"【变更概述】[Bugfix] 更新：DSV4 TP16 garbage output
+【PR号】#47493
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vllm/models/deepsee",medium,auto-inherit,否,S,medium-risk,"vllm/models/deepseek_v4/attention.py, vllm/models/deepseek_v4/common/ops/cache_utils.py, vllm/models/deepseek_v4/compressor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,d9e57ea8,2026-07-08,test-ci,performance,"【变更概述】[ROCm] 优化：Perf MXFP8 dense-linear + grouped-MoE GEMM optimizations MiniMax-M3
+【PR号】#46117
+【变更类",none,skip,否,S,low-risk,"tests/kernels/test_minimax_m3_amd_ops.py, vllm/model_executor/kernels/linear/mxfp8/rocm_native.py, vllm/model_executor/layers/fused_moe/experts/mxfp8_native_moe.py",,
+P2,2c17d33f,2026-07-09,attention-kv-cache,bugfix,"【变更概述】[Bugfix] 更新：ROCm Change AttentionCGSuppoort TritonMLA UNIFORM_SINGLE_TOKEN_DECODE
+【PR号】#47144
+",medium,auto-inherit,否,S,medium-risk,vllm/v1/attention/backends/mla/triton_mla.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,bc44f9fe,2026-07-09,moe-fusion,bugfix,"【变更概述】[ROCm] 修复：CI][MoE 修复 double-transpose 融合 w3 expert weights
+【PR号】#47874
+【变更类型】此提交为问题修复类型
+【变更文件】",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fused_moe/routed_experts.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,95d6d6f4,2026-07-09,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Use int8 workspace FlashInfer MLA decode
+【PR号】#48046
+【变更类型】此提交为问题修复类型
+【MRV2关联】此变更涉",medium,auto-inherit,否,S,medium-risk,"tests/kernels/attention/test_flashinfer_mla_decode.py, vllm/v1/attention/backends/mla/flashinfer_mla.py, vllm/v1/attention/backends/mla/flashinfer_mla_sparse.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,56da398d,2026-07-09,model-architecture,bugfix,"【变更概述】修复：修复 embed scaling + CUDA graphs Transformers modelling 后端
+【PR号】#48010
+【变更类型】此提交为问题修复类型
+【变更文件",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/transformers/base.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,26831949,2026-07-09,attention-kv-cache,bugfix,"【变更概述】[ROCm] 修复：修复 pooling startup workspace lock
+【PR号】#47912
+【变更类型】此提交为问题修复类型
+【MRV2关联】此变更涉及 Model R",none,skip,否,S,low-risk,"vllm/v1/attention/backends/rocm_attn.py, vllm/v1/attention/backends/triton_attn.py, vllm/v1/attention/ops/triton_prefill_attention.py",,
+P3,6cf7b26b,2026-07-09,moe-fusion,bugfix,"【变更概述】[docs] 修复：修复 文档 build
+【PR号】#48008
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vllm/model_executor/layers/fused_m",low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/fused_moe/layer.py, vllm/v1/kv_offload/tiering/p2p/manager.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,49abadae,2026-07-09,attention-kv-cache,bugfix,"【变更概述】[ROCm] 修复：Bugfix 修复 empty-tensor max crash AITER FA
+【PR号】#47894
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vllm",medium,idea-copy,否,L,medium-risk,vllm/v1/attention/backends/rocm_aiter_fa.py,理解上游优化思路（vllm/v1/attention/backends/rocm_aiter_fa.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,089e4128,2026-07-09,test-ci,performance,"【变更概述】[Perf] 更新：Integrate TRTLLM BF16 MoE Modular 内核
+【PR号】#45182
+【变更类型】此提交为性能优化类型
+【变更文件】新增 tests/ker",low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_trtllm_bf16_moe.py, tests/kernels/moe/test_unquantized_backend_selection.py, vllm/model_executor/layers/fused_moe/experts/trtllm_bf16_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,b2cf70ea,2026-07-09,test-ci,bugfix,[CI] BugFix Eval Small Models Distributed test for DiffusionGemma (#47980),none,skip,否,S,low-risk,"tests/evals/gsm8k/configs/DiffusionGemma-26B-A4B-it-FP8-dynamic.yaml, tests/evals/gsm8k/test_gsm8k_correctness.py",,
+P3,d1f1d867,2026-07-09,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Re-enable benchmarking librispeech dataset
+【PR号】#47033
+【变更类型】此提交为问题修复类型
+【变更文件】修改 t",low,auto-inherit,否,S,low-risk,"tests/benchmarks/test_audio_dataset.py, vllm/benchmarks/datasets/datasets.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,300e3379,2026-07-10,model-architecture,performance,"【变更概述】[Perf] 更新：fuse more rmsnorm all-reduce qwen3.5
+【PR号】#46998
+【变更类型】此提交为性能优化类型
+【变更文件】修改 vllm/mode",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py, vllm/model_executor/models/qwen3_next.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,88e5e2c5,2026-07-10,test-ci,bugfix,"【变更概述】[CI/Build] 修复：AMD 修复 ROCm OOM eagle_correctness_heavy by reserving CUDA graph 内存
+【PR号】#47366
+【",low,auto-inherit,否,S,low-risk,"tests/v1/e2e/spec_decode/test_spec_decode.py, vllm/v1/worker/gpu_worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,feb384ad,2026-07-10,test-ci,bugfix,[bugfix] bge-m3-sparse-plugin mismatch requests (#48112),none,skip,否,S,low-risk,tests/plugins/bge_m3_sparse_plugin/bge_m3_sparse_processor/sparse_embeddings_processor.py,,
+skip,e12b91b0,2026-07-10,test-ci,bugfix,[CI] Fix cargo-deny config flag ordering (#48170),none,skip,否,S,low-risk,.buildkite/scripts/run-rust-frontend-cargo-ci.sh,,
+P3,766469a4,2026-07-10,other,bugfix,"【变更概述】[ROCm] 修复：Revert Part `[ROCm 修复 pooling startup workspace lock`
+【PR号】#48154
+【变更类型】此提交为问题修复类型
+【",low,auto-inherit,否,S,low-risk,vllm/v1/worker/gpu_worker.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,b0dec2a1,2026-07-10,attention-kv-cache,performance,"【变更概述】[ROCM] 优化：DSV32][Perf][MTP Enable UNIFORM_BATCH CG mode rocm_aiter_mla_sparse
+【PR号】#45149
+【变更类",medium,idea-copy,否,L,medium-risk,vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py,理解上游优化思路（vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,ed908cf0,2026-07-11,test-ci,bugfix,"【变更概述】[Bugfix] 修复：修复 thinking_token_budget not enforced after natural </think> re-entry
+【PR号】#45984
+",low,auto-inherit,否,S,low-risk,"tests/v1/logits_processors/test_correctness.py, vllm/v1/sample/thinking_budget_state.py, vllm/v1/worker/gpu_input_batch.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,26ff616b,2026-07-11,test-ci,bugfix,[Bugfix][Test] Register Qwen/Qwen3.5-4B example model (#48276),none,skip,否,S,low-risk,tests/models/registry.py,,
+P3,735def4f,2026-07-11,other,bugfix,"【变更概述】[Bugfix] 修复：修复 FlashMLA dense fp8 metadata crash num_sm_parts clamp
+【PR号】#48045
+【变更类型】此提交为问题修复",low,auto-inherit,否,S,low-risk,cmake/external_projects/flashmla.cmake,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,27c3e579,2026-07-12,test-ci,bugfix,[CI][Rust Frontend] Pin cargo tool versions (#48222),none,skip,否,S,low-risk,.buildkite/scripts/run-rust-frontend-cargo-ci.sh,,
+P3,5f8e73cb,2026-07-12,test-ci,bugfix,"【变更概述】[Bugfix] 更新：保护 mixed-dtype AllReduce RMSNorm 量化 融合
+【PR号】#48330
+【变更类型】此提交为问题修复类型
+【变更文件】修改 tests",low,auto-inherit,否,S,low-risk,"tests/compile/passes/distributed/test_fusion_all_reduce.py, vllm/compilation/passes/fusion/allreduce_rms_fusion.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,a02984ed,2026-07-12,model-architecture,performance,"【变更概述】[Perf] 更新：Qwen Replace MoE all-reduce reduce-scatter
+【PR号】#47006
+【变更类型】此提交为性能优化类型
+【变更文件】修改 vll",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py, vllm/model_executor/models/qwen3_5.py, vllm/model_executor/models/qwen3_next.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,481e481b,2026-07-12,test-ci,bugfix,"【变更概述】【MRV2】[2/N] 修复：核心 支持 partial prefix 缓存 hit hybrid model
+【PR号】#46384
+【变更类型】此提交为问题修复类型
+【变更文件】新增 ",medium,config-align,否,M,medium-risk,"tests/v1/core/prefix_cache/test_partial_prefix_cache_hits.py, tests/v1/core/test_deferred_block_free.py, tests/v1/core/test_kv_cache_utils.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+skip,8e981630,2026-07-12,test-ci,bugfix,[CI][CPU] Add Qwen2-VL multimodal tests for CPU backend and fix incompatibilities (#48072),none,skip,否,S,low-risk,".buildkite/hardware_tests/cpu.yaml, tests/models/multimodal/generation/test_qwen2_5_vl.py",,
+P3,9a48eef8,2026-07-12,test-ci,bugfix,"【变更概述】[Bugfix] 新增：LoRA 支持 ark_linear base layer _get_lora_device
+【PR号】#47690
+【变更类型】此提交为问题修复类型
+【变更文件】",low,auto-inherit,否,S,low-risk,"tests/lora/test_layers_utils.py, vllm/lora/layers/utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,b3cfca99,2026-07-13,other,bugfix,"【变更概述】[Mypy Fix] 更新：拆分 Mypy 工作
+【PR号】#48490
+【变更类型】此提交为问题修复类型
+【变更文件】修改 tools/pre_commit/mypy.py (+24/-",low,auto-inherit,否,S,low-risk,tools/pre_commit/mypy.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,56a357ed,2026-07-13,test-ci,bugfix,"【变更概述】[Bugfix] [KV Cache] 更新：Don't route uniform-page-size MLA+SWA models into DeepseekV4 packing
+【P",medium,auto-inherit,否,S,medium-risk,"tests/v1/core/test_kv_cache_utils.py, vllm/v1/core/kv_cache_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+skip,75fe92a3,2026-07-13,distributed,performance,"【变更概述】[Distributed] [Perf] 更新：Enable FlashInfer MNNVL AllReduce RMS quant 融合
+【PR号】#48064
+【变更类型】此提交为性",none,skip,否,S,low-risk,"vllm/compilation/passes/fusion/allreduce_rms_fusion.py, vllm/distributed/device_communicators/flashinfer_all_reduce.py",,
+P2,36484e46,2026-07-13,model-architecture,bugfix,"【变更概述】[BugFix] 更新：Restore full tokens Qwen MTP When MoE SP
+【PR号】#48429
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vll",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/models/qwen3_5_mtp.py, vllm/model_executor/models/qwen3_next_mtp.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,8c5dafcd,2026-07-13,test-ci,bugfix,"【变更概述】[Bugfix] [UT] 修复：修复 EagleMiniCPMForCausalLM meet TypeError
+【PR号】#48452
+【变更类型】此提交为问题修复类型
+【变更文件】",medium,auto-inherit,否,S,medium-risk,"tests/models/registry.py, vllm/model_executor/models/minicpm_eagle.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+skip,775c1589,2026-07-13,distributed,bugfix,"【变更概述】[Bugfix] [ROCm] 更新：Keep TP all_gather base-class collective
+【PR号】#48446
+【变更类型】此提交为问题修复类型
+【变更文件",none,skip,否,S,low-risk,vllm/distributed/device_communicators/cuda_communicator.py,,
+P3,2595d5ce,2026-07-13,moe-fusion,performance,"【变更概述】[Model] 优化：优化 Qwen3.5 H20
+【PR号】#48350
+【变更类型】此提交为性能优化类型
+【变更文件】新增 vllm/model_executor/layers/fus",low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/fused_moe/configs/E=256,N=256,device_name=NVIDIA_H20.json",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,4c81772e,2026-07-13,distributed,bugfix,"【变更概述】[Bugfix] [KV Offloading] 修复：修复 stale transfer_jobs after reset_cache + harden job completion
+【",low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,1ff94296,2026-07-14,config,bugfix,"【变更概述】[CI Bug] 更新：Fully solve accuracy issue DSv3.2 + MTP + Sequence Parallel
+【PR号】#48036
+【变更类型】此提交为",medium,config-align,否,S,medium-risk,"vllm/config/parallel.py, vllm/model_executor/models/deepseek_mtp.py, vllm/models/deepseek_v32/nvidia/mtp.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 config 模块在 Ascend 行为一致
+P3,af453e56,2026-07-14,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Gemma4 parser classify channel-less output consistently streaming non-streaming
+【P",low,auto-inherit,否,S,low-risk,"tests/parser/engine/test_gemma4_streaming_reasoning.py, vllm/parser/gemma4.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,32aef443,2026-07-14,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Include inline per-token-head scales offloaded page transfer width
+【PR号】#48411
+【变更",low,auto-inherit,否,S,low-risk,"tests/v1/core/test_kv_cache_utils.py, vllm/distributed/kv_transfer/kv_connector/v1/offloading/worker.py, vllm/v1/kv_cache_interface.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,793cf79c,2026-07-14,test-ci,bugfix,"【变更概述】[Bugfix] [Security] 修复：修复 concurrent sparse invariant race bypassing CVE remediation
+【PR号】#485",medium,auto-inherit,否,S,medium-risk,"tests/renderers/test_sparse_tensor_concurrent_race.py, vllm/multimodal/media/audio.py, vllm/multimodal/media/image.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,038ec293,2026-07-14,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Return 400 instead 500 when 多模态 data is sent text-only model
+【PR号】#48473
+【变更类型】此提交",low,auto-inherit,否,S,low-risk,"tests/renderers/test_process_multi_modal_uuids.py, vllm/renderers/base.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,c9a788ee,2026-07-14,other,bugfix,"【变更概述】修复：fix(security guard lm-format-enforcer regex compile 超时
+【PR号】#47595
+【变更类型】此提交为问题修复类型
+【变更文件】修",low,auto-inherit,否,S,low-risk,vllm/v1/structured_output/backend_lm_format_enforcer.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,af1f036a,2026-07-14,test-ci,bugfix,[Bugfix] Skip minimax_m3 tool parser tests when Rust extension is absent (#48523),none,skip,否,S,low-risk,tests/tool_parsers/test_minimax_m3_tool_parser.py,,
+P3,dcf4072d,2026-07-14,other,bugfix,"【变更概述】[Perf] [ROCm] 修复：修复 GDN KKT warmup regression RDNA by avoiding fp32 tl.dot
+【PR号】#45000
+【变更类型】此",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fla/ops/chunk_scaled_dot_kkt.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,fec64fea,2026-07-14,other,bugfix,"【变更概述】[BugFix] 更新：Correct OTEL span start time Dynamo compilation
+【PR号】#40698
+【变更类型】此提交为问题修复类型
+【变更文件",low,auto-inherit,否,S,low-risk,vllm/compilation/backends.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,9a21f0d1,2026-07-14,model-architecture,bugfix,"【变更概述】[BugFix] 更新：Initialize model_config Qwen3-VL MoE
+【PR号】#44863
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vllm/mo",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/qwen3_vl_moe.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,550218b1,2026-07-14,test-ci,bugfix,【变更概述】[Bugfix] [Frontend] 更新：Flush engine reasoning parser at engine-reasoning → tool streaming boun,low,auto-inherit,否,S,low-risk,"tests/parser/test_streaming.py, vllm/parser/abstract_parser.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,26587f95,2026-07-14,core-engine,bugfix,【变更概述】【MRV2】[BugFix] 【MRV2】[ModelRunner V2] 【MRV2】修复：修复 stale attn metadata speculator prefill cudag,medium,idea-copy,否,L,medium-risk,"vllm/v1/worker/gpu/cudagraph_utils.py, vllm/v1/worker/gpu/model_runner.py, vllm/v1/worker/gpu/spec_decode/autoregressive/cudagraph_utils.py",理解上游优化思路（vllm/v1/worker/gpu/cudagraph_utils.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 core-engine 模块在 Ascend 行为一致
+skip,5811ed6a,2026-07-15,test-ci,bugfix,[Test][kv_offload] Fix flaky drain() helper in test_fs_tier.py (#48545),none,skip,否,S,low-risk,tests/v1/kv_offload/tiering/test_fs_tier.py,,
+P3,1b30ae4c,2026-07-15,other,bugfix,"【变更概述】[Rust Frontend] 修复：修复 flaky `tls_handshake_timeout_drops_silent_client` 测试
+【PR号】#47873
+【变更类型】此",low,auto-inherit,否,S,low-risk,"rust/.config/nextest.toml, rust/src/server/src/tls_tests.rs",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,66b6c684,2026-07-15,distributed,bugfix,"【变更概述】[PD] [Bugfix] 修复：修复 validation 缓存 shape attn backends enforcing different `kernel_block_size`
+",low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,c0302d94,2026-07-15,test-ci,bugfix,"【变更概述】[Bugfix] 修复：修复 parallel_tool_calls=null crash Responses API from_request
+【PR号】#48098
+【变更类型】此提交",low,auto-inherit,否,S,low-risk,"tests/tool_use/test_responses_request_validations.py, vllm/entrypoints/openai/responses/protocol.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,313fae3e,2026-07-15,other,bugfix,"【变更概述】[Bugfix] 修复：修复 GLM5 config
+【PR号】#48711
+【变更类型】此提交为问题修复类型
+【变更文件】修改 vllm/transformers_utils/confi",low,auto-inherit,否,S,low-risk,vllm/transformers_utils/config.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,7aab6e26,2026-07-15,test-ci,bugfix,"【变更概述】[ROCm] [Bugfix] 更新：Enable fp32 head_dtype torch.mm fast path ROCm
+【PR号】#48688
+【变更类型】此提交为问题修复类型",low,auto-inherit,否,S,low-risk,"tests/v1/sample/test_head_dtype.py, vllm/model_executor/layers/logits_processor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,9dd2e728,2026-07-15,test-ci,bugfix,fix flaky multi example connector consistency (#48206),none,skip,否,S,low-risk,tests/v1/kv_connector/unit/test_multi_connector.py,,
+P2,adce0681,2026-07-15,test-ci,bugfix,"【变更概述】[ROCm] [CI] 修复：修复 test_common.py
+【PR号】#48676
+【变更类型】此提交为问题修复类型
+【变更文件】修改 tests/conftest.py (+9/-",medium,auto-inherit,否,S,medium-risk,"tests/conftest.py, vllm/model_executor/models/hyperclovax.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,3b39fd28,2026-07-15,test-ci,bugfix,"【变更概述】[Bugfix] [Spec Decode] 新增：支持 heterogeneous QK 融合 geometry
+【PR号】#48671
+【变更类型】此提交为问题修复类型
+【变更文件】修",low,auto-inherit,否,S,low-risk,"tests/compile/passes/test_qk_norm_rope_fusion.py, vllm/compilation/passes/fusion/qk_norm_rope_fusion.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,64721312,2026-07-15,other,bugfix,"【变更概述】[Bugfix] 更新：Set kv_quant_mode generic MLA KV-cache spec
+【PR号】#48379
+【变更类型】此提交为问题修复类型
+【变更文件】修改 ",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/attention/mla_attention.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,442c421e,2026-07-15,model-architecture,performance,"【变更概述】[Perf] 更新：移除 redundant repeat copy dsv4 1.8% E2E TPOT improvement
+【PR号】#48137
+【变更类型】此提交为性能优化类型",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/kernels/mhc/tilelang.py, vllm/model_executor/kernels/mhc/tilelang_kernels.py, vllm/models/deepseek_v4/nvidia/model.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,0bd6b85a,2026-07-15,test-ci,bugfix,"【变更概述】[Bugfix] 更新：Preserve unloaded non-persistent buffers during layerwise reload
+【PR号】#44371
+【变更类型",low,auto-inherit,否,S,low-risk,"tests/model_executor/model_loader/test_reload.py, vllm/model_executor/model_loader/reload/layerwise.py, vllm/model_executor/model_loader/reload/meta.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,3ca242d1,2026-07-15,test-ci,bugfix,"【变更概述】【MRV2】[Bugfix] 【MRV2】[R3] 【MRV2】更新：Exclude draft routers from expert capture
+【PR号】#48622
+【变更类型",medium,cherry-pick,否,S,medium-risk,"tests/model_executor/test_routed_experts_capture.py, vllm/v1/worker/gpu_model_runner.py",Cherry-pick 上游 PR 到 vllm-ascend 对应路径 | 验证 tests/model_executor/test_routed_experts_capture.py 修改未破坏 NPUModelRunner,确认 test-ci 模块在 Ascend 行为一致
+skip,7e950521,2026-07-15,attention-kv-cache,bugfix,fix: size FlashInfer prefill workspace to batch head footprint (#48428),none,skip,否,S,low-risk,vllm/v1/attention/backends/flashinfer.py,,
+skip,0f0f28b5,2026-07-15,test-ci,bugfix,[Bugfix][CI] Fix test_head_dtype quant_method test on ROCm (#48654),none,skip,否,S,low-risk,tests/v1/sample/test_head_dtype.py,,
+P3,520a20ba,2026-07-15,test-ci,bugfix,"【变更概述】[Bugfix] 新增：MoRIIO toy P/D proxy 添加 /health
+【PR号】#45222
+【变更类型】此提交为问题修复类型
+【变更文件】修改 examples/dis",low,auto-inherit,否,S,low-risk,"examples/disaggregated/disaggregated_serving/moriio_toy_proxy_server.py, tests/v1/kv_connector/unit/test_moriio_toy_proxy_server.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,313d01f5,2026-07-15,test-ci,bugfix,"【变更概述】[CI] [Bugfix] 修复：修复 FlashAttention reported MLA dimension 支持
+【PR号】#48631
+【变更类型】此提交为问题修复类型
+【变更文",medium,auto-inherit,否,S,medium-risk,"docs/design/attention_backends.md, tests/v1/attention/test_mla_prefill_selector.py, tools/pre_commit/generate_attention_backend_docs.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+skip,05d4f8bb,2026-07-15,test-ci,bugfix,[ROCm][CI] fix flashinfer import check (#48647),none,skip,否,S,low-risk,tests/v1/attention/test_flashinfer_dcp_spec_reorder.py,,
+P3,32e632df,2026-07-15,other,performance,"【变更概述】[Reasoning] 优化：优化 TPOT thinking budget when used speculative decoding
+【PR号】#46662
+【变更类型】此提交为性能",low,auto-inherit,否,S,low-risk,"vllm/v1/sample/rejection_sampler.py, vllm/v1/sample/sampler.py, vllm/v1/sample/thinking_budget_state.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,b2f7d256,2026-07-15,other,bugfix,"【变更概述】[Bugfix] 更新：Make MLA+SWA check layer's 后端 not model config
+【PR号】#48520
+【变更类型】此提交为问题修复类型
+【变更文件】",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/attention/attention.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,75bdad40,2026-07-16,test-ci,bugfix,"【变更概述】[Bug] [Quantization] 修复：修复 humming is_layer_skipped compressed-tensors ""re:"" ignore entries
+【P",low,auto-inherit,否,S,low-risk,"tests/quantization/test_humming_ignore.py, vllm/model_executor/layers/quantization/humming.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,d08eebad,2026-07-16,test-ci,performance,"【变更概述】[Perf] [MoE] 更新：Write FlashInfer combine into final output
+【PR号】#47156
+【变更类型】此提交为性能优化类型
+【变更文件】",low,auto-inherit,否,S,low-risk,"tests/distributed/test_mnnvl_alltoall.py, vllm/distributed/device_communicators/all2all.py, vllm/model_executor/layers/fused_moe/prepare_finalize/flashinfer_nvlink_one_sided.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,b8168e33,2026-07-16,test-ci,performance,"【变更概述】[ROCm] [Perf] [DSV4] 更新：Enable 拆分 sparse decode gfx942
+【PR号】#46275
+【变更类型】此提交为性能优化类型
+【变更文件】修改 t",medium,idea-copy,否,L,medium-risk,"tests/kernels/attention/test_rocm_triton_attn_dsv4.py, vllm/v1/attention/ops/rocm_aiter_mla_sparse.py",理解上游优化思路（tests/kernels/attention/test_rocm_triton_attn_dsv4.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 test-ci 模块在 Ascend 行为一致
+P3,530852f9,2026-07-16,test-ci,bugfix,"【变更概述】[KV Connector] 修复：修复 PD async scheduling race condition hybrid attn models
+【PR号】#48481
+【变更类型】此",low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_nixl_connector_hma.py, vllm/v1/core/kv_cache_manager.py, vllm/v1/core/sched/scheduler.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,8c3393f3,2026-07-16,other,bugfix,[Bugfix][Rust Frontend] Limit chat top_logprobs in responses (#48134),none,skip,否,S,low-risk,"rust/src/server/src/routes/openai/chat_completions.rs, rust/src/server/src/routes/openai/chat_completions/convert.rs, rust/src/server/src/routes/openai/utils/logprobs.rs",,
+skip,cc706b05,2026-07-16,other,bugfix,[Bugfix][Rust Frontend] Detokenizer: avoid leaking prompt on zero-generated-token completions (#4770,none,skip,否,S,low-risk,rust/src/tokenizer/src/incremental.rs,,
+skip,dc9f845d,2026-07-16,other,bugfix,[Rust Frontend] Fix mock engine test shutdown race (#48738),none,skip,否,S,low-risk,rust/src/mock-engine/src/tests.rs,,
+P3,12f2c515,2026-07-16,distributed,bugfix,"【变更概述】[Bugfix] 修复：修复 卸载 set_ overflow packed non-uniform KV caches
+【PR号】#48530
+【变更类型】此提交为问题修复类型
+【变更文",low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/v1/offloading/worker.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,59b964f3,2026-07-16,test-ci,bugfix,"【变更概述】修复：fix(lora validate LoRA rank is positive PEFTHelper
+【PR号】#48437
+【变更类型】此提交为问题修复类型
+【变更文件】修改 te",low,auto-inherit,否,S,low-risk,"tests/lora/test_peft_helper.py, vllm/lora/peft_helper.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,6a9f24aa,2026-07-16,core-engine,bugfix,"【变更概述】【MRV2】[ROCm] 【MRV2】[CI] 【MRV2】修复：修复 CUDA graph mem profile issue
+【PR号】#48764
+【变更类型】此提交为问题修复类型
+",medium,cherry-pick,否,S,medium-risk,vllm/v1/worker/gpu_model_runner.py,Cherry-pick 上游 PR 到 vllm-ascend 对应路径 | 验证 vllm/v1/worker/gpu_model_runner.py 修改未破坏 NPUModelRunner,确认 core-engine 模块在 Ascend 行为一致
+P3,df8a0900,2026-07-16,other,bugfix,"【变更概述】[BugFix] 更新：Don't apply weight batch-invariant RMSNorm when has_weight=False
+【PR号】#48741
+【变更类型",low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/batch_invariant.py, vllm/model_executor/layers/layernorm.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,2db39c70,2026-07-16,model-architecture,bugfix,"【变更概述】[Bugfix] [Spec Decode] 修复：修复 eagle3 first-layer qkv_proj prefix quantized drafts
+【PR号】#48068
+【",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/llama_eagle3.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,3935829f,2026-07-16,other,bugfix,[Docs] fix error key name (#48802),none,skip,否,S,low-risk,docs/deployment/k8s.md,,
+skip,77469612,2026-07-16,test-ci,bugfix,[CI] Fix flaky lora test (#47375),none,skip,否,S,low-risk,tests/lora/test_gptoss_tp.py,,
+P2,3c1bc1fc,2026-07-16,attention-kv-cache,performance,"【变更概述】[ROCm] [Perf] 优化：优化 sparse 注意力 prefill 内核 DeepSeek-V4
+【PR号】#48519
+【变更类型】此提交为性能优化类型
+【变更文件】修改 vl",medium,idea-copy,否,L,medium-risk,vllm/v1/attention/ops/rocm_aiter_mla_sparse.py,理解上游优化思路（vllm/v1/attention/ops/rocm_aiter_mla_sparse.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P2,3a5e88e6,2026-07-16,config,bugfix,"【变更概述】[Bugfix] 修复：修复 local speculators dots name from classifying as custom_class
+【PR号】#48754
+【变更类型】",medium,config-align,否,S,medium-risk,vllm/config/speculative.py,同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 config 模块在 Ascend 行为一致
+P3,0becb748,2026-07-16,other,bugfix,"【变更概述】[BugFix] [MLA] 新增：支持 kv_cache_dtype_skip_layers MLA 注意力
+【PR号】#47309
+【变更类型】此提交为问题修复类型
+【变更文件】修改 ",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/attention/mla_attention.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,2dab187f,2026-07-16,operator-kernel,performance,"【变更概述】[Perf] 优化：优化 `fused_topk_bias` DSv4 1.5~2x 内核 性能 improvement
+【PR号】#47463
+【变更类型】此提交为性能优化类型
+【变更文",low,idea-copy,否,L,low-risk,"csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu, tests/kernels/moe/test_topk_softplus_sqrt.py, vllm/model_executor/layers/fused_moe/router/fused_topk_bias_router.py",理解上游优化思路（csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+P2,eb33ff34,2026-07-16,test-ci,performance,"【变更概述】[ROCm] [Perf] 更新：DSv4 two-stage compressor 内核 HCA prefill
+【PR号】#47718
+【变更类型】此提交为性能优化类型
+【变更文件】修",medium,auto-inherit,否,S,medium-risk,"tests/kernels/test_compressor_kv_cache.py, vllm/models/deepseek_v4/common/ops/fused_compress_quant_cache.py, vllm/models/deepseek_v4/compressor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,2bd89576,2026-07-16,quantization,bugfix,"【变更概述】[Bugfix] [NVFP4 MoE] 更新：Pad gated intermediate 64 FlashInfer TRT-LLM shuffle M%128
+【PR号】#46880",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/quantization/utils/flashinfer_fp4_moe.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,ecf4aa5c,2026-07-16,test-ci,bugfix,"【变更概述】【MRV2】[Bugfix] 【MRV2】修复：修复 FlashInfer non-causal draft 注意力 DFlash/DSpark Blackwell
+【PR号】#48167",none,skip,否,S,low-risk,"tests/v1/spec_decode/test_dflash_causality.py, tools/pre_commit/generate_attention_backend_docs.py, vllm/model_executor/models/qwen3_dflash.py",,
+P2,b7950e79,2026-07-16,core-engine,bugfix,"【变更概述】【MRV2】[Bugfix] 【MRV2】更新：Initialize draft CUDA-graph keys native draft_model proposer
+【PR号】#474",medium,cherry-pick,否,S,medium-risk,vllm/v1/worker/gpu_model_runner.py,Cherry-pick 上游 PR 到 vllm-ascend 对应路径 | 验证 vllm/v1/worker/gpu_model_runner.py 修改未破坏 NPUModelRunner,确认 core-engine 模块在 Ascend 行为一致
+P3,43cd3402,2026-07-16,other,bugfix,"【变更概述】[Fix] 更新：Align OpenAI vllm_xargs value types across request schemas
+【PR号】#48252
+【变更类型】此提交为问题修复",low,auto-inherit,否,S,low-risk,"vllm/entrypoints/openai/completion/protocol.py, vllm/entrypoints/speech_to_text/transcription/protocol.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,1d99f0f4,2026-07-16,test-ci,bugfix,"【变更概述】[ROCm] [BugFix] 更新：Triton W4A16 handling GPTQ/AutoGPTQ qzeros layout
+【PR号】#47770
+【变更类型】此提交为问题修",low,auto-inherit,否,S,low-risk,"tests/kernels/quantization/test_triton_w4a16.py, vllm/model_executor/kernels/linear/mixed_precision/triton_w4a16.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,c7ce03bc,2026-07-18,other,bugfix,"【变更概述】升级 tml-fa4（FlashAttention 4 外部依赖）版本以适配 cutlass-dsl 4.6 的 API 变更，解决编译兼容性问题。
+【PR号】#48988
+【变更类型】b",low,auto-inherit,否,S,low-risk,cmake/external_projects/tml_fa4.cmake,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,d96aee09,2026-07-18,other,bugfix,【变更概述】修复 replicated 权重和 disable_tp 场景下权重重新加载时 tp_rank 不同步的问题。在 linear.py 的 process_weights_after_loa,low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/linear.py, vllm/model_executor/model_loader/reload/layerwise.py, vllm/model_executor/model_loader/utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,c71a583a,2026-07-18,other,performance,【变更概述】对 hybrid（Mamba/SSM）模型 _copy_mamba_state_block 进行向量化优化，将状态块拷贝改为 uint64 批量拷贝，提升 temporal 系列（如 Ma,low,auto-inherit,否,S,low-risk,vllm/v1/worker/mamba_utils.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,f12b80c6,2026-07-18,test-ci,bugfix,【变更概述】修复 ROCm 平台 GPT-OSS 模型使用 Quark MXFP4 量化时 MoE 加载的 emulation buffer 未按 block 对齐的问题。在 mxfp4.py 和 q,low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_ocp_mx_moe.py, vllm/model_executor/layers/fused_moe/oracle/mxfp4.py, vllm/model_executor/layers/quantization/quark/quark_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,da64db78,2026-07-18,moe-fusion,performance,【变更概述】优化 TrtLlmLoRAExperts（TensorRT-LLM 风格的 LoRA MoE 专家）实现，重构 trtllm_lora_moe.py（+210/-40）并调整 lora_e,low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/fused_moe/experts/lora_experts_mixin.py, vllm/model_executor/layers/fused_moe/experts/trtllm_lora_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,425c4eaf,2026-07-18,test-ci,performance,【变更概述】优化采样路径：apply_sampling_params 不再强制将 logits 上转为 fp32，改由后续 topk/topp 采样核按需处理精度。涉及 topk_topp_sampl,low,auto-inherit,否,S,low-risk,"tests/v1/sample/test_topk_topp_sampler.py, vllm/v1/sample/ops/topk_topp_sampler.py, vllm/v1/sample/ops/topk_topp_triton.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,fae54301,2026-07-18,other,performance,"【变更概述】将 beam-search 离线入口的 beam 拍平从 sum（O(n²)）改为 itertools.chain（O(n)），小幅性能优化。
+【PR号】#48829
+【变更类型】perf",low,auto-inherit,否,S,low-risk,vllm/entrypoints/generate/beam_search/offline.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,41ea2dd4,2026-07-18,test-ci,bugfix,"【变更概述】★★★ MRV2 重点 commit ★★★
+修复 prompt_logprobs 未遵循 logprobs_mode 配置的问题。当 logprobs_mode 为 raw_logits",medium,config-align,否,M,medium-risk,"tests/v1/sample/test_logprobs.py, vllm/config/model.py, vllm/config/vllm.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P3,b5433b6f,2026-07-18,operator-kernel,performance,【变更概述】为 DeepSeek-V4（DSV4）的 MoE routing 引入专用 CUDA kernel topk_softplus_sqrt，在 csrc/libtorch_stable/mo,low,idea-copy,否,L,low-risk,"csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu, tests/kernels/moe/test_topk_softplus_sqrt.py, vllm/model_executor/layers/fused_moe/router/dsv4_topk.py",理解上游优化思路（csrc/libtorch_stable/moe/topk_softplus_sqrt_kernels.cu） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+P3,c4cd2bd5,2026-07-18,test-ci,bugfix,【变更概述】修复 MoRIIO toy P/D（Prefill/Decode 分离）代理服务器在 DP-rank 索引别名上的问题，并增强高并发突发场景下的鲁棒性。修改 examples/disagg,low,auto-inherit,否,S,low-risk,"examples/disaggregated/disaggregated_serving/moriio_toy_proxy_server.py, tests/v1/kv_connector/unit/test_moriio_proxy_routing.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,bf578e1a,2026-07-18,test-ci,bugfix,【变更概述】修复 GLM-4V（glm4_1v.py）在视频 dummy profiling（预分配 profiling）时的内存使用问题，重构视频处理路径（+20/-49）。补充 test_glm4,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/processing/test_glm4_1v.py, vllm/model_executor/models/glm4_1v.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,efed8a1e,2026-07-18,attention-kv-cache,performance,【变更概述】优化 ROCm gfx950 上 DSV4 sparse decode reduction 的占用率，调整 vllm/v1/attention/ops/rocm_aiter_mla_spa,medium,idea-copy,否,L,medium-risk,vllm/v1/attention/ops/rocm_aiter_mla_sparse.py,理解上游优化思路（vllm/v1/attention/ops/rocm_aiter_mla_sparse.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,11d29151,2026-07-18,test-ci,bugfix,【变更概述】修复 MiniMax M2、Qwen3、MiniCPM5 XML 工具解析器在解析参数值时丢失空白字符的问题。修改 minimax_m2.py / qwen3.py / minicpm5x,low,auto-inherit,否,S,low-risk,"tests/parser/engine/test_qwen3.py, tests/tool_parsers/test_minicpm5xml_tool_parser.py, tests/tool_parsers/test_minimax_m2_tool_parser.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,e6d1310b,2026-07-19,test-ci,bugfix,【变更概述】修复 pooling 参数被移除后的校验问题。当用户传入已被废弃的 pooling 参数时，vLLM 此前会静默忽略，现在改为显式抛出 Pydantic BeforeValidator 校,medium,config-align,否,M,medium-risk,"tests/test_pooling_params.py, vllm/config/pooler.py, vllm/entrypoints/pooling/base/protocol.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P2,7c2acd38,2026-07-19,model-architecture,bugfix,【变更概述】修复 Qwen3-VL 与 Qwen2.5-Omni 在处理视频提示时未遵循 max_pixels/min_pixels 参数的 bug。修改 vllm/model_executor/mo,medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/models/qwen2_5_omni_thinker.py, vllm/model_executor/models/qwen3_vl.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,e9424389,2026-07-19,attention-kv-cache,performance,【变更概述】为 ROCm 平台的 DeepSeek V3.2 sparse MLA decode 添加 KV-splits 工作量上限启发式。修改 vllm/v1/attention/backends,medium,idea-copy,否,L,medium-risk,vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py,理解上游优化思路（vllm/v1/attention/backends/mla/rocm_aiter_mla_sparse.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P2,0a5069e4,2026-07-20,test-ci,bugfix,【变更概述】修复 Gemma4 模型在 ModelOpt 混合精度量化时 MoE 专家权重路径映射错误。主要变更：(1) 新增 _GEMMA4_EXPERT_PARENT_MAPPER Weights,medium,auto-inherit,否,S,medium-risk,"tests/quantization/test_modelopt.py, vllm/model_executor/models/gemma4.py, vllm/model_executor/models/gemma4_mm.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,8ce53a61,2026-07-20,other,bugfix,【变更概述】修复量化 + 滑动窗口混合 KV 缓存场景下，新分配的 KV 块未零初始化导致 decode 阶段读取到 NaN/Inf 的问题。主要变更：(1) 新增 KVCacheConfig.has,low,auto-inherit,否,S,low-risk,vllm/v1/kv_cache_interface.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,530ee36a,2026-07-20,test-ci,bugfix,【变更概述】修复 OpenAI 兼容接口中非数字 logprobs 值导致 HTTP 500 错误的问题。主要变更：在 ChatCompletionRequest 和 CompletionReques,low,auto-inherit,否,S,low-risk,"tests/entrypoints/openai/chat_completion/test_chat_error.py, tests/entrypoints/openai/completion/test_completion_error.py, vllm/entrypoints/openai/chat_completion/protocol.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,d835ad57,2026-07-20,other,bugfix,[Bugfix][Rust Frontend] Map missing prompt logprobs for single-token prompts in chat and raw generat,none,skip,否,S,low-risk,"rust/src/server/src/routes/inference/generate.rs, rust/src/server/src/routes/openai/chat_completions.rs, rust/src/server/src/routes/openai/completions.rs",,
+P3,8950394e,2026-07-21,test-ci,bugfix,【变更概述】修复当 KV connector 延迟请求时 prefix-cache 命中指标被重复计数的问题。修改 v1 scheduler（+34/-30）和 kv_cache_manager（+1,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_scheduler.py, tests/v1/core/utils.py, tests/v1/kv_connector/unit/utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,7bb49be4,2026-07-21,other,bugfix,"【变更概述】修复 FA4 JIT 预热阶段 MLA 模型回退处理的边界问题。修改 fa4_cutedsl_warmup.py（+5/-1）。
+【PR号】#49306
+【变更类型】bugfix - JI",low,auto-inherit,否,S,low-risk,vllm/model_executor/warmup/fa4_cutedsl_warmup.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,f890e1db,2026-07-21,test-ci,bugfix,【变更概述】【MRV2 相关】修复 MRV2 中 FULL CUDA graph 捕获前未设置 graph_pool_id 的问题。修改 vllm/v1/worker/gpu/cudagraph_ut,low,idea-copy,否,L,low-risk,"tests/v1/cudagraph/test_cudagraph_manager.py, vllm/v1/worker/gpu/cudagraph_utils.py",理解上游优化思路（tests/v1/cudagraph/test_cudagraph_manager.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+skip,5b3762a7,2026-07-21,operator-kernel,bugfix,[Bugfix][CPU] Fix Clang OpenMP build on macOS (#49021),none,skip,否,S,low-risk,csrc/cpu/cpu_attn_vec.hpp,,
+P2,4d30c510,2026-07-21,test-ci,bugfix,【变更概述】修复 Cosmos3 Edge 多模态模型的 checkpoint 权重过滤、视频加载和提示扩展问题。修改 cosmos3_edge.py（+8/-1）和 video.py（+1/-1）。,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/processing/test_cosmos3_edge.py, tests/models/multimodal/test_mapping.py, tests/multimodal/test_video.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,1134545b,2026-07-21,test-ci,bugfix,【变更概述】【MRV2 相关】回退 PR #48641，恢复在 apply_sampling_params 中将 logits 上转为 fp32 的行为。修改 MRV2 采样路径 vllm/v1/wo,low,auto-inherit,否,S,low-risk,"tests/v1/sample/test_topk_topp_sampler.py, vllm/v1/sample/ops/topk_topp_sampler.py, vllm/v1/sample/ops/topk_topp_triton.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,3e0c8875,2026-07-21,model-architecture,bugfix,"【变更概述】修复 Ovis2.5 多模态模型在 transformers v5 下的特殊 token 处理问题。修改 ovis2_5.py（+3/-4）和 processor（+9/-15）。
+【PR",medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/models/ovis2_5.py, vllm/transformers_utils/processors/ovis2_5.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,8def3cdd,2026-07-21,model-architecture,bugfix,【变更概述】修复 LFM2 模型 ShortConv 投影层未接收 quant_config 导致量化不正确的问题。修改 short_conv.py（+4/-0）、lfm2.py（+1/-0）、lfm,medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/layers/mamba/short_conv.py, vllm/model_executor/models/lfm2.py, vllm/model_executor/models/lfm2_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,f25953cc,2026-07-21,other,bugfix,[Bugfix][Rust Frontend] Handle zero-column logprobs payloads without panicking (#49113),none,skip,否,S,low-risk,"rust/src/engine-core-client/src/protocol/logprobs.rs, rust/src/engine-core-client/src/protocol/logprobs/tests.rs",,
+P3,94ed0bf4,2026-07-21,test-ci,bugfix,【变更概述】修复 KV Offloading connector 在处理已排队但未分配 KV block 请求中止时的错误。修改 offloading/scheduler.py（+12/-6），新增测,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/offloading_connector/test_scheduler.py, vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,0a684ab0,2026-07-21,other,bugfix,【变更概述】修复 Windows WSL 环境下 pin_memory 的 warning_once 机制导致的循环导入问题。修改 platforms/cuda.py（+2/-1）和 interfac,none,skip,否,S,low-risk,"vllm/platforms/cuda.py, vllm/platforms/interface.py",,
+skip,0d9210a5,2026-07-21,operator-kernel,performance,Fixes non-coalesced HBM access in marlin_int4_fp8_preprocess_kernel_awq (#47268),none,skip,否,S,low-risk,csrc/libtorch_stable/quantization/marlin/marlin_int4_fp8_preprocess.cu,,
+P2,2e2e626b,2026-07-21,test-ci,bugfix,【变更概述】修复 get_max_concurrency_for_kv_cache_config 中未按 per-group 统计 KV cache block 数的问题。修改 kv_cache_ut,medium,auto-inherit,否,S,medium-risk,"tests/v1/core/test_kv_cache_utils.py, vllm/v1/core/kv_cache_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,58b2012a,2026-07-21,test-ci,bugfix,【变更概述】修复 CuMem（CUDA 内存管理）slept-L1 碎片化统计问题。修改 mem_utils.py（+22/-9）和 gpu_worker.py（+21/-35），新增 test_me,low,auto-inherit,否,S,low-risk,"tests/models/language/pooling/test_reward.py, tests/utils_/test_mem_utils.py, vllm/utils/mem_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,53c2f20d,2026-07-22,moe-fusion,bugfix,【变更概述】修复 ROCm 平台 EPLB（Expert-Level Load Balancing）启用时 MoE 权重填充导致的冲突问题。EPLB 要求权重连续以进行 view/重排操作，而原有的权,low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fused_moe/unquantized_fused_moe_method.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,37e370fe,2026-07-22,test-ci,performance,【变更概述】为 DeepSeek V4 压缩器（compressor）添加 c128 边界检测机制，在上下文无需 c128 压缩时跳过空内核启动，实现约 2 倍的内核性能提升。核心新增 _get_c1,medium,auto-inherit,否,S,medium-risk,"tests/kernels/test_compressor_kv_cache.py, vllm/models/deepseek_v4/compressor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,2dc5a72e,2026-07-22,other,bugfix,【变更概述】修复异步渲染路径中视觉 chunk UUID 未重建的问题。在 HfRenderer 中，当检测到多模态数据需要异步渲染时，调用 rebuild_mm_uuids_from_mm_data,low,auto-inherit,否,S,low-risk,vllm/renderers/hf.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,d6dbdb9b,2026-07-22,operator-kernel,bugfix,【变更概述】为 XPU 平台添加 topk_softplus_sqrt 算子参数不匹配的临时规避方案（Workaround）。当平台为 XPU 时，调用不带 is_padding 参数的旧版 topk,low,auto-inherit,否,S,low-risk,vllm/_custom_ops.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,06da482f,2026-07-22,operator-kernel,bugfix,【变更概述】为 XPU 平台添加 topk_softmax 算子参数不匹配的临时规避方案（Workaround）。当平台为 XPU 时，调用不带 is_padding 参数的旧版 topk_softm,low,auto-inherit,否,S,low-risk,vllm/_custom_ops.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,7c21548c,2026-07-22,distributed,bugfix,【变更概述】修复 NIXL KV connector 在混合 MLA+Mamba（SSM）模型异构 TP 场景下的错误行为。纯 MLA 场景下 KV cache 是复制的，只需单次读取；但混合 MLA,low,auto-inherit,否,S,low-risk,"vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py, vllm/distributed/kv_transfer/kv_connector/v1/nixl/pull_worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,060b5f61,2026-07-22,test-ci,bugfix,【变更概述】修复 MLA（Multi-Head Latent Attention）在 PCP（Prefill Context Parallelism）场景下，空的上下文 chunk 导致 attent,medium,auto-inherit,否,S,medium-risk,"tests/evals/gsm8k/configs/GLM-5.2-NVFP4-TP1-PCP4-EP.yaml, tests/evals/gsm8k/configs/GLM-5.2-NVFP4-TP2-PCP2-EP.yaml, tests/kernels/attention/test_merge_attn_states.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,ba189290,2026-07-22,test-ci,bugfix,【变更概述】修复 MTP（Multi-Token Prediction）投机解码在权重传输（weight transfer）场景下完整性检查误报的问题。原代码在所有 load_weights 调用中都,medium,auto-inherit,否,S,medium-risk,"tests/model_executor/model_loader/test_mtp_validation.py, vllm/distributed/weight_transfer/ipc_engine.py, vllm/distributed/weight_transfer/nccl_engine.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,c8db00b1,2026-07-23,model-architecture,bugfix,【变更概述】修复 GPTQ 量化模式下 Qwen3.5 MTP（Multi-Token Prediction）模型在使用投机解码时权重加载错误的问题。修改 vllm/model_executor/mo,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/qwen3_5_mtp.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,80c76839,2026-07-23,multimodal,performance,【变更概述】将多模态 embeds（图像/视频/音频嵌入）的加载操作从主事件循环中分离，改为延迟异步执行，避免阻塞事件循环导致请求处理延迟。修改 vllm/entrypoints/chat_utils,medium,auto-inherit,否,S,medium-risk,"vllm/entrypoints/chat_utils.py, vllm/multimodal/media/connector.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 multimodal 模块在 Ascend 行为一致
+skip,638d6e97,2026-07-23,test-ci,bugfix,[Bugfix][CI/Build] Fix Plamo2 HF runner crash on transformers v5 (_tied_weights_keys list→dict) (#44,none,skip,否,S,low-risk,"tests/conftest.py, tests/models/registry.py",,
+P3,1ad84fea,2026-07-23,test-ci,bugfix,【变更概述】修复投机解码中 stop string 检测的边界问题。当多个 stop string 同时匹配时，此前可能选择非最早的停止点导致生成多余 token。修改 vllm/v1/engine/,low,auto-inherit,否,S,low-risk,"tests/detokenizer/test_check_stop_strings.py, vllm/v1/engine/detokenizer.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,12213c67,2026-07-23,test-ci,bugfix,【变更概述】修复结构化输出语法编译失败时导致引擎崩溃的问题。此前当 XGrammar/LLGuidance 等语法编译失败时，异常会传播到引擎核心导致整个服务崩溃。修改 vllm/v1/core/sc,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_async_scheduler.py, tests/v1/core/test_scheduler.py, vllm/v1/core/sched/interface.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,10c75477,2026-07-23,test-ci,bugfix,【变更概述】修复共享内存广播（shm_broadcast）机制中空闲 reader 无限等待与读取槽位未释放的问题。此前空闲 reader 会持续等待导致资源泄漏，修改 vllm/distribute,low,auto-inherit,否,S,low-risk,"tests/distributed/test_shm_broadcast.py, vllm/distributed/device_communicators/shm_broadcast.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,a76df87d,2026-07-23,test-ci,bugfix,【变更概述】修复 MooncakeStore KV 连接器在存储边界上外部命中（external hits）推导不完整的问题。此前在 KV cache 存储边界处，外部命中计算可能遗漏部分 token,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_mooncake_store_connector.py, tests/v1/kv_connector/unit/test_mooncake_store_hma_e2e.py, tests/v1/kv_connector/unit/test_mooncake_store_scheduler.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,a4904ba9,2026-07-23,test-ci,performance,【变更概述】将 MooncakeStore KV 连接器在 KV 加载路径上的 prepare_value 操作向量化，用批量张量操作替代逐元素循环，提升 KV cache 加载性能。修改 store,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_mooncake_store_prepare_values.py, tests/v1/kv_connector/unit/test_mooncake_store_worker.py, vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/data.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,76bf5524,2026-07-23,model-architecture,bugfix,【变更概述】修复 DeepSeek-V4 DSpark draft 模型的共享专家（shared expert）在张量并行（TP）大于 8 时 padding 计算错误的问题。此前 TP>8 时共享专,medium,auto-inherit,否,S,medium-risk,"vllm/models/deepseek_v4/nvidia/dspark.py, vllm/models/deepseek_v4/nvidia/model.py, vllm/models/deepseek_v4/nvidia/mtp.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,9a698f32,2026-07-23,model-architecture,performance,【变更概述】优化 Inkling 模型的结果处理，避免临时张量分配以减少内存开销，防止在较小显存配置下 OOM。修改 vllm/models/inkling/nvidia/mlp.py 与 moe.p,medium,auto-inherit,否,S,medium-risk,"vllm/models/inkling/nvidia/mlp.py, vllm/models/inkling/nvidia/moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,4080263b,2026-07-23,test-ci,bugfix,【变更概述】移除 Inkling 模型 scale planning 中对 SciPy 的依赖，改用纯 PyTorch 实现相应计算，减少外部依赖。修改 vllm/models/inkling/com,medium,auto-inherit,否,S,medium-risk,"tests/models/inkling/test_contract_validation.py, vllm/models/inkling/common/towers.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,b07ec92f,2026-07-23,test-ci,bugfix,【变更概述】修复 NVFP4 量化 MoE（Mixture of Experts）中共享 scales 不可写的问题。此前共享 scales 张量被标记为只读，导致在运行时修改（如 padding）时,low,auto-inherit,否,S,low-risk,"tests/quantization/test_trtllm_nvfp4_hidden_dim_padding.py, vllm/model_executor/layers/quantization/utils/flashinfer_fp4_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,229e01e9,2026-07-23,test-ci,bugfix,【变更概述】修复混合模型（hybrid models，如包含不同 attention 类型的层）在使用 KV 连接器时逐组（per-group）前缀命中（prefix-hit）分歧的问题。此前不同 a,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_scheduler.py, vllm/v1/core/kv_cache_coordinator.py, vllm/v1/core/kv_cache_manager.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,149daf0d,2026-07-23,test-ci,bugfix,【变更概述】修复 torch.compile 缓存命中问题。此前路径派生的环境变量（如安装路径）被纳入 torch.compile 的缓存因子，导致不同安装路径下缓存无法复用。修改 vllm/envs,low,auto-inherit,否,S,low-risk,"tests/config/test_config_utils.py, vllm/envs.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,917fdb5b,2026-07-23,other,bugfix,【变更概述】修复使用 FlashInferFp8DeepGEMMDynamicBlockScaledKernel 内核时 DeepGEMM warmup 失败的问题。修改 vllm/model_exe,low,auto-inherit,否,S,low-risk,vllm/model_executor/warmup/deep_gemm_warmup.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,d02df748,2026-07-24,test-ci,bugfix,"【变更概述】修复 MediaConnector 解析 base64 data URL 时未遵循 RFC 2397 的问题。此前用 split("";"",1) 切分会把带参数（如 data:image/p",medium,auto-inherit,否,S,medium-risk,"tests/multimodal/media/test_connector.py, vllm/multimodal/media/connector.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,8eac21a6,2026-07-24,test-ci,bugfix,【变更概述】修复 ROCm AITER 融合 AllReduce+RMSNorm 的 token_num 维度计算：由 input_.shape[0] 改为 input_.numel()//hidde,low,auto-inherit,否,S,low-risk,"tests/compile/fusions_e2e/test_tp2_ar_rms.py, vllm/_aiter_ops.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,a454a1dd,2026-07-24,test-ci,bugfix,【变更概述】修复 #39896 引入的回归：--skip-tokenizer-init 与 --dataset-name custom 同用时 serve.py 无条件 assert tokenize,low,auto-inherit,否,S,low-risk,"tests/benchmarks/test_skip_tokenizer_init.py, vllm/benchmarks/datasets/datasets.py, vllm/benchmarks/serve.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,163ecba3,2026-07-24,other,bugfix,【变更概述】修复 layerwise reload 时线性 bias 被错误重载导致权重损坏。bias 在 create_weights() 之后构建，未被 layerwise-reload 触发器跟,low,auto-inherit,否,S,low-risk,vllm/model_executor/model_loader/reload/meta.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,589a5b88,2026-07-24,test-ci,bugfix,【变更概述】修复 PD 分离部署 NixlPush KV 连接器 writer 线程同步握手阻塞管线导致延迟尖刺的问题。重构 push_worker.py 将握手移出 writer 线程阻塞路径，ba,low,auto-inherit,否,S,low-risk,"docs/design/nixl_kv_push_connector.md, tests/v1/kv_connector/unit/test_nixl_push_connector.py, vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,dd72658e,2026-07-24,operator-kernel,performance,【变更概述】【MRV2 关键 commit】为 GLM-5.2（DeepSeek V3.2 架构）在 Blackwell B300 上做大规模解码性能优化，新增 2139 行、修改 29 个文件。核心,medium,idea-copy,否,L,medium-risk,"CMakeLists.txt, csrc/libtorch_stable/bf16_skinny_gemm.cu, csrc/libtorch_stable/bf16_skinny_gemm_entry.cu",理解上游优化思路（CMakeLists.txt） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 operator-kernel 模块在 Ascend 行为一致
+P2,7bdf8cc3,2026-07-24,model-architecture,bugfix,"【变更概述】修复 hy_v3（Humming）模型在 layer.has_bias 为 None 时内核崩溃，单行修复安全处理 None 值。
+【PR号】#48769
+【变更类型】bugfix - 模",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/hy_v3.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,275556c3,2026-07-24,test-ci,bugfix,【变更概述】修复 packed KV cache specs 在混合精度下未被正确检测的问题，修改 vllm/v1/kv_cache_interface.py 增强对不同精度张量的检测与打包逻辑，新增,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_kv_cache_utils.py, vllm/v1/kv_cache_interface.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,0231dd54,2026-07-24,test-ci,bugfix,[BugFix][LoRA] Skip marlin-backend gpt-oss LoRA tests on XPU (#49385),none,skip,否,S,low-risk,tests/lora/test_gptoss_tp.py,,
+P2,33ef67e9,2026-07-25,model-architecture,bugfix,"【变更概述】提升 MOSS-TD（MOSS Transcribe Diarize，语音转写与说话人分离）模型支持的最大音频时长上限，修复长音频处理被截断的问题。
+【PR号】#49403
+【变更类型】b",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/moss_transcribe_diarize.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,d1a8ba63,2026-07-25,model-architecture,bugfix,【变更概述】修复 MiniMax-M3 模型在 Triton kernel 中 token-major top-k 缓冲区处理错误，调整 indexer 与 sparse_attention 的缓冲区,medium,auto-inherit,否,S,medium-risk,"vllm/models/minimax_m3/common/indexer.py, vllm/models/minimax_m3/common/sparse_attention.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,1423569f,2026-07-25,test-ci,bugfix,"【变更概述】修复 Jamba 和 InternLM2 工具解析器在流式输出时丢弃部分参数的 bug，完善流式工具调用参数的累积逻辑，并补充两个解析器的单元测试。
+【PR号】#48852
+【变更类型】b",low,auto-inherit,否,S,low-risk,"tests/tool_parsers/test_internlm2_tool_parser.py, tests/tool_parsers/test_jamba_tool_parser.py, vllm/tool_parsers/internlm2_tool_parser.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,0b1a8bb1,2026-07-25,test-ci,bugfix,[Bugfix][CI] Fix stale Mooncake lookup expectation broken by a merge race (#49802),none,skip,否,S,low-risk,tests/v1/kv_connector/unit/test_mooncake_store_worker.py,,
+P2,fe514576,2026-07-25,test-ci,bugfix,【变更概述】修复 prefix-LM 模型（如 GLM 系列）在纯文本服务时注意力后端被错误排除的问题。修改 vllm/config/model.py（+43/-1）在多模态配置校验中保留文本-onl,medium,config-align,否,M,medium-risk,"tests/config/test_multimodal_config.py, tests/models/utils.py, vllm/config/model.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P3,a82f1b38,2026-07-25,other,performance,【变更概述】性能优化：当 prefix caching 关闭时，跳过 free_blocks 中的 LRU 哈希拆分逻辑，减少不必要的开销。修改 vllm/v1/core/block_pool.py ,low,auto-inherit,否,S,low-risk,vllm/v1/core/block_pool.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,70052fb9,2026-07-25,test-ci,bugfix,【变更概述】修复 Mooncake store worker 中 TP 分片的 Mamba state 被错误纳入 KV-head 去重的问题，重构 worker.py（+97/-78）的 state,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_mooncake_store_hma_e2e.py, tests/v1/kv_connector/unit/test_mooncake_store_worker.py, vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,6a1acac3,2026-07-25,test-ci,bugfix,[BUGFIX] Fix log capture in KV test (#49655),none,skip,否,S,low-risk,tests/v1/core/test_kv_cache_utils.py,,
+P3,7154856f,2026-07-26,distributed,bugfix,【变更概述】修复 KV cache 在接收端布局后处理（kv_postprocess_layout_on_receive）中对 5D 缓存的维度排列错误。此前该函数硬编码了 4D cache 的逆排列,low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/utils.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,3f1d4096,2026-07-26,distributed,bugfix,【变更概述】修复 OffloadingConnectorScheduler 中 num_tokens_after_batch 在请求被中止（FINISHED_ABORTED）时的计算错误。此前对所有已,low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,0da6e7f3,2026-07-26,test-ci,bugfix,"【变更概述】修复 CompilationConfig 和 CustomOp 对矛盾自定义算子指令（custom_ops）的处理。此前使用 assert 进行校验，存在三类问题：(1) 同时指定 ""al",medium,config-align,否,S,medium-risk,"tests/compile/test_config.py, vllm/config/compilation.py, vllm/model_executor/custom_op.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P3,55596792,2026-07-26,distributed,bugfix,【变更概述】修复 OffloadingConnectorScheduler 中 sliding window attention（SWA）卸载时的边界检查错误。在判断 num_pending_gpu_,low,auto-inherit,否,S,low-risk,vllm/distributed/kv_transfer/kv_connector/v1/offloading/scheduler.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,8d28b48d,2026-07-26,test-ci,performance,【变更概述】将多模态（MM）预处理从共享的 renderer 线程池 executor 隔离到独立的单线程 executor，避免 tokenization 与 MM 预处理互相阻塞。具体变更：(1),medium,config-align,否,S,medium-risk,"tests/test_config.py, vllm/config/model.py, vllm/renderers/base.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P2,30b07140,2026-07-26,model-architecture,performance,【变更概述】优化 DeepSeek-OCR-2（基于 DeepEncoder2 架构）的首 token 延迟（TTFT）。核心优化是将 CustomQwen2Decoder 中的自定义 4D atte,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/deepencoder2.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,7a29a3c5,2026-07-26,test-ci,bugfix,【变更概述】修复 KV 卸载持久化缓存（FileMapper）的命名空间未区分 V1（parallelism-agnostic）与 V2（parallelism-specific）model runn,low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/test_file_mapper.py, vllm/v1/kv_offload/file_mapper.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,1240c74c,2026-07-26,test-ci,bugfix,【变更概述】修复 ColQwen3.5（ColBERT 式 late-interaction 检索模型）的注意力契约处理。此前 ColQwen3.5Config.verify_and_update_m,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/pooling/test_colqwen3_5.py, vllm/model_executor/models/config.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,48ebd6f2,2026-07-26,other,bugfix,【变更概述】修复 KVConnector 在 per-token-head 量化模式下启用跨层 KV 块（cross-layer KV blocks）导致 KV 数据损坏的问题。KVConnector,low,auto-inherit,否,S,low-risk,vllm/v1/worker/kv_connector_model_runner_mixin.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,04502dec,2026-07-27,test-ci,performance,【变更概述】优化多模态视频哈希机制，将视频哈希方式从帧数据哈希改为按源字节（source bytes）哈希。当视频帧的 nbytes 小于原始字节大小时，使用帧数据进行哈希；否则使用原始字节。新增 M,medium,auto-inherit,否,S,medium-risk,"tests/multimodal/test_hasher.py, vllm/multimodal/hasher.py, vllm/multimodal/inputs.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,d2ca3002,2026-07-27,other,performance,【变更概述】【MRV2 commit】在 MRV2 采样器中跳过不必要的 FP32 logits 物化操作。新增 _requires_logits_processing 方法，在采样前检查当前批次是否,low,auto-inherit,否,S,low-risk,vllm/v1/worker/gpu/sample/sampler.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,27d7061e,2026-07-27,test-ci,bugfix,【变更概述】修复 JinaRankingIOProcessor 在在线请求构建时丢失 truncate_prompt_tokens 和 truncation_side 参数的 bug。JinaRank,low,auto-inherit,否,S,low-risk,"tests/entrypoints/pooling/scoring/test_jina_ranking_io_processor_unit.py, vllm/entrypoints/pooling/scoring/io_processor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,ef9975d0,2026-07-27,model-architecture,bugfix,【变更概述】移除 DiffusionGemma 模型不正确的流水线并行（PP）支持声明。移除 SupportsPP 导入和继承，删除 make_empty_intermediate_tensors 赋,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/diffusion_gemma.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,56c96b0d,2026-07-27,other,performance,【变更概述】为 LL BF16 Router GEMM 添加 SM100F（Blackwell）和 SM90（Hopper）架构特定的调优配置。新增 _arch_tuned_configs() 函数根,low,auto-inherit,否,S,low-risk,"vllm/model_executor/kernels/linear/cute_dsl/ll_bf16.py, vllm/model_executor/warmup/kernel_warmup.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,59a6b041,2026-07-27,test-ci,bugfix,【变更概述】修复 DP 内部负载均衡（LB）的多个问题：(1) 移除 Rust 前端 routing_score 中对 waiting 请求的额外惩罚；(2) 引入 engine_inflight 精,low,auto-inherit,否,S,low-risk,"rust/src/engine-core-client/src/client/state.rs, tests/v1/engine/test_engine_core_client.py, vllm/v1/core/sched/interface.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,a89015c6,2026-07-27,attention-kv-cache,performance,【变更概述】将 triton_merge_attn_states.py 中 merge_attn_states 内核的 prefill_tokens_with_context 参数从编译时常量改为运行,medium,auto-inherit,否,S,medium-risk,vllm/v1/attention/ops/triton_merge_attn_states.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,96fa3f42,2026-07-27,other,performance,"【变更概述】在 kernel_warmup 中为 ll_bf16 router GEMM 预热添加 is_moe 条件检查，仅在 MoE 模型时执行预热。
+【PR号】#49659
+【变更类型】perf",low,auto-inherit,否,S,low-risk,vllm/model_executor/warmup/kernel_warmup.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,81962bb6,2026-07-27,distributed,bugfix,【变更概述】修复 FlashInfer MNNVL 工作空间创建时未校验 mc_ptr 的问题。当 MNNVL multicast 不可用时，工作空间的 mc_ptr 为 0，修复后显式销毁无效工作空,none,skip,否,S,low-risk,vllm/distributed/device_communicators/flashinfer_all_reduce.py,,
+P3,30fbd055,2026-07-27,test-ci,bugfix,【变更概述】修复 ReplaySSM Triton 内核在 ROCm 上不支持 tf32x3 的问题。将 input_precision 改为根据平台动态选择：ROCm 使用 None，CUDA 保持,low,auto-inherit,否,S,low-risk,".buildkite/test-amd.yaml, vllm/model_executor/layers/mamba/ops/selective_state_update_replayssm_output_only.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,394beb63,2026-07-27,test-ci,bugfix,"【变更概述】修复 ROCm 平台 CPU KV cache 加载使用 Triton 内核的问题。ROCm 上 GPU 内核不能直接解引用 CPU 指针，应使用 C++ batch DMA 路径。
+【P",low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/cpu/test_gpu_worker.py, vllm/v1/kv_offload/cpu/gpu_worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,7f599d78,2026-07-27,operator-kernel,bugfix,[communication] [bugfix] fix quickreduce acc error in cudagraph mode (#46913),none,skip,否,S,low-risk,"csrc/quickreduce/quick_reduce.h, tests/distributed/test_rocm_quick_reduce.py",,
+P3,eb290ab6,2026-07-27,test-ci,bugfix,【变更概述】修复 CPU 平台 MoE grouped-gemm 内核在 TP 分片后 intermediate size 不对齐 32 字节时静默回退到慢速 per-expert torch 循环的,low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_cpu_fused_moe.py, vllm/model_executor/layers/fused_moe/cpu_fused_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,cbc3a872,2026-07-27,other,bugfix,"【变更概述】修复 HF tokenizer 在双格式 Mistral 仓库中选择错误 tokenizer 类的问题。对 HF tokenizer 明确使用 config_format=""hf"" 加载 ",low,auto-inherit,否,S,low-risk,vllm/tokenizers/registry.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,8061dc26,2026-07-27,test-ci,bugfix,"【变更概述】修复 DeepSeek V4 sparse MLA 预热时 compress_ratios 中包含 0 值导致预热键异常的问题。将 0 值归一化为 1。
+【PR号】#49392
+【变更类型",medium,auto-inherit,否,S,medium-risk,"tests/v1/attention/test_indexer_deepseek_v4_slot_mapping.py, vllm/v1/attention/backends/mla/indexer.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,544cb724,2026-07-27,operator-kernel,performance,"【变更概述】优化 CPU 平台投机解码的 GDN 卷积路径。重构 conv.cpp 和 gdn_attention.py 以提升性能。
+【PR号】#48577
+【变更类型】performance - ",low,idea-copy,否,L,low-risk,"csrc/cpu/sgl-kernels/conv.cpp, csrc/cpu/torch_bindings.cpp, tests/kernels/mamba/cpu/test_cpu_gdn_ops.py",理解上游优化思路（csrc/cpu/sgl-kernels/conv.cpp） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+P3,53397fbf,2026-07-27,test-ci,bugfix,"【变更概述】修复 KV Offload P2P 传输中重连到已回收 peer 时 EngineCore 崩溃的问题。在 zmq 控制层添加 reconnect 状态处理。
+【PR号】#49823
+【变",low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/tiering/p2p/test_zmq_transport.py, vllm/v1/kv_offload/tiering/p2p/control/base.py, vllm/v1/kv_offload/tiering/p2p/control/zmq.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,49f31d7c,2026-07-27,test-ci,bugfix,"【变更概述】修复 ROCm 平台 vllm_c RMSNorm 内核输出非连续张量的问题。
+【PR号】#49913
+【变更类型】bugfix - ROCm 内核修复
+【变更文件】vllm/kernel",low,auto-inherit,否,S,low-risk,"tests/kernels/ir/test_layernorm.py, vllm/kernels/vllm_c.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,74d3b799,2026-07-27,other,bugfix,"【变更概述】修复 mHC block-M prenorm GEMM 中跨行规约进位错误。
+【PR号】#49429
+【变更类型】bugfix - 内核数值修复
+【变更文件】vllm/model_exec",low,auto-inherit,否,S,low-risk,vllm/model_executor/kernels/mhc/tilelang_kernels.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,439f3362,2026-07-27,other,bugfix,【变更概述】【MRV2 commit】修复 MRV2 mamba_hybrid.py 中的 GPU<->CPU 同步问题。将 num_accepted_tokens_gpu 和 _mamba_stat,low,auto-inherit,否,S,low-risk,vllm/v1/worker/gpu/model_states/mamba_hybrid.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,50aa8304,2026-07-27,test-ci,bugfix,【变更概述】【MRV2 commit】修复 MRV2 中 dummy 请求创建时将余数 token 全部分配给最后一个请求，导致该请求 seq_len 超过 max_model_len 的问题。改为将,medium,auto-inherit,否,S,medium-risk,"tests/v1/worker/test_gpu_input_batch_v2.py, vllm/v1/worker/gpu/input_batch.py, vllm/v1/worker/gpu/lora_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,f0553889,2026-07-27,test-ci,bugfix,【变更概述】修复 XPU 平台 sparse MLA 内核中全掩码索引块导致 NaN 中毒的问题。使用有限哨兵值 -1e30 替代 -inf，避免 re_scale = exp2(-inf - -in,medium,auto-inherit,否,S,medium-risk,"tests/kernels/attention/test_xpu_mla_sparse.py, vllm/v1/attention/ops/xpu_mla_sparse.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,30217b0e,2026-07-28,test-ci,bugfix,【变更概述】修复 P2P KV Offload 会话中 serve 状态管理问题，将 serve 状态限定在每次 fetch 轮次内，避免跨轮次状态污染。重构 client.py、server.py、,low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/tiering/p2p/test_manager.py, tests/v1/kv_offload/tiering/p2p/test_sessions.py, vllm/v1/kv_offload/tiering/p2p/session/client.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,1e81853a,2026-07-28,test-ci,bugfix,【变更概述】修复 Mamba 模型在 DCP（Decode Context Parallelism）下 KV Offload 的 block span 缩放问题，确保 Mamba block span,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/offloading_connector/test_config.py, vllm/distributed/kv_transfer/kv_connector/v1/offloading/config.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,b6cbba8b,2026-07-28,test-ci,bugfix,[Bugfix][Kernel] Fix batch invariance in RMSNorm kernels by pinning block size (#48391),none,skip,否,S,low-risk,".buildkite/test_areas/misc.yaml, csrc/libtorch_stable/layernorm_kernels.cu, csrc/libtorch_stable/layernorm_quant_kernels.cu",,
+P2,62d8db7c,2026-07-28,model-architecture,bugfix,"【变更概述】补充 Kimi-K3 模型目录缺失的 __init__.py 文件，修复导入错误。
+【PR号】#50131
+【变更类型】bugfix - 缺失文件补全
+【变更文件】vllm/models/",medium,auto-inherit,否,S,medium-risk,"vllm/models/kimi_k3/__init__.py, vllm/models/kimi_k3/amd/ops/__init__.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,98e91a96,2026-07-28,distributed,bugfix,"【变更概述】优化 NIXL Push 模式 D->P 握手流程，跳过多余的 add_remote_agent 步骤，减少握手延迟。
+【PR号】#49345
+【变更类型】bugfix - NIXL 握手",low,auto-inherit,否,S,low-risk,"vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_worker.py, vllm/distributed/kv_transfer/kv_connector/v1/nixl/push_worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,948107ac,2026-07-28,test-ci,bugfix,"【变更概述】增强 Intel INC 量化方案的 extra_config 处理，修复 layer name suffix 匹配逻辑。
+【PR号】#48589
+【变更类型】bugfix - 量化配置匹",low,auto-inherit,否,S,low-risk,"tests/quantization/test_auto_round.py, vllm/model_executor/layers/quantization/inc/config_parser.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,bf9f2300,2026-07-28,other,bugfix,[Rust Frontend] Fix finish reason for named tool choices (#49496),none,skip,否,S,low-risk,"rust/src/server/src/routes/openai/chat_completions.rs, rust/src/server/src/routes/openai/chat_completions/convert.rs, rust/src/server/src/routes/tests.rs",,
+P3,b09688a6,2026-07-28,other,bugfix,【变更概述】修复 speculative decode 在 level-2 sleep（GPU 休眠）后 draft buffers 被释放的问题，确保 sleep 唤醒后 draft buffers,low,auto-inherit,否,S,low-risk,vllm/v1/worker/gpu_worker.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,03a2d033,2026-07-28,other,bugfix,"【变更概述】修复权重加载时未在所有平台上遵循 cgroup 内存限制的问题，统一内存限制检测逻辑。
+【PR号】#49966
+【变更类型】bugfix - 内存限制检测修复
+【变更文件】vllm/mod",low,auto-inherit,否,S,low-risk,vllm/model_executor/model_loader/weight_utils.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,90245f41,2026-07-28,multimodal,bugfix,【变更概述】【MRV2 相关】修复 CPU MRV2 上多模态推理的问题。修改 vllm/v1/worker/gpu/model_states/encoder_decoder.py 处理多模态输入，在,medium,auto-inherit,否,S,medium-risk,"vllm/multimodal/inputs.py, vllm/v1/worker/cpu/shm.py, vllm/v1/worker/gpu/model_states/encoder_decoder.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 multimodal 模块在 Ascend 行为一致
+P3,f472ab0a,2026-07-28,test-ci,bugfix,"【变更概述】移除 ROCm 平台的 triton per group 量化逻辑，清理 input_quant_fp8.py 和 fp8_utils.py 中的相关代码。
+【PR号】#49621
+【变更",low,auto-inherit,否,S,low-risk,"tests/compile/passes/distributed/test_fusion_all_reduce.py, tests/compile/passes/test_fusion.py, tests/compile/passes/test_silu_mul_quant_fusion.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,d223c900,2026-07-28,model-architecture,bugfix,"【变更概述】修复 transformers backend 中 value padding 逻辑，仅在 value 维度更窄时才进行 padding，避免不必要的 padding。
+【PR号】#500",medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/transformers/__init__.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,52c3c4a4,2026-07-28,test-ci,bugfix,"【变更概述】修复 OBJ（对象存储）KV Offload 在清理期间作业完成状态丢失的问题。
+【PR号】#49947
+【变更类型】bugfix - KV Offload 清理修复
+【变更文件】vllm",low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/tiering/test_obj_tier.py, vllm/v1/kv_offload/tiering/obj/manager.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,a8f29608,2026-07-28,test-ci,bugfix,"【变更概述】使 KV Offload 的紧凑二级标识（compact secondary identity）与 TP（张量并行）无关，简化跨 TP 配置的 KV 迁移。
+【PR号】#49858
+【变更",low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/test_file_mapper.py, tests/v1/kv_offload/tiering/test_fs_tier.py, tests/v1/kv_offload/tiering/test_obj_tier.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,fbb1ef68,2026-07-28,model-architecture,bugfix,"【变更概述】修复 DeepseekV4FP8 Quark MXFP4 量化在遇到列表值权重时的崩溃问题。
+【PR号】#49634
+【变更类型】bugfix - 量化崩溃修复
+【变更文件】vllm/mo",medium,auto-inherit,否,S,medium-risk,vllm/models/deepseek_v4/quant_config.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,33fe71a4,2026-07-28,test-ci,bugfix,"【变更概述】回退 AMD MXFP4 MoE backend 的 TRITON_UNFUSED 回退逻辑，恢复原有行为。
+【PR号】#46491
+【变更类型】bugfix - 回退 MoE backe",low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_ocp_mx_moe.py, tests/quantization/test_gfx950_moe.py, vllm/model_executor/layers/fused_moe/oracle/mxfp4.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,02b6ecf0,2026-07-28,attention-kv-cache,performance,"【变更概述】优化 ROCm sparse MLA decode 热循环，消除逐 decode 的 FillFunctor 启动开销。
+【PR号】#44527
+【变更类型】performance - R",medium,idea-copy,否,L,medium-risk,vllm/v1/attention/ops/rocm_aiter_mla_sparse.py,理解上游优化思路（vllm/v1/attention/ops/rocm_aiter_mla_sparse.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,12068918,2026-07-28,distributed,bugfix,"【变更概述】修复 ROCm MoRI-IO KV Connector 在 WRITE 模式下远程 TP rank 坍缩问题。
+【PR号】#47764
+【变更类型】bugfix - KV Connect",low,auto-inherit,否,S,low-risk,"vllm/distributed/kv_transfer/kv_connector/v1/moriio/moriio_common.py, vllm/distributed/kv_transfer/kv_connector/v1/moriio/moriio_connector.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,381b6916,2026-07-29,test-ci,bugfix,【变更概述】修复 Kimi K3 的 KDA（Kernel Delta Attention）在 ROCm 平台上的支持问题。在 vllm/models/kimi_k3/nvidia/kda.py 的 ,medium,auto-inherit,否,S,medium-risk,".buildkite/test-amd.yaml, vllm/models/kimi_k3/nvidia/kda.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,d6247d71,2026-07-29,test-ci,performance,【变更概述】将 DSpark（Qwen3-DSpark）的 Markov head 在各 TP rank 上复制而非分片，避免每个 draft 位置增加 all-reduce 与全词表 gather。,medium,auto-inherit,否,S,medium-risk,"tests/v1/sample/test_head_dtype.py, vllm/model_executor/layers/logits_processor.py, vllm/model_executor/layers/vocab_parallel_embedding.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,a0c092ee,2026-07-29,test-ci,bugfix,【变更概述】修复异步调度（AsyncScheduler）下请求被抢占时 num_output_placeholders 下溢的 bug。此前抢占后仍有在途的 stale output 帧返回，会错误递,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_async_scheduler.py, tests/v1/core/test_scheduler.py, vllm/v1/core/sched/async_scheduler.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,e0cfa52d,2026-07-29,other,bugfix,【变更概述】修复语音转文字（speech-to-text）接口中 transcription 与 translation 的 verbose 字段类型，由字符串/整型改为 float 返回，符合 Op,low,auto-inherit,否,S,low-risk,"vllm/entrypoints/speech_to_text/base/serving.py, vllm/entrypoints/speech_to_text/transcription/protocol.py, vllm/entrypoints/speech_to_text/translation/protocol.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,72297d85,2026-07-29,other,performance,"【变更概述】将 XPU 平台上无权重（weightless）的 RMSNorm 路由到 _C 扩展分发路径，删除 vllm/kernels/xpu_ops.py 中冗余的实现（-6 行）。
+【PR号】",low,auto-inherit,否,S,low-risk,vllm/kernels/xpu_ops.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,aeaa50a7,2026-07-29,test-ci,bugfix,【变更概述】修复多模态缓存哈希未包含媒体 IO 配置（如图片/视频处理参数）的 bug，导致不同 IO 配置的多模态输入会错误命中同一缓存。修改 vllm/multimodal/hasher.py（+,medium,auto-inherit,否,S,medium-risk,"tests/multimodal/test_hasher.py, vllm/multimodal/hasher.py, vllm/multimodal/media/base.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,32e657e6,2026-07-29,test-ci,bugfix,【变更概述】修复 Eagle 投机解码 draft 模型 max_position_embeddings 处理 bug。修改 vllm/config/speculative.py（+43/-0）校验并,medium,config-align,否,M,medium-risk,"tests/config/test_speculative_draft_max_position_embeddings.py, tests/v1/spec_decode/test_llm_base_proposer.py, vllm/config/speculative.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P2,65a1a165,2026-07-29,operator-kernel,bugfix,【变更概述】修复 CPU 平台 FP8 attention 的 scratchpad 大小计算问题。修改 csrc/cpu/cpu_attn.cpp、torch_bindings.cpp、vllm/_,medium,idea-copy,否,L,medium-risk,"csrc/cpu/cpu_attn.cpp, csrc/cpu/torch_bindings.cpp, tests/kernels/attention/test_cpu_attn.py",理解上游优化思路（csrc/cpu/cpu_attn.cpp） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 operator-kernel 模块在 Ascend 行为一致
+P3,db7a79cb,2026-07-29,operator-kernel,bugfix,【变更概述】修复 s390x（IBM Z 架构）构建问题并更新 dockerfile 中的 torch 版本。修改 csrc/cpu/cpu_types_vxe.hpp、docker/Dockerfi,low,idea-copy,否,L,low-risk,"csrc/cpu/cpu_types_vxe.hpp, docker/Dockerfile.s390x",理解上游优化思路（csrc/cpu/cpu_types_vxe.hpp） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+P2,837eae64,2026-07-30,test-ci,bugfix,【变更概述】DeepSeek V4 性能优化，移除 flashmla sparse prefill 中冗余的 full kernel 调用，内核性能提升 1.88x。修改 combine_topk_s,medium,auto-inherit,否,S,medium-risk,"tests/kernels/attention/test_flashmla_sparse.py, vllm/models/deepseek_v4/common/ops/cache_utils.py, vllm/models/deepseek_v4/nvidia/flashmla.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,904fae8b,2026-07-30,model-architecture,bugfix,【变更概述】DeepSeek V4 显存优化，修复 pipeline parallel 场景下 _mtp_hidden_buffer 的冗余分配与拷贝，节省 448 MiB GPU 显存。原实现无论是,medium,auto-inherit,否,S,medium-risk,"vllm/models/deepseek_v4/amd/model.py, vllm/models/deepseek_v4/nvidia/model.py, vllm/models/deepseek_v4/xpu/model.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,5b958907,2026-07-30,test-ci,bugfix,【变更概述】修复 FlexAttention 编码器场景下 block-mask 编译爆炸问题，避免编译时间过长或 OOM。修改 vllm/config/attention.py 与 vllm/v1/,medium,config-align,否,M,medium-risk,"tests/entrypoints/pooling/embed/test_online_long_text.py, tests/kernels/test_flex_attention.py, vllm/config/attention.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P3,59e831c0,2026-07-30,test-ci,performance,【变更概述】新增编译 pass：将 Transformers 的 Residual Add 与 RMSNorm 算子融合。在 vllm/compilation/passes/fusion/add_rm,low,auto-inherit,否,S,low-risk,"tests/compile/passes/test_rmsnorm_reshape_fusion.py, vllm/compilation/passes/fusion/add_rms_fusion.py, vllm/compilation/passes/pass_manager.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,e04a30a7,2026-07-30,test-ci,bugfix,"【变更概述】前端 chat_utils 延迟初始化媒体连接器，避免不必要的初始化开销。
+【PR号】#49914
+【变更类型】refactor - 延迟初始化
+【变更文件】tests/entrypoin",low,auto-inherit,否,S,low-risk,"tests/entrypoints/unit_tests/test_chat_utils.py, vllm/entrypoints/chat_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,b8891661,2026-07-30,test-ci,bugfix,【变更概述】Triton prefix-prefill 算子支持 cached K/V（key/value=None）场景，修改 vllm/v1/attention/ops/prefix_prefil,medium,auto-inherit,否,S,medium-risk,"tests/kernels/attention/test_prefix_prefill.py, vllm/v1/attention/ops/prefix_prefill.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,4e582c5b,2026-07-30,test-ci,bugfix,【变更概述】P/D 分离场景下，将 KV lease 截止时间从全局时钟重算到 worker 本地时钟，修复 NIXL connector 的 lease 超时判断偏差。修改 nixl base_sc,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_nixl_connector.py, vllm/distributed/kv_transfer/kv_connector/v1/nixl/base_scheduler.py, vllm/distributed/kv_transfer/kv_connector/v1/nixl/metadata.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,437e0b7f,2026-07-30,test-ci,bugfix,【变更概述】修复 P/D 分离下的抢占竞态条件。修改核心 vllm/v1/core/sched/scheduler.py 与多个 kv_connector（base/multi_connector/o,low,auto-inherit,否,S,low-risk,"tests/v1/core/test_async_scheduler.py, tests/v1/core/utils.py, vllm/distributed/kv_transfer/kv_connector/v1/base.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,451227cb,2026-07-30,operator-kernel,bugfix,[Bugfix][Kernel] Fix integer overflow in libtorch_stable/activation_kernels.cu (#49660),none,skip,否,S,low-risk,csrc/libtorch_stable/activation_kernels.cu,,
+P3,b28c178f,2026-07-30,other,bugfix,"【变更概述】修复 Quark 量化模型在推测解码场景下 FusedMoE 触发的 AssertionError。注：该 commit 未携带文件级变更统计（patch 为空，疑似合并/纯逻辑修复）。
+",low,auto-inherit,否,S,low-risk,(无文件变更信息),确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,48aa8d8d,2026-07-30,test-ci,bugfix,"【变更概述】修复多进程执行器中陈旧 RPC deadline 变成无限等待的问题，修改 shm_broadcast 与 multiproc_executor，新增超时测试。
+【PR号】#41357
+【",low,auto-inherit,否,S,low-risk,"tests/v1/executor/test_multiproc_executor_timeout.py, vllm/distributed/device_communicators/shm_broadcast.py, vllm/v1/executor/multiproc_executor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,a0cd2b69,2026-07-31,test-ci,bugfix,【变更概述】【MRV2 commit】将 block table 宽度的 128-token 对齐逻辑统一抽取为 get_block_table_width 函数，替换此前分散在 model_runn,medium,auto-inherit,否,S,medium-risk,"tests/v1/attention/test_indexer_deepseek_v4_slot_mapping.py, tests/v1/attention/test_mla_backends.py, tests/v1/worker/test_gpu_model_runner.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,94e9ef07,2026-07-31,test-ci,bugfix,【变更概述】修复融合 MoE（Fused MoE）权重加载中对量化 scale 转置的问题。此前 RoutedExperts.load_weights 在加载融合 expert 权重时，会根据 hid,low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_moe_weight_loading_padded.py, vllm/model_executor/layers/fused_moe/routed_experts.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,df71917c,2026-07-31,operator-kernel,performance,【变更概述】【DSv4 性能优化】为 DeepSeek V4 的 attention eager break 路径引入 DeepseekV4EagerScratchPool（137 行新文件），预分配,medium,idea-copy,否,L,medium-risk,"csrc/libtorch_stable/fused_deepseek_v4_qnorm_rope_kv_insert_kernel.cu, csrc/libtorch_stable/ops.h, csrc/libtorch_stable/torch_bindings.cpp",理解上游优化思路（csrc/libtorch_stable/fused_deepseek_v4_qnorm_rope_kv_insert_kernel.cu） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 operator-kernel 模块在 Ascend 行为一致
+P3,5233368d,2026-07-31,moe-fusion,bugfix,【变更概述】为 ROCm gfx942 平台添加 MXFP4 仿真回退路径。当 AITER MXFP4 后端不可用时，回退到 EMULATION 后端，使用 W4A16（仅权重量化）模式运行 MXFP,low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/fused_moe/experts/ocp_mx_emulation_moe.py, vllm/model_executor/layers/fused_moe/experts/triton_moe.py, vllm/model_executor/layers/fused_moe/oracle/mxfp4.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,0b5b49dd,2026-07-31,test-ci,bugfix,【变更概述】将 vllm/entrypoints/chat_utils.py 中多处面向用户的 ValueError 替换为 VLLMValidationError，提供更精确的错误类型和参数信息。涉,low,auto-inherit,否,S,low-risk,"tests/entrypoints/unit_tests/test_chat_utils.py, tests/renderers/test_chat_utils_prompt_embeds.py, vllm/entrypoints/chat_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,f5ffc59b,2026-07-31,other,bugfix,【变更概述】修复 renderer 预热（warmup）流程，将其从 OpenAIServingChat 统一移到 OnlineRenderer 和 LLM 类中。此前 warmup 由 OpenAI,low,auto-inherit,否,S,low-risk,"vllm/entrypoints/generate/api_router.py, vllm/entrypoints/llm.py, vllm/entrypoints/openai/api_server.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,92643d68,2026-07-31,model-architecture,performance,【变更概述】为 Kimi K3 DSpark（推测解码）模型实现 all-reduce + residual-add + RMSNorm 融合优化。核心改动将 vllm/models/deepseek,medium,auto-inherit,否,S,medium-risk,"vllm/models/common/ops/__init__.py, vllm/models/common/ops/fused_allreduce_rms_norm.py, vllm/models/deepseek_v32/amd/model.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,17beffd5,2026-07-31,test-ci,bugfix,【变更概述】明确 split_audio 函数要求单声道（1D）音频输入，并增加多声道输入的显式校验。在 vllm/multimodal/audio.py 中，将 split_audio 的 audi,medium,auto-inherit,否,S,medium-risk,"docs/features/multimodal_inputs.md, tests/multimodal/test_audio.py, vllm/entrypoints/speech_to_text/base/serving.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,f727951d,2026-07-31,test-ci,bugfix,【变更概述】重新合入（re-land）MiniMax M3 的默认视频处理器修复。在 vllm/models/minimax_m3/common/mm_preprocess.py 中，为 MiniMa,medium,auto-inherit,否,S,medium-risk,"tests/multimodal/test_video.py, vllm/model_executor/layers/fused_allreduce_gemma_rms_norm.py, vllm/models/minimax_m3/common/mm_preprocess.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,10e6b400,2026-07-31,test-ci,bugfix,【变更概述】修复 CPU attention backend 中冗余的 KV cache 写入问题。在 vllm/v1/attention/backends/cpu_attn.py 中，重构 KV c,medium,auto-inherit,否,S,medium-risk,".buildkite/scripts/hardware_ci/run-cpu-test-arm.sh, tests/kernels/attention/test_cpu_attn.py, vllm/v1/attention/backends/cpu_attn.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,3ee2bd13,2026-07-31,model-architecture,bugfix,【变更概述】修复 HunyuanVL 模型图像边界 token 重复的问题。此前 dummy 输入仅使用 image_token，且 PromptReplacement 的 target 仅匹配单个 ,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/hunyuan_vision.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,bebf9180,2026-07-31,test-ci,bugfix,【变更概述】为 JinaEmbeddingsV5Model 新增 JinaEmbeddingsV5ModelConfig 配置处理器，在加载时检测 hf_config.is_decoder，若为 Fa,medium,auto-inherit,否,S,medium-risk,"tests/models/language/pooling/test_jina_embeddings_v5.py, vllm/model_executor/models/config.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,1d8be5cb,2026-07-31,other,bugfix,【变更概述】将 deepseek_v4_fp8 加入 XPUPlatform 的 supported_quantization 列表，使 DeepSeek V4 FP8 量化方法在 Intel XPU,low,auto-inherit,否,S,low-risk,vllm/platforms/xpu.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,ef0d084b,2026-07-31,other,bugfix,【变更概述】修复 XPU FP8 block-scaled GEMM kernel 的 scale 布局以兼容 MLA。此前 process_weights_after_loading 将 scale,low,auto-inherit,否,S,low-risk,vllm/model_executor/kernels/linear/scaled_mm/xpu.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,4689c7dd,2026-07-31,other,performance,【变更概述】为 AMD Instinct MI325X 显卡新增 selective_state_update Triton 内核的 float16 调优配置。配置文件针对 headdim=64、ds,low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/mamba/ops/configs/selective_state_update/headdim=64,dstate=128,device_name=AMD_Instinct_MI325X,cache_dtype=float16.json",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,d91f7af7,2026-07-31,test-ci,bugfix,【变更概述】修复 ROCm DeepEP 的 FP8 dispatch 量化上界问题。将 DeepEP 构建分支从 a9ea9774 升级到 0f63d3e9，并在构建时传入 --rocm-gfx94,low,idea-copy,否,L,low-risk,"docker/Dockerfile.rocm, tests/kernels/moe/test_deepep_moe.py",理解上游优化思路（docker/Dockerfile.rocm） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,
+P3,ab98034d,2026-07-31,test-ci,bugfix,【变更概述】修复 Kimi K3 工具调用 ID 在多轮会话中重复的问题。此前解析器根据 XTML 的 index 属性生成形如 {tool}:{index} 的 ID（如 calc:0），该 ID ,low,auto-inherit,否,S,low-risk,"rust/src/chat/src/renderer/kimi_k3/encoding.rs, rust/src/chat/src/renderer/kimi_k3/tests.rs, rust/src/parser/src/unified/kimi_k3.rs",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,f1899b2f,2026-07-31,test-ci,bugfix,【变更概述】修复 ROCm AITER MLA 在 MTP（Multi-Token Prediction）验证阶段的 decode 元数据尺寸问题。此前 get_mla_metadata_info_v,medium,idea-copy,否,L,medium-risk,"tests/v1/attention/test_rocm_aiter_mla_mtp_split.py, vllm/v1/attention/backends/mla/rocm_aiter_mla.py",理解上游优化思路（tests/v1/attention/test_rocm_aiter_mla_mtp_split.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 test-ci 模块在 Ascend 行为一致
+skip,d6938b74,2026-07-31,other,bugfix,[Bugfix][Rust Frontend] Select earliest-completing stop string (#50200),none,skip,否,S,low-risk,rust/src/text/src/output/decoded.rs,,
+P3,0bff0ce5,2026-07-31,test-ci,bugfix,【变更概述】修复 DeepGEMM MoE 在 Kimi K3 配置下的 ep_gather 内核问题。Kimi K3 的 latent-MoE hidden_size（如 3584）不能被 1024,low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_deepgemm.py, vllm/model_executor/layers/fused_moe/deep_gemm_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,39f55ffd,2026-08-01,other,performance,【变更概述】将 AsyncLLM 中原始提示词（raw prompt）的预处理（tokenization 和多模态处理）从事件循环同步调用改为卸载到渲染器线程池异步执行。当请求包含原始文本提示词（非已,low,auto-inherit,否,S,low-risk,"vllm/v1/engine/async_llm.py, vllm/v1/engine/input_processor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,ab064861,2026-08-01,operator-kernel,bugfix,[Bugfix][Kernel] Fix dangling temporary in AWQ gemm torch::stable::sum dim arg (#46805),none,skip,否,S,low-risk,csrc/libtorch_stable/quantization/awq/gemm_kernels.cu,,
+P2,77469c90,2026-08-01,test-ci,bugfix,【变更概述】修复 ROCm 平台 AITER MLA 注意力后端在小头（small-head）验证场景下 flatten 操作的因果掩码问题。当 MLA 模型在 ROCm 上使用 AITER 后端进行,medium,idea-copy,否,L,medium-risk,"tests/kernels/attention/test_rocm_aiter_mla_causal_verify_mask.py, vllm/v1/attention/backends/mla/rocm_aiter_mla.py",理解上游优化思路（tests/kernels/attention/test_rocm_aiter_mla_causal_verify_mask.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 test-ci 模块在 Ascend 行为一致
+P3,6c91de36,2026-08-01,other,bugfix,【变更概述】修复推理解析器（reasoning parser）未将 model_config 转发给嵌套解析器的问题。单行修复，确保嵌套的 reasoning parser 能够接收 model_co,low,auto-inherit,否,S,low-risk,vllm/parser/abstract_parser.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,f7097a92,2026-08-01,model-architecture,bugfix,【变更概述】修复导入 vllm.models.common.ops 时意外初始化 CUDA 的问题。此前 __init__.py 导出 fused_allreduce_rms_norm 会触发 CUD,medium,auto-inherit,否,S,medium-risk,"vllm/models/common/ops/__init__.py, vllm/models/deepseek_v32/amd/model.py, vllm/models/deepseek_v32/nvidia/model.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,c4a4a42d,2026-08-01,test-ci,bugfix,[Bugfix][Test] Fix monolithic routing replay test buffer capacity (#50640),none,skip,否,S,low-risk,tests/kernels/moe/test_routed_experts_capture_monolithic.py,,
+P2,68ca6fd0,2026-08-03,config,bugfix,【变更概述】移除 SpeculativeConfig 中针对 DSpark 投机解码方法的错误启动断言。该断言要求 num_speculative_tokens >= dspark_block_siz,medium,config-align,否,S,medium-risk,vllm/config/speculative.py,同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 config 模块在 Ascend 行为一致
+P3,ec40f6a8,2026-08-03,other,bugfix,【变更概述】修复 CPU-only 主机上 torch.compile 因调用 torch.accelerator.synchronize 而崩溃的问题。在 CPU-only 环境下 torch.ac,low,auto-inherit,否,S,low-risk,"vllm/v1/worker/cpu/shm.py, vllm/v1/worker/cpu_model_runner.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,89ac407e,2026-08-03,test-ci,performance,【变更概述】优化多模态占位符（placeholder）和 token 匹配扫描的性能。重构 vllm/multimodal/processing/processor.py (+97/-44) 的扫描逻,medium,auto-inherit,否,S,medium-risk,"tests/multimodal/test_processing.py, vllm/multimodal/processing/processor.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,d83eb0b3,2026-08-03,test-ci,bugfix,【变更概述】安全修复：将 NVIDIA DeepStream 视频处理管线正确分类为 GPU 后端，并强制执行视频像素限制。修改 vllm/multimodal/video.py 和 vllm/mul,medium,auto-inherit,否,S,medium-risk,"tests/multimodal/media/test_video.py, vllm/multimodal/media/video.py, vllm/multimodal/video.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,4635cc3e,2026-08-03,moe-fusion,performance,【变更概述】为 Kimi-K3 Latent-MoE 的 fused path 新增基于 token 数量的三级 tail 实现调度机制（LatentTailTier）。重构 latent_moe_r,medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/layers/fused_moe/runner/latent_moe_runner.py, vllm/models/kimi_k3/nvidia/model.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 moe-fusion 模块在 Ascend 行为一致
+P3,2755489a,2026-08-03,test-ci,bugfix,【变更概述】修复 INC（Intel Neural Compressor）w4a4 量化模型的问题。修改 vllm/model_executor/layers/quantization/inc/sch,low,auto-inherit,否,S,low-risk,"tests/quantization/test_auto_round.py, vllm/model_executor/layers/quantization/inc/schemes/inc_mxfp4_linear.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,f5bb701f,2026-08-03,test-ci,bugfix,【变更概述】在 Anthropic API 兼容入口点约束 cache_salt 为非空。修改 vllm/entrypoints/anthropic/protocol.py (+1) 添加非空约束，新,low,auto-inherit,否,S,low-risk,"tests/entrypoints/anthropic/test_anthropic_messages_conversion.py, vllm/entrypoints/anthropic/protocol.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,5e35a6f4,2026-08-03,other,performance,【变更概述】当编译模式为 CompilationMode.NONE 时跳过 CPU model runner 的 warm up 阶段。修改 vllm/v1/worker/cpu_model_runn,low,auto-inherit,否,S,low-risk,vllm/v1/worker/cpu_model_runner.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,5c4fe4b1,2026-08-03,test-ci,bugfix,【变更概述】修复 Mooncake KV Connector 在合并的 store 组间未正确传播 EAGLE 投机解码状态的问题。重构 vllm/distributed/kv_transfer/kv,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_mooncake_store_coordinator.py, vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/coordinator.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,e42c230e,2026-08-03,test-ci,bugfix,[Bugfix] serving_llama70B_tp4 benchmark was silently running at tensor_parallel_size=1 (#50766),none,skip,否,S,low-risk,.buildkite/performance-benchmarks/tests/serving-tests.json,,
+P3,7b50d2c0,2026-08-04,moe-fusion,performance,【变更概述】重构 vllm/model_executor/layers/fused_moe/all2all_utils.py，避免在每次 `vllm serve` 配置生成时都导入 nixl_ep。将,low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fused_moe/all2all_utils.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,122b3d46,2026-08-04,operator-kernel,bugfix,[Bugfix][CPU] Fix macOS build: std::sqrt is not constexpr under libc++ (#50915),none,skip,否,S,low-risk,csrc/cpu/sgl-kernels/fla.cpp,,
+P3,199644d4,2026-08-04,test-ci,bugfix,【变更概述】修复 sparse MLA 在 masked MHA 路径下 workspace 未正确保护导致的潜在问题。修改 vllm/model_executor/layers/attention/,low,auto-inherit,否,S,low-risk,"tests/v1/attention/test_sparse_mla_backends.py, vllm/model_executor/layers/attention/mla_attention.py, vllm/model_executor/layers/attention/sparse_mla_attention.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,7c40d61e,2026-08-04,model-architecture,bugfix,【变更概述】修复多模态 embeddings 展平逻辑，原先只处理 3D，现扩展到 >2D 的任意维度。修改 vllm/model_executor/models/transformers/multi,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/transformers/multimodal.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,5f2ee2fa,2026-08-04,attention-kv-cache,bugfix,【变更概述】将 KV cache 容量日志打印时机调整到 block-size 解析完成之后，确保打印的容量值准确。修改 vllm/v1/core/kv_cache_utils.py 与 vllm/v,medium,auto-inherit,否,S,medium-risk,"vllm/v1/core/kv_cache_utils.py, vllm/v1/engine/core.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 attention-kv-cache 模块在 Ascend 行为一致
+P3,24c939c4,2026-08-04,other,bugfix,"【变更概述】修复 XPU 平台 collect_env.py 中 oneccl 版本信息采集问题。
+【PR号】#47104
+【变更类型】bugfix - XPU 环境信息采集
+【变更文件】vllm/c",low,auto-inherit,否,S,low-risk,vllm/collect_env.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,6a9fdf0d,2026-08-04,test-ci,bugfix,【变更概述】修复多模态 checkpoint 下序列分类（seq-cls）num_labels 未从顶层配置正确解析的问题。修改 vllm/model_executor/models/adapters,medium,auto-inherit,否,S,medium-risk,"tests/models/test_adapters.py, vllm/model_executor/models/adapters.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,a1657a02,2026-08-04,other,bugfix,"【变更概述】修复 DeepGEMM 在 CUDA 12.9 下 FP8 头文件可见性问题，调整 cmake 与安装脚本。
+【PR号】#51003
+【变更类型】bugfix - 构建修复
+【变更文件】c",low,auto-inherit,否,S,low-risk,"cmake/external_projects/deepgemm.cmake, tools/install_deepgemm.sh",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,72cd5424,2026-08-04,other,bugfix,[Rust][Benchmark] Preserve UTF-8 across benchmark stream chunks (#50868),none,skip,否,S,low-risk,rust/src/bench/src/backends/streaming.rs,,
+P3,adbf08d9,2026-08-04,test-ci,performance,【变更概述】优化 Kimi K3 reasoning parser 在 decode 路径上的推理结束检查，从全量扫描改为 O(delta) 增量检查，降低 decode 每步的开销。修改 vllm/,low,auto-inherit,否,S,low-risk,"tests/reasoning/test_kimi_k3_reasoning_parser.py, vllm/reasoning/kimi_k3_reasoning_parser.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,385d4c08,2026-08-04,test-ci,bugfix,【变更概述】修复 ROCm AITER triton MOE routing 的 memory access fault 错误，修改 vllm/model_executor/layers/fused_,low,auto-inherit,否,S,low-risk,"tests/models/quantization/test_gpt_oss.py, vllm/model_executor/layers/fused_moe/experts/aiter_mxfp4_w4a8_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,413e70d5,2026-08-04,moe-fusion,performance,"【变更概述】新增 NVIDIA H20 平台 E=256,N=512 的 fused MoE 性能配置文件，优化 H20 上的 MoE 计算。
+【PR号】#48825
+【变更类型】performanc",low,auto-inherit,否,S,low-risk,"vllm/model_executor/layers/fused_moe/configs/E=256,N=512,device_name=NVIDIA_H20.json",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,41ba11b8,2026-08-04,operator-kernel,bugfix,【变更概述】修复 Kimi K3 AttnRes dispatch 的 packed rows 与算子可用性检查，修改 csrc/libtorch_stable/kimi_k3/attn_res_ke,medium,idea-copy,否,L,medium-risk,"csrc/libtorch_stable/kimi_k3/attn_res_kernel.cu, vllm/models/kimi_k3/nvidia/ops/attn_res.py",理解上游优化思路（csrc/libtorch_stable/kimi_k3/attn_res_kernel.cu） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 operator-kernel 模块在 Ascend 行为一致
+P2,6a9109d8,2026-08-04,test-ci,bugfix,【变更概述】修复 Qwen3-Omni 在 use_audio_in_video=True 时处理无音轨视频的崩溃问题。修改 qwen2_5_omni_thinker.py 与 qwen3_omni_,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/processing/test_audio_in_video.py, vllm/model_executor/models/qwen2_5_omni_thinker.py, vllm/model_executor/models/qwen3_omni_moe_thinker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+skip,66b3c0e6,2026-08-05,test-ci,performance,【变更概述】优化 FlashAttention 4 (FA4) 的 mm_prefix（多模态前缀）范围查找逻辑。在 flash_attn.py 后端中优化多模态 prefix attention 的,none,skip,否,S,low-risk,"tests/v1/attention/test_mm_prefix.py, vllm/model_executor/models/gemma4_mm.py, vllm/v1/attention/backend.py",,
+P3,08b8613b,2026-08-05,test-ci,bugfix,【变更概述】修复 MiniMax-M3 模型使用 NVFP4 量化时 flashinfer cutlass MoE 专家层的推理正确性问题。修改 flashinfer_cutlass_moe.py (,low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_flashinfer_moe.py, vllm/model_executor/layers/fused_moe/experts/flashinfer_cutlass_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,cd930c8e,2026-08-05,other,bugfix,【变更概述】修复 MLA（Multi-Head Latent Attention）在 Marlin FP8 量化下 kv_b_proj 投影层的激活 dtype 不匹配问题。修改 mla_attent,low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/attention/mla_attention.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,beca88e5,2026-08-05,model-architecture,bugfix,【变更概述】修复 Kimi-K3 模型在启用专家并行（EP）时 moe_intermediate 层不必要的 padding 问题。修改 kimi_k3/nvidia/model.py (+1/-1),medium,auto-inherit,否,S,medium-risk,vllm/models/kimi_k3/nvidia/model.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,f5cd862d,2026-08-05,model-architecture,bugfix,【变更概述】修复 Kimi-K3 模型在 ROCm 平台上的两个问题：(1) 混合批次时 KDA 算子产生 NaN；(2) autotune 配置存在竞争条件。新增 kimi_k3/amd/kda.p,medium,auto-inherit,否,S,medium-risk,"vllm/models/kimi_k3/amd/kda.py, vllm/models/kimi_k3/amd/linear.py, vllm/models/kimi_k3/amd/ops/third_party/kda/chunk.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,b92352ca,2026-08-05,test-ci,performance,【变更概述】优化 CPU KV Offload 的 ARC（Adaptive Replacement Cache）策略，避免批次驱逐时的二次时间复杂度。修改 arc.py (+20/-21) 优化驱逐,low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/cpu/test_manager.py, vllm/v1/kv_offload/cpu/policies/arc.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,999dd8b4,2026-08-05,other,bugfix,"【变更概述】为 XPU 平台添加 is_current_stream_capturing 的别名，指向 XPU 实现。修改 xpu_model_runner.py (+1) 添加别名。
+【PR号】#5",low,auto-inherit,否,S,low-risk,vllm/v1/worker/xpu_model_runner.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,4719a9b8,2026-08-05,model-architecture,bugfix,【变更概述】修复 EAGLE3 DeepSeek draft 模型在非 YaRN RoPE 配置下的崩溃问题。修改 deepseek_eagle3.py (+0/-9) 移除对 YaRN 配置的硬性依,medium,auto-inherit,否,S,medium-risk,vllm/model_executor/models/deepseek_eagle3.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,50c51682,2026-08-05,test-ci,bugfix,【变更概述】修复 EC（Encoder-Connector）Connector 在图像编码完成前错误停止 encoder-instance 请求的问题。修改 scheduler.py (+12) 增加,low,auto-inherit,否,S,low-risk,"examples/disaggregated/disaggregated_encoder/disagg_epd_proxy.py, tests/v1/core/test_scheduler.py, vllm/v1/core/sched/scheduler.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,7794b1e0,2026-08-05,model-architecture,bugfix,【变更概述】修复 Qwen3 多模态模型在无视觉输入时仍尝试处理 deepstack buffers 的问题。修改 qwen3_vl.py、qwen3_vl_moe.py、qwen3_omni_moe,medium,auto-inherit,否,S,medium-risk,"vllm/model_executor/models/qwen3_omni_moe_thinker.py, vllm/model_executor/models/qwen3_vl.py, vllm/model_executor/models/qwen3_vl_moe.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,eb3dce97,2026-08-05,test-ci,bugfix,【变更概述】修复 Gemma3n/Gemma4 模型处理变长音频批次时的 padding 问题。修改 gemma3n_mm.py (+56/-4) 和 gemma4_mm.py (+8/-5) 实现变,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/generation/test_gemma_ragged_audio.py, vllm/model_executor/models/gemma3n_mm.py, vllm/model_executor/models/gemma4_mm.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,2cb3ff88,2026-08-05,quantization,bugfix,【变更概述】修复 compressed_tensors w8a16_fp8 量化方案中 KV scale reload 测试失败的问题。修改 compressed_tensors_w8a16_fp8.,low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/quantization/compressed_tensors/schemes/compressed_tensors_w8a16_fp8.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,c416f157,2026-08-05,model-architecture,bugfix,"【变更概述】修复 Kimi-K3 模型在禁用上下文并行（CP）时 MLA 注意力的处理问题。修改 kimi_k3/nvidia/mla.py (+5) 在 CP 禁用时正确处理 MLA 逻辑。
+【PR",medium,auto-inherit,否,S,medium-risk,vllm/models/kimi_k3/nvidia/mla.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P2,33c50587,2026-08-05,model-architecture,bugfix,【变更概述】恢复 Inkling 模型 MTP（Multi-Token Prediction）在 ROCm 平台的后端对等性。修改 inkling/amd/mtp.py (+42/-13) 使 AMD,medium,auto-inherit,否,S,medium-risk,vllm/models/inkling/amd/mtp.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+skip,77b51991,2026-08-05,test-ci,bugfix,[CI][Bugfix] Fix `test_shutdown_on_engine_failure` startup deadlock (#51050),none,skip,否,S,low-risk,tests/entrypoints/openai/completion/test_shutdown.py,,
+P3,ffee3246,2026-08-05,test-ci,bugfix,【变更概述】修复 Mooncake KV Connector 使用局部 DP index 而非全局 data_parallel_index 作为引擎索引的问题。修改 mooncake/store/wo,low,auto-inherit,否,S,low-risk,"tests/v1/kv_connector/unit/test_mooncake_store_worker.py, vllm/distributed/kv_transfer/kv_connector/v1/mooncake/mooncake_utils.py, vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/worker.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+skip,7b4ed496,2026-08-06,operator-kernel,performance,attn_res kernel latency improvements (#50185),none,skip,否,S,low-risk,csrc/libtorch_stable/kimi_k3/attn_res_kernel.cu,,
+P3,62a86318,2026-08-06,other,bugfix,"【变更概述】修复 VocabParallelEmbedding 的 extra_repr 方法中字段拼接错误，修正调试输出显示。
+【PR号】#51224
+【变更类型】bugfix - 调试输出修正
+【",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/vocab_parallel_embedding.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,46e6a83c,2026-08-06,kv-offload,bugfix,"【变更概述】修复 KV Offload（CPU/tiering）在初始化失败后未正确清理资源的问题，避免资源泄漏导致后续重试失败。
+【PR号】#51227
+【变更类型】bugfix - 资源清理
+【变",low,auto-inherit,否,S,low-risk,"vllm/v1/kv_offload/cpu/spec.py, vllm/v1/kv_offload/tiering/spec.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,5fba75ae,2026-08-06,model-architecture,bugfix,"【变更概述】为 Kimi-K3 的 nvidia model 补充缺失的 fused_qkv_a_proj 到 packed_modules_mapping，确保 LoRA 能正确映射该融合层。
+【P",medium,auto-inherit,否,S,medium-risk,vllm/models/kimi_k3/nvidia/model.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,ef2615c2,2026-08-06,test-ci,bugfix,"【变更概述】当系统不支持 MADV_POPULATE_WRITE 时，KV offload 的 shared_offload_region 回退到兼容实现，避免启动失败。
+【PR号】#51116
+【变",low,auto-inherit,否,S,low-risk,"tests/v1/kv_offload/cpu/test_shared_offload_region.py, vllm/v1/kv_offload/cpu/shared_offload_region.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,872fd597,2026-08-06,moe-fusion,bugfix,"【变更概述】在 unquantized MoE oracle 的 LoRA gate 逻辑中增加激活类型判断，避免 BF16 MoE 在 TrtLlm 路径下 LoRA gate 误触发。
+【PR号】",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fused_moe/oracle/unquantized.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,9c226684,2026-08-06,test-ci,bugfix,"【变更概述】修复在线 NVFP4 专家打包过程中的精度损失问题，调整 nvfp4.py 打包逻辑。
+【PR号】#50029
+【变更类型】bugfix - 量化精度修复
+【变更文件】vllm/model",low,auto-inherit,否,S,low-risk,"tests/quantization/test_online.py, vllm/model_executor/layers/quantization/online/nvfp4.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,ad528025,2026-08-06,model-architecture,performance,【变更概述】DeepSeek-V3.2/GLM 在 MTP（Multi-Token Prediction）场景下使用 skip topk 路径，使 kernel 性能提升约 2.0x。修改 deeps,medium,idea-copy,否,L,medium-risk,"vllm/models/deepseek_v32/amd/rocm.py, vllm/models/deepseek_v32/attention.py",理解上游优化思路（vllm/models/deepseek_v32/amd/rocm.py） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 model-architecture 模块在 Ascend 行为一致
+P2,2dfb8ba5,2026-08-06,operator-kernel,performance,【变更概述】为 DeepSeek Sparse Attention（DSA）decode kernel 引入 programmatic dependent launch（可编程依赖启动），减少 ker,medium,idea-copy,否,L,medium-risk,"csrc/libtorch_stable/quantization/fp4/nvfp4_quant_kernels.cu, vllm/models/deepseek_v32/common/kernels.py",理解上游优化思路（csrc/libtorch_stable/quantization/fp4/nvfp4_quant_kernels.cu） | 用 Ascend 算子（TBE/AscendCL）重新实现 | 性能对比验证收益,确认 operator-kernel 模块在 Ascend 行为一致
+P2,febea17f,2026-08-06,test-ci,bugfix,"【变更概述】修复原生 Qwen3.5 纯文本 checkpoint 加载时的权重前缀映射问题，确保权重正确加载。
+【PR号】#50355
+【变更类型】bugfix - 权重加载修复
+【变更文件】vll",medium,auto-inherit,否,S,medium-risk,"tests/models/registry.py, vllm/model_executor/models/qwen3_5.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,7e724dca,2026-08-06,test-ci,bugfix,"【变更概述】修复 ROCm AITER all-reduce 融合 pass 的覆盖范围问题，调整 allreduce_rms_fusion.py。
+【PR号】#50802
+【变更类型】bugfix ",low,auto-inherit,否,S,low-risk,"tests/compile/passes/distributed/test_fusion_all_reduce.py, vllm/compilation/passes/fusion/allreduce_rms_fusion.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,53704616,2026-08-06,test-ci,bugfix,"【变更概述】修复混合架构（hybrid）模型在 hidden-state 提取场景下的前缀缓存命中错误，修改 v1/core/kv_cache_utils.py。
+【PR号】#51108
+【变更类型】",medium,auto-inherit,否,S,medium-risk,"tests/v1/core/test_kv_cache_utils.py, vllm/v1/core/kv_cache_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P3,2e35c529,2026-08-06,test-ci,bugfix,"【变更概述】修复 FlashInfer CUTLASS 路径下 MXFP4 MoE 专家的转换逻辑，修改 oracle/mxfp4.py。
+【PR号】#51038
+【变更类型】bugfix - 量化转",low,auto-inherit,否,S,low-risk,"tests/kernels/moe/test_ocp_mx_moe.py, vllm/model_executor/layers/fused_moe/oracle/mxfp4.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,c0202c56,2026-08-06,test-ci,bugfix,"【变更概述】为使用 draft model 的推测解码自动启用异步调度（async scheduling），修改 config/vllm.py 默认行为。
+【PR号】#48341
+【变更类型】bugf",medium,config-align,否,S,medium-risk,"tests/test_config.py, tests/v1/e2e/spec_decode/draft_model/test_draft_model.py, vllm/config/vllm.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P2,82171711,2026-08-06,test-ci,bugfix,"【变更概述】当 pooling 模型存在 WeightsMapper 时跳过 weight-prefix 探测，避免错误探测导致加载失败。
+【PR号】#50890
+【变更类型】bugfix - 模型加",medium,auto-inherit,否,S,medium-risk,"tests/models/test_adapters.py, vllm/model_executor/models/adapters.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,f84df12c,2026-08-06,test-ci,bugfix,【变更概述】修复 Transformers v5 下 MiniCPM-V 的占位符替换与图像处理器加载问题，修改 minicpmv.py 模型与 multimodal/processing/proce,medium,auto-inherit,否,S,medium-risk,"tests/models/multimodal/processing/test_minicpmv.py, tests/models/registry.py, vllm/model_executor/models/minicpmv.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 test-ci 模块在 Ascend 行为一致
+P2,d54b58cc,2026-08-06,distributed,bugfix,【变更概述】将 host cache 清理由平台特定调用改为 torch.accelerator.empty_host_cache()，修改 distributed/parallel_state.py,medium,cherry-pick,否,S,medium-risk,vllm/distributed/parallel_state.py,Cherry-pick 上游 PR 到 vllm-ascend 对应路径 | 验证 vllm/distributed/parallel_state.py 修改未破坏 NPUModelRunner,确认 distributed 模块在 Ascend 行为一致
+P2,f85c1d2f,2026-08-06,model-architecture,bugfix,"【变更概述】移除 Kimi-K3 nvidia model 中 megamoe 路径的冗余 add 操作。
+【PR号】#51146
+【变更类型】bugfix - 模型计算修正
+【变更文件】vllm/m",medium,auto-inherit,否,S,medium-risk,vllm/models/kimi_k3/nvidia/model.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,确认 model-architecture 模块在 Ascend 行为一致
+P3,9f316996,2026-08-06,moe-fusion,bugfix,"【变更概述】对齐 TRTLLM MXFP4 MoE 的 autotune buckets 配置。
+【PR号】#50942
+【变更类型】bugfix - MoE autotune 对齐
+【变更文件】vl",low,auto-inherit,否,S,low-risk,vllm/model_executor/layers/fused_moe/experts/trtllm_mxfp4_moe.py,确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P2,b50fdebc,2026-08-06,test-ci,bugfix,【变更概述】修复 level-2 sleep/wake/reload 在 enable_lora=True 时的问题，修改 GPUModelRunner（gpu_model_runner.py）、gp,medium,cherry-pick,否,M,medium-risk,"docs/features/sleep_mode.md, tests/basic_correctness/test_mem.py, tests/lora/test_layers.py",Cherry-pick 上游 PR 到 vllm-ascend 对应路径 | 验证 docs/features/sleep_mode.md 修改未破坏 NPUModelRunner,确认 test-ci 模块在 Ascend 行为一致
+P2,8cfa01cd,2026-08-06,test-ci,bugfix,"【变更概述】修复 Dense 模型多节点数据并行（DP）rescope 问题，修改 config/parallel.py 与 v1/engine/core.py。
+【PR号】#49212
+【变更类型】",medium,config-align,否,S,medium-risk,"tests/test_config.py, vllm/config/parallel.py, vllm/v1/engine/core.py",同步 vllm/config/ 下的默认值 | 验证 Ascend 侧配置语义一致,确认 test-ci 模块在 Ascend 行为一致
+P3,47a4e410,2026-08-06,test-ci,bugfix,【变更概述】【MRV2 相关】修复 MRV2 rejection sampler 中 tl.argmax 的 NaN 处理问题，修改 gpu/spec_decode/rejection_sampler,low,auto-inherit,否,S,low-risk,"tests/v1/spec_decode/test_rejection_sampler_utils.py, vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
+P3,7c77868c,2026-08-06,test-ci,bugfix,【变更概述】修复非门控 MoE 的 w13 权重按 shard count 进行 sizing 与迭代的问题，涉及多个量化方法（fp8/awq/gptq/mxfp4 等）与 fused_moe/con,low,auto-inherit,否,S,low-risk,"tests/quantization/test_auto_gptq.py, tests/quantization/test_auto_round.py, vllm/model_executor/layers/fused_moe/config.py",确认 Ascend 未 patch 该路径 | 上游修复自动继承，无需操作,
