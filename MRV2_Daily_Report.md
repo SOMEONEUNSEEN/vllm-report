@@ -1,10 +1,167 @@
 # MRV2 每日报告
-生成时间: 2026-08-07 09:01:44
+生成时间: 2026-08-10 09:03:25
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 98
+MRV2 相关 commits 总数: 97
+
+## 2026-08-09
+### vllm
+- **[f18e10a7](https://github.com/vllm-project/vllm/commit/f18e10a7e1c1eb37e898c31989ff625d79791657)** ([#50892](https://github.com/vllm-project/vllm/pull/50892)) 将 Flashinfer 版本升级至 0.6.16.post3
+  - 标签: `chore`, `medium-risk`, `flashinfer`, `dependency`, `benchmark`
+  - 变更文件:
+  - 修改 `docker/Dockerfile` (+1/-1)
+  - 修改 `docker/versions.json` (+1/-1)
+  - 修改 `requirements/cuda.txt` (+2/-2)
+  - 修改 `vllm/model_executor/warmup/kernel_warmup.py` (+36/-51)
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+11/-3)
+  - Ascend 影响: ✓ 无影响
+
+- **[9b0afeb4](https://github.com/vllm-project/vllm/commit/9b0afeb4f6c435a06d394f8a25209d4682a215af)** ([#51458](https://github.com/vllm-project/vllm/pull/51458)) [Perf] 避免更多不必要的 GPU<->CPU 同步
+  - 标签: `perf`, `low-risk`, `gpu-sync`, `multimodal`
+  - 变更文件（共 13 个）:
+  - 修改 `tests/basic_correctness/test_basic_correctness.py` (+2/-1)
+  - 修改 `tests/v1/e2e/general/test_mamba_prefix_cache.py` (+7/-7)
+  - 修改 `tests/v1/logits_processors/utils.py` (+14/-6)
+  - 修改 `vllm/distributed/kv_transfer/kv_connector/utils.py` (+8/-3)
+  - 修改 `vllm/distributed/kv_transfer/kv_connector/v1/example_connector.py` (+4/-3)
+  - 修改 `vllm/lora/ops/triton_ops/fused_moe_lora_op.py` (+2/-2)
+  - 修改 `vllm/model_executor/models/chameleon.py` (+32/-4)
+  - 修改 `vllm/model_executor/models/gemma3n_mm.py` (+13/-4)
+  - 修改 `vllm/model_executor/models/glm4_1v.py` (+11/-4)
+  - 修改 `vllm/model_executor/models/qwen3_omni_moe_thinker.py` (+1/-1)
+  - ... 及其他 3 个文件
+  - Ascend 影响: ✓ 无影响
+
+- **[d608dfab](https://github.com/vllm-project/vllm/commit/d608dfabfdba7e1496e5fef7c66d27c131f59432)** ([#51438](https://github.com/vllm-project/vllm/pull/51438)) [Bugfix] 在 V2 warmup 中预留 spec-decode lookahead blocks
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `spec-decode`, `warmup`, `scheduler`, `model-runner`
+  - 变更文件:
+  - 新增 `tests/v1/worker/test_gpu_warmup_blocks.py` (+361/-0)
+  - 修改 `vllm/config/vllm.py` (+27/-0)
+  - 修改 `vllm/v1/core/sched/scheduler.py` (+2/-16)
+  - 修改 `vllm/v1/worker/gpu/warmup.py` (+59/-21)
+  - Ascend 影响: ✓ 无影响
+
+---
+
+## 2026-08-08
+### vllm
+- **[44351f81](https://github.com/vllm-project/vllm/commit/44351f81d58861edc873c7678c500a4f40834450)** ([##51410](https://github.com/vllm-project/vllm/pull/#51410)) [CI] 刷新混合模型 Model Runner V2 覆盖率
+  - 标签: `chore`, `low-risk`, `ci`, `mtp`, `pipeline-parallel`
+  - 变更文件:
+  - 修改 `.buildkite/intel_jobs/model_runner_v2_intel.yaml` (+1/-0)
+  - 修改 `.buildkite/test-amd.yaml` (+1/-1)
+  - 修改 `.buildkite/test_areas/model_runner_v2.yaml` (+5/-1)
+  - 修改 `.buildkite/test_areas/quantization.yaml` (+1/-7)
+  - 修改 `tests/v1/e2e/spec_decode/mtp/test_mtp.py` (+0/-7)
+  - Ascend 影响: ✓ 无影响
+
+---
+
+## 2026-08-07
+### vllm
+- **[ae934ba8](https://github.com/vllm-project/vllm/commit/ae934ba8a5577c580c33e3489290ff7d8bf1f83e)** ([#48355](https://github.com/vllm-project/vllm/pull/48355)) [功能] 扩展 EPLB 支持到 Mistral Large 3 及更多 MoE backend
+  - 标签: `feature`, `mrv2`, `medium-risk`, `eplb`, `quantization`, `model-executor`, `moe`
+  - 变更文件（共 16 个）:
+  - 新增 `tests/distributed/test_eplb_quant_scale_consistency.py` (+299/-0)
+  - 修改 `tests/kernels/moe/test_flashinfer_cutedsl_nvfp4_moe.py` (+16/-15)
+  - 修改 `tests/quantization/test_trtllm_nvfp4_hidden_dim_padding.py` (+6/-1)
+  - 修改 `tests/v1/worker/test_gpu_model_runner_v2_eplb.py` (+6/-4)
+  - 修改 `vllm/model_executor/layers/fused_moe/oracle/fp8.py` (+13/-2)
+  - 修改 `vllm/model_executor/layers/fused_moe/oracle/nvfp4.py` (+5/-0)
+  - 修改 `vllm/model_executor/layers/quantization/compressed_tensors/compressed_tensors_moe/compressed_tensors_moe_w4a4_nvfp4.py` (+16/-2)
+  - 修改 `vllm/model_executor/layers/quantization/compressed_tensors/compressed_tensors_moe/compressed_tensors_moe_w8a8_fp8.py` (+3/-1)
+  - 修改 `vllm/model_executor/layers/quantization/fp8.py` (+3/-1)
+  - 修改 `vllm/model_executor/layers/quantization/modelopt.py` (+3/-1)
+  - ... 及其他 6 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改了 vllm/v1/worker/gpu/eplb_utils.py（MRV2 路径）和 vllm/v1/worker/gpu_model_runner.py。EPLB 在 Ascend 上的 MoE 专家负载均衡行为需验证。同时修改了 vllm/model_executor/ 下多个量化 backend，需确认 Ascend 使用的量化 backend 是否受影响
+
+- **[b706fd16](https://github.com/vllm-project/vllm/commit/b706fd1628b06c216a945176a9fedfa808324803)** ([#51337](https://github.com/vllm-project/vllm/pull/51337)) [CI][XPU] 通过 VLLM_DISABLE_COMPILE_CACHE=1 规避 Intel XPU CI 中的间歇性段错误
+  - 标签: `ci`, `low-risk`, `xpu`
+  - 变更文件:
+  - 修改 `.buildkite/intel_jobs/basic_correctness.yaml` (+2/-1)
+  - 修改 `.buildkite/intel_jobs/model_executor_intel.yaml` (+2/-1)
+  - 修改 `.buildkite/intel_jobs/model_runner_v2_intel.yaml` (+2/-1)
+  - 修改 `.buildkite/intel_jobs/models_distributed_intel.yaml` (+2/-1)
+  - 修改 `.buildkite/intel_jobs/samplers_intel.yaml` (+2/-1)
+  - Ascend 影响: ✓ 无影响
+
+- **[dd856e48](https://github.com/vllm-project/vllm/commit/dd856e48bbf969e3f0e561e8c76f6e92c76e0795)** ([#51222](https://github.com/vllm-project/vllm/pull/51222)) [Bugfix][EPD][Model Runner V2] 为 encoder-only 实例跳过多模态 embedding gather
+  - 标签: `bugfix`, `mrv2`, `high-risk`, `model-runner`, `multimodal`, `encoder`, `epd`
+  - 变更文件:
+  - 修改 `tests/v1/core/test_scheduler.py` (+31/-0)
+  - 修改 `tests/v1/worker/test_encoder_runner.py` (+43/-0)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+11/-3)
+  - 修改 `vllm/v1/worker/gpu/model_states/default.py` (+1/-8)
+  - 修改 `vllm/v1/worker/gpu/model_states/interface.py` (+15/-0)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 修改了 vllm/v1/worker/gpu/model_runner.py 和 vllm/v1/worker/gpu/model_states/default.py，这两个文件是 vllm-ascend 的核心覆盖路径。vllm-ascend 的 NPUModelRunner 继承 GPUModelRunner，encoder-only 实例的 mm embedding gather 跳过逻辑会传递到 Ascend 子类。model_states/default.py 的 gather 逻辑重构（移到 interface.py）需验证 NPUModelRunner 的 model states 是否受影响
+    - 建议测试区域: `encoder-only 实例 mm embedding gather 跳过在 Ascend 上的正确性`, `EPD 分离场景多模态模型在 Ascend 上的正确性`, `NPUModelRunner model_states interface 适配验证`
+
+- **[72c0d676](https://github.com/vllm-project/vllm/commit/72c0d6765793e4c7242c3586274af3e1a8aca170)** ([#46727](https://github.com/vllm-project/vllm/pull/46727)) [功能] 在 Model Runner V2 中支持 thinking_token_budget
+  - 标签: `feature`, `mrv2`, `high-risk`, `model-runner`, `sampling`, `reasoning`, `config`
+  - 变更文件:
+  - 新增 `benchmarks/kernels/benchmark_thinking_budget.py` (+365/-0)
+  - 修改 `tests/entrypoints/openai/chat_completion/test_thinking_token_budget.py` (+3/-8)
+  - 新增 `tests/v1/worker/test_gpu_thinking_budget.py` (+262/-0)
+  - 修改 `vllm/config/reasoning.py` (+31/-13)
+  - 修改 `vllm/config/vllm.py` (+0/-6)
+  - 修改 `vllm/v1/engine/input_processor.py` (+9/-16)
+  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+1/-0)
+  - 修改 `vllm/v1/worker/gpu/sample/sampler.py` (+22/-0)
+  - 新增 `vllm/v1/worker/gpu/sample/thinking_budget.py` (+428/-0)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler.py` (+1/-0)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 直接影响 - 修改了 vllm/v1/worker/gpu/model_runner.py（vllm-ascend 核心覆盖路径，NPUModelRunner 继承 GPUModelRunner）和 vllm/config/reasoning.py（配置路径）。新增的 thinking_budget.py（428 行）位于 vllm/v1/worker/gpu/sample/ 路径下，thinking budget 的采样逻辑会传递到 Ascend 子类。sampler.py 的采样流程变更需验证在 Ascend 上的正确性
+    - 建议测试区域: `thinking_token_budget 在 Ascend 上的采样正确性`, `推理模型 thinking budget 限制在 Ascend 上的效果`, `NPUModelRunner thinking_budget 初始化适配`, `spec_decode rejection sampler thinking budget 适配`
+
+- **[b1e12d14](https://github.com/vllm-project/vllm/commit/b1e12d142d8c9533f857f8da13d8fc368e95a8cd)** ([#51304](https://github.com/vllm-project/vllm/pull/51304)) [V1] 异步将 logits 中的 NaN 计数拷贝到主机
+  - 标签: `performance`, `medium-risk`, `model-runner`, `v1`
+  - 变更文件:
+  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+52/-18)
+  - Ascend 影响: ✓ 无影响
+
+- **[27930df9](https://github.com/vllm-project/vllm/commit/27930df9c2bd14047be35ff2a986ca72fc65631a)** ([#50939](https://github.com/vllm-project/vllm/pull/50939)) [Model Runner V2] 修复 rejection sampler 中的 -1 占位 draft token ids
+  - 标签: `bugfix`, `mrv2`, `medium-risk`, `spec-decode`, `model-runner`, `sampling`
+  - 变更文件:
+  - 修改 `tests/v1/spec_decode/test_rejection_sampler_utils.py` (+122/-0)
+  - 修改 `vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py` (+107/-74)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py 位于 vllm/v1/worker/gpu/ 路径下（MRV2 路径）。rejection sampler 的 -1 占位符处理逻辑在 Ascend 上也适用，需验证 spec decode 在 Ascend 上的正确性
+
+### vllm-ascend
+- **[08a68770](https://github.com/vllm-project/vllm-ascend/commit/08a68770b68debdb21c8fe7720a7d89797e6bdc8)** ([#13810](https://github.com/vllm-project/vllm-ascend/pull/13810)) [BugFix][Test] 恢复 NPU 内存辅助函数的导入
+  - 标签: `bugfix`, `low-risk`, `tests`, `mrv2`
+  - 变更文件:
+  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+1/-1)
+  - Ascend 影响: ✓ 无影响
+
+- **[a6ae7f57](https://github.com/vllm-project/vllm-ascend/commit/a6ae7f57601e9bafdc18ec1e3a5035e53d5fad6f)** ([#13290](https://github.com/vllm-project/vllm-ascend/pull/13290)) 回退 "[Performance] 移除 DSA_CP 中 QLIMetadata builder 的 D2H 同步"
+  - 标签: `bugfix`, `low-risk`, `attention`, `dsa-cp`, `tests`, `mrv2`
+  - 变更文件:
+  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+1/-2)
+  - 修改 `vllm_ascend/attention/context_parallel/dsa_cp.py` (+11/-11)
+  - Ascend 影响: ✓ 无影响
+
+- **[1bff043f](https://github.com/vllm-project/vllm-ascend/commit/1bff043fe717aaafeacf1051313ac9b8256311d0)** ([#13155](https://github.com/vllm-project/vllm-ascend/pull/13155)) [Feature] 在 ModelRunner V2 中支持 DSA
+  - 标签: `feature`, `mrv2`, `high-risk`, `dsa`, `attention`, `kv-cache`, `model-runner`, `deepseek-v4`, `tests`
+  - 变更文件（共 27 个）:
+  - 修改 `tests/ut/_310p/fused_moe/test_shared_fused_moe_310.py` (+2/-0)
+  - 修改 `tests/ut/models/test_deepseek_v4_moe.py` (+15/-0)
+  - 修改 `tests/ut/ops/test_fused_moe.py` (+66/-3)
+  - 修改 `tests/ut/test_ascend_forward_context.py` (+51/-0)
+  - 新增 `tests/ut/worker/test_attn_utils_v2.py` (+306/-0)
+  - 修改 `vllm_ascend/ascend_forward_context.py` (+0/-3)
+  - 修改 `vllm_ascend/attention/dsa_v1.py` (+14/-5)
+  - 修改 `vllm_ascend/attention/mla_v1.py` (+3/-1)
+  - 修改 `vllm_ascend/core/kv_cache_interface.py` (+11/-0)
+  - 修改 `vllm_ascend/models/deepseek_v4.py` (+33/-11)
+  - ... 及其他 17 个文件
+  - Ascend 影响: ✓ 无影响
+
+---
 
 ## 2026-08-06
 ### vllm
@@ -1132,145 +1289,6 @@ MRV2 相关 commits 总数: 98
   - 新增 `csrc/attention/store_kv_block_metadata/op_api/l0_store_kv_block_metadata.cpp` (+53/-0)
   - 新增 `csrc/attention/store_kv_block_metadata/op_api/l0_store_kv_block_metadata.h` (+26/-0)
   - ... 及其他 17 个文件
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-11
-### vllm
-- **[04d553f3](https://github.com/vllm-project/vllm/commit/04d553f390fd37e09ab111936ef1592881299957)** [Misc] Use meta tensor for KV cache stride calculation (#47316)
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+1/-1)
-  - Ascend 影响: ✓ 无影响
-
-- **[9c18e90f](https://github.com/vllm-project/vllm/commit/9c18e90f6c94b90ecdaa99b2230389ba40e0fc69)** [BugFix] Fix packed HND KV cache reshape for FlashAttention (#47314)
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+1/-1)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-10
-### vllm
-- **[08dfd686](https://github.com/vllm-project/vllm/commit/08dfd68610d2e05a0d8ddc99c23488da6163df3f)** [Model] Add LongCat-Flash-Lite (n-gram embedding) (#47857)
-  - 变更文件（共 16 个）:
-  - 修改 `CMakeLists.txt` (+1/-0)
-  - 新增 `csrc/libtorch_stable/ngram_embedding_kernels.cu` (+96/-0)
-  - 修改 `csrc/libtorch_stable/ops.h` (+9/-0)
-  - 修改 `csrc/libtorch_stable/torch_bindings.cpp` (+13/-0)
-  - 修改 `tests/models/registry.py` (+7/-0)
-  - 修改 `tests/models/utils.py` (+7/-2)
-  - 修改 `vllm/_custom_ops.py` (+31/-0)
-  - 修改 `vllm/config/speculative.py` (+1/-1)
-  - 修改 `vllm/config/vllm.py` (+1/-0)
-  - 修改 `vllm/model_executor/models/config.py` (+19/-1)
-  - ... 及其他 6 个文件
-  - Ascend 影响: ✓ 无影响
-
-- **[433f2911](https://github.com/vllm-project/vllm/commit/433f291195ded3ca8d278bc78da9280c5d4e5329)** ([#48186](https://github.com/vllm-project/vllm/pull/48186)) [CI] 维护：Right-size test-area timeouts from nightly durations
-  - 标签: `chore`, `mrv2`
-  - 变更文件（共 30 个）:
-  - 修改 `.buildkite/test_areas/attention.yaml` (+3/-3)
-  - 修改 `.buildkite/test_areas/basic_correctness.yaml` (+2/-2)
-  - 修改 `.buildkite/test_areas/benchmarks.yaml` (+2/-2)
-  - 修改 `.buildkite/test_areas/compile.yaml` (+11/-11)
-  - 修改 `.buildkite/test_areas/cuda.yaml` (+2/-2)
-  - 修改 `.buildkite/test_areas/disaggregated.yaml` (+12/-12)
-  - 修改 `.buildkite/test_areas/distributed.yaml` (+10/-10)
-  - 修改 `.buildkite/test_areas/docker.yaml` (+1/-1)
-  - 修改 `.buildkite/test_areas/e2e_integration.yaml` (+5/-5)
-  - 修改 `.buildkite/test_areas/engine.yaml` (+11/-11)
-  - ... 及其他 20 个文件
-  - Ascend 影响: ✓ 无影响
-
-- **[95ed0fea](https://github.com/vllm-project/vllm/commit/95ed0feaa5cd7fb16d72c53ce04950aaf07c4698)** ([#40996](https://github.com/vllm-project/vllm/pull/40996)) 新增：DCP supports hybrid 注意力
-  - 标签: `chore`, `mrv2`, `distributed`, `attention`, `python`, `model-runner`, `low-risk`
-  - 变更文件（共 26 个）:
-  - 修改 `tests/distributed/test_context_parallel.py` (+8/-0)
-  - 修改 `tests/distributed/test_pynccl.py` (+47/-0)
-  - 修改 `tests/models/language/generation/test_hybrid.py` (+13/-1)
-  - 修改 `tests/models/multimodal/generation/test_vit_cudagraph.py` (+1/-0)
-  - 修改 `tests/test_config.py` (+4/-4)
-  - 修改 `tests/v1/streaming_input/test_gpu_model_runner_streaming.py` (+1/-0)
-  - 新增 `tests/v1/worker/test_cp_utils.py` (+45/-0)
-  - 修改 `tests/v1/worker/test_gpu_input_batch.py` (+6/-0)
-  - 修改 `tests/v1/worker/test_gpu_model_runner.py` (+3/-0)
-  - 修改 `vllm/config/model.py` (+2/-5)
-  - ... 及其他 16 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 可能影响 vllm-ascend 的接口或实现
-    - 建议测试区域: `vllm/config/model.py`, `vllm/v1/attention/backend.py`, `vllm/v1/attention/backends/flash_attn.py`, `vllm/v1/core/kv_cache_coordinator.py`, `vllm/v1/core/kv_cache_utils.py`, `vllm/v1/core/single_type_kv_cache_manager.py`, `vllm/v1/kv_cache_interface.py`, `vllm/v1/worker/block_table.py`, `vllm/v1/worker/cp_utils.py`, `vllm/v1/worker/gpu_input_batch.py`, `vllm/v1/worker/gpu_model_runner.py`, `vllm/v1/worker/tpu_input_batch.py`
-
-- **[766469a4](https://github.com/vllm-project/vllm/commit/766469a4c460043ae52cda19b1c52f0dc87e555c)** ([#48154](https://github.com/vllm-project/vllm/pull/48154)) [ROCm] 修复：Revert Part `[ROCm 修复 pooling startup workspace lock`
-  - 标签: `bugfix`, `low-risk`, `mrv2`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu_worker.py` (+3/-22)
-  - Ascend 影响: ✓ 无影响
-
-- **[ff8d3488](https://github.com/vllm-project/vllm/commit/ff8d3488f248acc8b5c1d23243723eeb00c74914)** ([#48132](https://github.com/vllm-project/vllm/pull/48132)) [Bugfix] 新增：MRV2 Reset num_accepted_tokens add_request all modes
-  - 标签: `chore`, `mrv2`, `low-risk`, `python`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/model_states/mamba_hybrid.py` (+2/-1)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 可能影响 vllm-ascend 的接口或实现
-    - 建议测试区域: `vllm/v1/worker/gpu/model_states/mamba_hybrid.py`
-
-- **[e08a9151](https://github.com/vllm-project/vllm/commit/e08a9151468190575114de1c996275b993ec940a)** ([#48135](https://github.com/vllm-project/vllm/pull/48135)) [Bugfix] 更新：Preserve tensor causal metadata grouped 注意力
-  - 标签: `chore`, `low-risk`, `python`
-  - 变更文件:
-  - 修改 `vllm/v1/worker/gpu/attn_utils.py` (+4/-2)
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 可能影响 vllm-ascend 的接口或实现
-    - 建议测试区域: `vllm/v1/worker/gpu/attn_utils.py`
-
-- **[67e7ea89](https://github.com/vllm-project/vllm/commit/67e7ea8977bc4281d4d33dd3a81a5c5fab3df920)** ([#48146](https://github.com/vllm-project/vllm/pull/48146)) [ROCm] 维护：CI Set all timeout_in_minutes 180
-  - 标签: `chore`, `mrv2`
-  - 变更文件:
-  - 修改 `.buildkite/test-amd.yaml` (+27/-27)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-09
-### vllm
-- **[85b3a726](https://github.com/vllm-project/vllm/commit/85b3a7264b6c4e4e89a1c45a2c4ccfd1b8c342dc)** [Bugfix][Model Runner V2] Order uniform decodes first so spec decodes aren't misclassified as prefills (#47381)
-  - 变更文件:
-  - 新增 `tests/v1/worker/test_gpu_batch_ordering.py` (+70/-0)
-  - 修改 `vllm/model_executor/models/deepseek_v2.py` (+6/-1)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+10/-2)
-  - Ascend 影响: ✓ 无影响
-
-- **[1cd75b3d](https://github.com/vllm-project/vllm/commit/1cd75b3dd4b3bf90e4ef81831b6f0dd91fde2fe1)** [Bugfix] Fix race condition in KVBlockZeroer (#48085)
-  - 变更文件:
-  - 新增 `tests/v1/worker/test_kv_block_zeroer.py` (+44/-0)
-  - 修改 `vllm/v1/worker/gpu/model_runner.py` (+1/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-0)
-  - 修改 `vllm/v1/worker/utils.py` (+37/-20)
-  - Ascend 影响: ✓ 无影响
-
-- **[95d6d6f4](https://github.com/vllm-project/vllm/commit/95d6d6f4bba8234088e62124ff20a482acd98714)** ([#48046](https://github.com/vllm-project/vllm/pull/48046)) [Bugfix] 更新：Use int8 workspace FlashInfer MLA decode
-  - 标签: `bugfix`, `low-risk`, `mrv2`
-  - 变更文件:
-  - 修改 `tests/kernels/attention/test_flashinfer_mla_decode.py` (+87/-45)
-  - 修改 `vllm/v1/attention/backends/mla/flashinfer_mla.py` (+3/-1)
-  - 修改 `vllm/v1/attention/backends/mla/flashinfer_mla_sparse.py` (+3/-1)
-  - Ascend 影响: ✓ 无影响
-
-- **[26831949](https://github.com/vllm-project/vllm/commit/26831949b48a0d81fba379dcaf7e378206fd9087)** ([#47912](https://github.com/vllm-project/vllm/pull/47912)) [ROCm] 修复：修复 pooling startup workspace lock
-  - 标签: `bugfix`, `low-risk`, `mrv2`
-  - 变更文件:
-  - 修改 `vllm/v1/attention/backends/rocm_attn.py` (+3/-0)
-  - 修改 `vllm/v1/attention/backends/triton_attn.py` (+1/-0)
-  - 修改 `vllm/v1/attention/ops/triton_prefill_attention.py` (+14/-2)
-  - 修改 `vllm/v1/worker/gpu_worker.py` (+22/-3)
-  - Ascend 影响: ✓ 无影响
-
-- **[a5d19cbb](https://github.com/vllm-project/vllm/commit/a5d19cbb95872c4b426c06735733568542fa33db)** ([#48014](https://github.com/vllm-project/vllm/pull/48014)) [Core] 更新：Move MRV1 `late_interaction_runner.py` out MRV2 subtree
-  - 标签: `chore`, `mrv2`
-  - 变更文件:
-  - 修改 `tests/v1/worker/test_late_interaction_runner.py` (+1/-1)
-  - 重命名 `vllm/v1/pool/late_interaction_runner.py` (+0/-0)
-  - 修改 `vllm/v1/worker/gpu_model_runner.py` (+1/-1)
   - Ascend 影响: ✓ 无影响
 
 ---
