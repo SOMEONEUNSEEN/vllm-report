@@ -1,10 +1,70 @@
 # MRV2 每日报告
-生成时间: 2026-08-17 09:03:11
+生成时间: 2026-08-19 09:02:30
 统计范围: 最近 30 天
 
 **MRV2 定义**: `vllm/v1/worker/gpu/model_runner.py` 及其依赖的所有组件
 
-MRV2 相关 commits 总数: 99
+MRV2 相关 commits 总数: 102
+
+## 2026-08-18
+### vllm-ascend
+- **[27a94764](https://github.com/vllm-project/vllm-ascend/commit/27a94764b5ead50ed3e42ab52a257c2173032750)** ([#13470](https://github.com/vllm-project/vllm-ascend/pull/13470)) [Bugfix] 为投机解码支持概率拒绝采样
+  - 标签: `bugfix`, `mrv2`, `high-risk`, `spec-decode`, `rejection-sampling`, `dflash`, `dspark`
+  - 变更文件:
+  - 修改 `vllm_ascend/patch/worker/patch_v2/patch_triton.py` (+3/-0)
+  - 修改 `vllm_ascend/worker/v2/sample/gumbel.py` (+56/-45)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/dflash/speculator.py` (+19/-0)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/dspark/speculator.py` (+21/-1)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/rejection_sampler_utils.py` (+13/-2)
+  - Ascend 影响: ✓ 无影响
+
+---
+
+## 2026-08-17
+### vllm
+- **[70afdedc](https://github.com/vllm-project/vllm/commit/70afdedc1081d28c3eaae53bece8292298484c86)** ([#51855](https://github.com/vllm-project/vllm/pull/51855)) [K3] 为 Kimi-K3 支持 RecoverSSM
+  - 标签: `feature`, `mrv2`, `high-risk`, `model-runner`, `mamba`, `k3`, `recoverssm`
+  - 变更文件（共 19 个）:
+  - 修改 `tests/models/kimi_k3/test_kda.py` (+342/-0)
+  - 修改 `tests/models/kimi_k3/test_kda_metadata.py` (+145/-4)
+  - 修改 `tests/models/test_registry.py` (+3/-1)
+  - 修改 `tests/test_config.py` (+47/-0)
+  - 修改 `tests/v1/worker/test_mamba_hybrid_model_state.py` (+67/-0)
+  - 修改 `tests/v1/worker/test_mamba_utils.py` (+36/-0)
+  - 修改 `vllm/config/cache.py` (+4/-3)
+  - 修改 `vllm/config/vllm.py` (+33/-8)
+  - 修改 `vllm/model_executor/layers/mamba/abstract.py` (+5/-3)
+  - 修改 `vllm/model_executor/layers/mamba/mamba_utils.py` (+30/-0)
+  - ... 及其他 9 个文件
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改了 vllm/v1/worker/gpu/model_states/ 目录下的 mamba_hybrid.py 与 recoverssm.py，虽未直接命中 vllm-ascend 显式覆盖的 default.py，但该目录是 vllm-ascend MRV2 worker 继承链路的一部分。vllm-ascend 当前未支持 K3 模型， RecoverSSM 暂不直接影响 Ascend，但若未来 K3 上 Ascend，需评估 NPUModelRunner 是否需要为 RecoverSSM 适配状态恢复路径。
+
+- **[6664d397](https://github.com/vllm-project/vllm/commit/6664d397bf091cb9371cba481d4efb8233436fe6)** ([#52329](https://github.com/vllm-project/vllm/pull/52329)) [Performance] 缓存 logits 处理的请求状态
+  - 标签: `performance`, `mrv2`, `low-risk`, `sampler`, `logits-processing`, `model-runner`
+  - 变更文件:
+  - 新增 `tests/v1/worker/test_gpu_sampler_flags.py` (+90/-0)
+  - 修改 `tests/v1/worker/test_gpu_thinking_budget.py` (+39/-0)
+  - 修改 `vllm/v1/worker/gpu/sample/sampler.py` (+18/-19)
+  - Ascend 影响: ⚠️ 影响 Ascend
+    - 影响描述: 潜在影响 - 修改 vllm/v1/worker/gpu/sample/sampler.py，该路径不在显式覆盖列表中，但 vllm-ascend 的 MRV2 v2/ worker 通过继承链路可能复用上游 sampler。缓存行为变更可能影响 Ascend MRV2 采样路径，建议回归 thinking budget 与 sampler flags 行为。
+
+### vllm-ascend
+- **[58d624ad](https://github.com/vllm-project/vllm-ascend/commit/58d624ad4d89584ac30a3322f4d52945c64780d7)** ([#14391](https://github.com/vllm-project/vllm-ascend/pull/14391)) [CI] 重新启用 DeepSeek V4 测试
+  - 标签: `chore`, `low-risk`, `ci`, `deepseek-v4`, `mrv2`
+  - 变更文件:
+  - 修改 `tests/e2e/pull_request/four_card/model_runner_v2/test_deepseek_v4.py` (+0/-1)
+  - Ascend 影响: ✓ 无影响
+
+- **[8fcb3bb9](https://github.com/vllm-project/vllm-ascend/commit/8fcb3bb9e84b85ebe0cc7f029f5fce087c0a992f)** ([#14105](https://github.com/vllm-project/vllm-ascend/pull/14105)) [Feature] 在 eager 模式下支持 MTP 与 SFA
+  - 标签: `feature`, `mrv2`, `high-risk`, `spec-decode`, `mtp`, `sfa`, `model-runner`
+  - 变更文件:
+  - 修改 `.github/workflows/scripts/test_config.yaml` (+2/-0)
+  - 新增 `tests/e2e/pull_request/eight_card/model_runner_v2/__init__.py` (+1/-0)
+  - 新增 `tests/e2e/pull_request/eight_card/model_runner_v2/test_glm5_2.py` (+93/-0)
+  - 修改 `vllm_ascend/worker/v2/spec_decode/autoregressive/speculator.py` (+14/-8)
+  - Ascend 影响: ✓ 无影响
+
+---
 
 ## 2026-08-16
 ### vllm
@@ -1265,39 +1325,5 @@ MRV2 相关 commits 总数: 99
   - 修改 `vllm/model_executor/layers/quantization/utils/flashinfer_mxint4_moe.py` (+2/-0)
   - ... 及其他 1 个文件
   - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-20
-### vllm-ascend
-- **[fd69c96a](https://github.com/vllm-project/vllm-ascend/commit/fd69c96a5aad41108523b7e8bdcc167bd2093f0a)** ([#12017](https://github.com/vllm-project/vllm-ascend/pull/12017)) [特性] 为 DSpark 支持 FullGraph
-  - 标签: `feature`, `mrv2`, `medium-risk`, `spec-decode`, `dspark`, `aclgraph`
-  - 变更文件:
-  - 修改 `tests/e2e/pull_request/one_card/model_runner_v2/test_basic.py` (+13/-1)
-  - 修改 `vllm_ascend/worker/v2/aclgraph_utils.py` (+12/-0)
-  - 修改 `vllm_ascend/worker/v2/spec_decode/dspark/speculator.py` (+44/-2)
-  - Ascend 影响: ✓ 无影响
-
----
-
-## 2026-07-19
-### vllm
-- **[b6ff8a2f](https://github.com/vllm-project/vllm/commit/b6ff8a2f509cc7ac9c58176f5115a836aa1e08bd)** ([#46570](https://github.com/vllm-project/vllm/pull/46570)) [Core] 为 MLA 添加虚拟批次 Prefill Context Parallelism 支持
-  - 标签: `feature`, `mrv2`, `high-risk`, `model-runner`, `attention`, `distributed`, `kv-cache`, `mla`, `pcp`, `tests`
-  - 变更文件（共 39 个）:
-  - 修改 `.buildkite/test_areas/lm_eval.yaml` (+22/-0)
-  - 新增 `tests/evals/gsm8k/configs/GLM-5.2-NVFP4-TP1-PCP4-EP.yaml` (+16/-0)
-  - 新增 `tests/evals/gsm8k/configs/GLM-5.2-NVFP4-TP2-PCP2-EP.yaml` (+17/-0)
-  - 新增 `tests/evals/gsm8k/configs/models-pcp.txt` (+2/-0)
-  - 修改 `tests/evals/gsm8k/gsm8k_eval.py` (+15/-1)
-  - 修改 `tests/evals/gsm8k/test_gsm8k_correctness.py` (+1/-0)
-  - 修改 `tests/v1/attention/test_attention_splitting.py` (+16/-0)
-  - 修改 `tests/v1/attention/test_sparse_mla_backends.py` (+7/-0)
-  - 修改 `tests/v1/kv_offload/test_factory.py` (+4/-4)
-  - 修改 `tests/v1/simple_kv_offload/test_scheduler.py` (+16/-24)
-  - ... 及其他 29 个文件
-  - Ascend 影响: ⚠️ 影响 Ascend
-    - 影响描述: 直接影响 - 该 commit 修改了 vllm-ascend 的多个核心覆盖路径：(1) vllm/v1/worker/gpu/model_runner.py - vllm-ascend 通过 vllm_ascend.worker.model_runner_v1.NPUModelRunner 继承 GPUModelRunner，新增的 self.pcp_manager 字段、prepare_input_batch/prepare_attn/prepare_dummy_slot_mappings/sample 中的 PCP 处理逻辑会传递到 Ascend 子类；(2) vllm/v1/worker/gpu/attn_utils.py - vllm-ascend 有自己的 attn_utils 实现，supports_pcp 接口需在 Ascend backend 中实现；(3) vllm/v1/worker/gpu/model_states/default.py - vllm-ascend 覆盖该路径，prepare_attn 中的 PCP 处理需评估；(4) vllm/v1/worker/gpu/block_table.py 与 vllm/v1/worker/block_table.py - vllm-ascend 通过 vllm_ascend.patch.worker.block_table_patch 打补丁，PCP 相关的 block table 操作需验证；(5) vllm/v1/attention/backend.py 与 selector.py - vllm-ascend 有自己的 attention backend，supports_pcp 接口需实现；(6) vllm/model_executor/layers/attention/mla_attention.py - DeepSeek V3/R1 在 Ascend 上使用 MLA，use_pcp 字段与 PCP+DCP 组合的 all-gather/LSE reduce 需验证；(7) vllm/distributed/parallel_state.py 与 vllm/config/parallel.py - 通用分布式与配置路径，PCP group 初始化需验证。vllm-ascend 必须评估是否需要在 NPUModelRunner 中集成 PCPManager、是否需要在 Ascend attention backend 中实现 supports_pcp、以及 MLA + PCP 在 Ascend 通信库（HCCL）下的 all-gather/LSE reduce 正确性。
-    - 建议测试区域: `DeepSeek V3/R1 PCP 功能验证`, `MLA + PCP 通信正确性（HCCL all-gather/LSE reduce）`, `Ascend attention backend supports_pcp 接口实现`, `NPUModelRunner PCPManager 集成验证`, `block_table_patch 在 PCP 启用时的行为`, `PCP+DCP 组合在 Ascend 上的正确性`
 
 ---
