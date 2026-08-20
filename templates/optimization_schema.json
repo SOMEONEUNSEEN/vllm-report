@@ -1,48 +1,34 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "UpstreamOptimizationRecord",
-  "description": "上游 bugfix/优化 -> 下游迁移 单条记录 Schema（v2）",
+  "title": "UpstreamOptimizationRecordV3",
+  "description": "上游 bugfix/优化 -> 下游迁移 单条记录 Schema（v3 智能体增强版）",
   "type": "object",
   "required": [
-    "sha", "full_sha", "date", "repo", "title", "commit_url",
-    "category", "change_type", "optimization_point", "affected_files",
+    "_thought_process", "sha", "full_sha", "date", "repo", "title", "commit_url",
+    "category", "target_ascend_module", "change_type", "optimization_point", "affected_files",
     "ascend_value", "ascend_value_reason",
     "migration_method", "patch_conflict",
     "priority", "priority_reason", "effort_estimate", "risk_level",
     "status", "key_files"
   ],
   "properties": {
-    "sha": { "type": "string", "pattern": "^[0-9a-f]{8}$", "description": "8位短SHA" },
+    "_thought_process": { "type": "string", "description": "强制 LLM 输出思维链推导过程" },
+    "sha": { "type": "string", "pattern": "^[0-9a-f]{7,8}$", "description": "短SHA" },
     "full_sha": { "type": "string", "pattern": "^[0-9a-f]{40}$", "description": "40位完整SHA" },
-    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "commit日期 YYYY-MM-DD" },
-    "repo": { "type": "string", "enum": ["vllm-project/vllm", "vllm-project/vllm-ascend"], "description": "仓库" },
-    "title": { "type": "string", "maxLength": 200, "description": "commit首行message" },
-
-    "pr_number": { "type": ["string", "null"], "description": "PR号，从message正则提取，提取不到填null" },
-    "pr_url": { "type": ["string", "null"], "format": "uri", "description": "PR链接（如 https://github.com/vllm-project/vllm/pull/39935），无PR时填null" },
-    "commit_url": { "type": "string", "format": "uri", "description": "commit链接（https://github.com/{repo}/commit/{full_sha}）" },
-
-    "upstream_status": {
-      "type": "string",
-      "enum": ["merged", "open", "closed", "draft", "unknown"],
-      "description": "上游PR状态，默认merged"
-    },
-    "merged_at": { "type": ["string", "null"], "description": "合入时间 ISO8601，无PR时填null" },
-
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "repo": { "type": "string", "enum": ["vllm-project/vllm", "vllm-project/vllm-ascend"] },
+    "title": { "type": "string", "maxLength": 200 },
+    "pr_number": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
+    "pr_url": { "type": ["string", "null"], "format": "uri" },
+    "commit_url": { "type": "string", "format": "uri" },
+    "upstream_status": { "type": "string", "enum": ["merged", "open", "closed", "draft", "unknown"] },
+    "merged_at": { "type": ["string", "null"] },
     "author": {
       "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "email": { "type": "string" }
-      },
-      "required": ["name"],
-      "description": "commit作者"
+      "properties": { "name": { "type": "string" }, "email": { "type": "string" } },
+      "required": ["name"]
     },
-    "labels": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "上游PR标签（如 bug, perf, lora, attention）"
-    },
+    "labels": { "type": "array", "items": { "type": "string" } },
 
     "category": {
       "type": "string",
@@ -51,80 +37,49 @@
         "moe-fusion", "operator-kernel", "distributed",
         "spec-decode", "kv-offload", "quantization", "lora",
         "multimodal", "config", "scheduler", "test-ci", "other"
+      ]
+    },
+    "target_ascend_module": {
+      "type": "string",
+      "enum": [
+        "python-adapter", "csrc/attention", "csrc/moe", "csrc/gmm",
+        "csrc/quantization", "csrc/aclnn_torch_adapter", "fallback_comm", "none"
       ],
-      "description": "模块分类（按affected_files路径匹配）"
+      "description": "映射到 vllm-ascend 的具体 C++/Python 模块，便于自动分配与 PR 生成"
     },
-    "change_type": {
-      "type": "string",
-      "enum": ["bugfix", "performance", "feature", "refactor"],
-      "description": "变更类型"
-    },
-    "optimization_point": { "type": "string", "maxLength": 100, "description": "优化点一句话描述，格式：动词+对象+效果" },
-    "affected_files": {
-      "type": "array",
-      "items": { "type": "string" },
-      "minItems": 1,
-      "description": "受影响文件路径列表（从commits数据files[].filename提取）"
-    },
+    "change_type": { "type": "string", "enum": ["bugfix", "performance", "feature", "refactor"] },
+    "optimization_point": { "type": "string", "maxLength": 100 },
+    "affected_files": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
 
-    "ascend_value": {
-      "type": "string",
-      "enum": ["high", "medium", "low", "none"],
-      "description": "对Ascend的价值"
-    },
-    "ascend_value_reason": { "type": "string", "maxLength": 80, "description": "价值判断理由，必须基于architecture.json上下文" },
+    "ascend_value": { "type": "string", "enum": ["high", "medium", "low", "none"] },
+    "ascend_value_reason": { "type": "string", "maxLength": 100 },
     "ascend_impact_ref": {
       "type": ["object", "null"],
       "properties": {
         "ascend_affected": { "type": "boolean" },
         "functionality": { "type": "string" },
-        "source": { "type": "string", "description": "来源 analysis 文件日期，如 2026-08-06" }
-      },
-      "description": "引用 analyze_commits 的 ascend_impact 判定（如有）"
+        "source": { "type": "string" }
+      }
     },
 
     "migration_method": {
       "type": "string",
-      "enum": ["cherry-pick", "patch-sync", "idea-copy", "config-align", "auto-inherit", "skip"],
-      "description": "迁移策略"
+      "enum": ["cherry-pick", "patch-sync", "idea-copy", "config-align", "auto-inherit", "skip"]
     },
-    "migration_steps": {
-      "type": "array",
-      "items": { "type": "string", "minLength": 5 },
-      "minItems": 1,
-      "description": "可执行步骤列表，当method≠skip时至少1项，每步含具体文件/模块/验证方法"
-    },
-    "patch_conflict": { "type": "boolean", "description": "是否与Ascend patch冲突（基于patch_impact_map判定）" },
-    "patch_conflict_detail": { "type": "string", "description": "冲突详情，conflict=true时必填，列出命中的patch路径" },
-    "patch_matched_keys": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "命中的patch_impact_map的key列表（如 vllm.v1.worker.gpu_model_runner）"
-    },
+    "migration_steps": { "type": "array", "items": { "type": "string", "minLength": 5 }, "minItems": 1 },
+    "patch_conflict": { "type": "boolean" },
+    "patch_conflict_detail": { "type": "string" },
+    "patch_matched_keys": { "type": "array", "items": { "type": "string" } },
 
-    "priority": {
-      "type": "string",
-      "enum": ["P0", "P1", "P2", "P3", "skip"],
-      "description": "优先级"
-    },
-    "priority_reason": { "type": "string", "maxLength": 60, "description": "优先级判定理由" },
-    "effort_estimate": { "type": "string", "enum": ["S", "M", "L"], "description": "工作量：S=≤1天 M=1-3天 L=>3天" },
-    "risk_level": { "type": "string", "enum": ["high-risk", "medium-risk", "low-risk"], "description": "风险等级" },
+    "priority": { "type": "string", "enum": ["P0", "P1", "P2", "P3", "skip"] },
+    "priority_reason": { "type": "string", "maxLength": 80 },
+    "effort_estimate": { "type": "string", "enum": ["S", "M", "L", "XL"] },
+    "risk_level": { "type": "string", "enum": ["high-risk", "medium-risk", "low-risk"] },
 
-    "test_verification": {
-      "type": "array",
-      "items": { "type": "string", "minLength": 5 },
-      "minItems": 1,
-      "description": "需验证的测试场景，priority≤P2时必填"
-    },
-
-    "status": {
-      "type": "string",
-      "enum": ["pending", "in-progress", "done", "skipped", "blocked"],
-      "description": "落地状态"
-    },
-    "assignee": { "type": "string", "default": "", "description": "负责人" },
-    "key_files": { "type": "string", "description": "关键文件路径，逗号分隔（表格展示用）" },
+    "test_verification": { "type": "array", "items": { "type": "string", "minLength": 5 }, "minItems": 1 },
+    "status": { "type": "string", "enum": ["pending", "in-progress", "done", "skipped", "blocked"] },
+    "assignee": { "type": "string", "default": "" },
+    "key_files": { "type": "string" },
 
     "related_prs": {
       "type": "array",
@@ -136,56 +91,20 @@
           "relation": { "type": "string", "enum": ["depends-on", "reverts", "follows-up", "supersedes"] }
         },
         "required": ["pr_number", "relation"]
-      },
-      "description": "关联PR列表"
+      }
     },
-    "blocking_issues": {
-      "type": "array",
-      "items": { "type": "string" },
-      "description": "阻塞问题（如等待Ascend算子支持、依赖其他PR合入）"
-    },
-
-    "review_notes": {
-      "type": ["string", "null"],
-      "description": "人工复核反馈（P0必填，P1建议填）"
-    },
-    "low_confidence": { "type": "boolean", "default": false, "description": "AI标记的低置信度记录" },
-    "confidence_reason": {
-      "type": ["string", "null"],
-      "description": "低置信度原因（如上下文不足、跨模块影响难判断），low_confidence=true时必填"
-    }
+    "blocking_issues": { "type": "array", "items": { "type": "string" } },
+    "review_notes": { "type": ["string", "null"] },
+    "low_confidence": { "type": "boolean", "default": false },
+    "confidence_reason": { "type": ["string", "null"] }
   },
 
   "allOf": [
-    {
-      "if": { "properties": { "migration_method": { "not": { "const": "skip" } } } },
-      "then": { "required": ["migration_steps"] }
-    },
-    {
-      "if": { "properties": { "patch_conflict": { "const": true } } },
-      "then": { "required": ["patch_conflict_detail"] }
-    },
-    {
-      "if": { "properties": { "priority": { "enum": ["P0", "P1", "P2"] } } },
-      "then": { "required": ["test_verification"] }
-    },
-    {
-      "if": { "properties": { "migration_method": { "const": "skip" } } },
-      "then": {
-        "properties": {
-          "ascend_value_reason": { "minLength": 1 },
-          "ascend_value": { "const": "none" },
-          "priority": { "const": "skip" }
-        }
-      }
-    },
-    {
-      "if": { "properties": { "low_confidence": { "const": true } } },
-      "then": { "required": ["confidence_reason"] }
-    },
-    {
-      "if": { "properties": { "priority": { "const": "P0" } } },
-      "then": { "required": ["review_notes"] }
-    }
+    { "if": { "properties": { "migration_method": { "not": { "const": "skip" } } } }, "then": { "required": ["migration_steps"] } },
+    { "if": { "properties": { "patch_conflict": { "const": true } } }, "then": { "required": ["patch_conflict_detail"] } },
+    { "if": { "properties": { "priority": { "enum": ["P0", "P1", "P2"] } } }, "then": { "required": ["test_verification"] } },
+    { "if": { "properties": { "migration_method": { "const": "skip" } } }, "then": { "properties": { "ascend_value_reason": { "minLength": 1 }, "ascend_value": { "const": "none" }, "priority": { "const": "skip" }, "target_ascend_module": { "const": "none" } } } },
+    { "if": { "properties": { "low_confidence": { "const": true } } }, "then": { "required": ["confidence_reason"] } },
+    { "if": { "properties": { "priority": { "const": "P0" } } }, "then": { "required": ["review_notes"] } }
   ]
 }

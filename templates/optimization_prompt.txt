@@ -25,7 +25,14 @@
 
 ---
 
-## 分析流程（每个 commit 必须遵循）
+## 分析流程（每个 commit 必须严格遵循以下 12 个步骤）
+
+### 步骤 0：思维链推导 (CoT)
+在生成其他字段前，必须在 `_thought_process` 字段中进行逻辑推导：
+1. 变更的业务本质是什么？
+2. `affected_files` 是否命中 Patch 映射或影响判定规则？
+3. 变更逻辑在 Ascend 侧是否有独立实现（如 C++ 算子）或可以直接复用？
+4. 推导最终的 `ascend_value`、`migration_method` 和 `priority`。
 
 ### 步骤 1：提取基础字段
 1. `sha`：full_sha 前 8 位
@@ -41,9 +48,8 @@
 11. `labels`：从 commit message 或 PR 标签推断（如 [Bugfix]、[Performance]），无则空数组
 
 ### 步骤 2：提取 affected_files
-- 从 commits 数据的 `files[].filename` 提取所有变更文件路径
-- 若 commit 无 files 字段，从 message 的 diff stat 提取
-- 若完全无法提取，affected_files 填 `["<unknown>"]`，low_confidence=true
+- 从 commits 数据的 `files[].filename` 提取所有变更文件路径。
+- 若完全无法提取，affected_files 填 `["<unknown>"]`，low_confidence=true。
 
 ### 步骤 3：判定 category
 按 affected_files 路径匹配（取第一个命中项）：
@@ -62,28 +68,28 @@
 - `vllm/v1/core/sched/` → scheduler
 - `tests/`, `.buildkite/` → test-ci
 - 其他 → other
+*(跨模块 commit：取影响最大的模块，优先 core-engine > attention-kv-cache > distributed)*
 
-跨模块 commit：取影响最大的模块（优先 core-engine > attention-kv-cache > distributed > 其他）
+### 步骤 4：判定 target_ascend_module
+将上游的修改映射到 `vllm-ascend` 中应该进行适配的具体模块：
+- 若为纯 Python 补丁拦截 → `python-adapter`
+- 若涉及注意力机制算子 → `csrc/attention`
+- 若涉及 MoE 算子 → `csrc/moe`
+- 若涉及矩阵乘法/量化算子 → `csrc/gmm` 或 `csrc/quantization`
+- 若涉及通信或图模式 → `fallback_comm` 或 `csrc/aclnn_torch_adapter`
+- 若无需修改或 skip → `none`
 
-### 步骤 4：判定 ascend_value（必须引用架构上下文）
-1. 检查 affected_files 是否命中 patch_impact_map 的任一 key
-   - 命中 → patch_conflict=true, patch_matched_keys 填入命中的 key, ascend_value ≥ medium
-2. 检查是否属于 definitely_affected_paths
-   - 命中 → ascend_value=high 或 medium（视变更范围）
-3. 检查是否属于 potentially_affected_paths
-   - 命中 → 结合变更内容判断，ascend_value=medium 或 low
-4. 检查是否属于 never_affected_paths 或纯平台特化代码（csrc/, flashinfer, rocm, cuda）
-   - 命中 → ascend_value=none, migration_method=skip
-5. 公共路径（gpu_model_runner.py 等）但未命中 patch_impact_map
-   - ascend_value 视变更内容, patch_conflict=false
+### 步骤 5：判定 ascend_value（必须引用架构上下文）
+1. 检查 affected_files 是否命中 patch_impact_map 的任一 key → 命中则 patch_conflict=true, patch_matched_keys 填入, ascend_value ≥ medium。
+2. 检查是否属于 definitely_affected_paths → ascend_value=high/medium。
+3. 检查是否属于 potentially_affected_paths → 结合内容判断，ascend_value=medium/low。
+4. 检查 never_affected_paths 或纯平台特化（csrc/, flashinfer, rocm, cuda）→ ascend_value=none, migration_method=skip。
+5. 公共路径但未命中 patch → patch_conflict=false，价值视内容定。
 
-### 步骤 5：判定 change_type
-- bugfix：message 含 fix, bug, crash, error, wrong, broken, regression
-- performance：message 含 perf, optimize, speedup, faster, reduce overhead
-- feature：message 含 add, support, implement, introduce
-- refactor：message 含 refactor, cleanup, rename, reorganize
+### 步骤 6：判定 change_type
+- bugfix / performance / feature / refactor（根据 message 关键字判断）。
 
-### 步骤 6：判定 priority（严格遵循矩阵）
+### 步骤 7：判定 priority（严格遵循矩阵）
 | 条件 | 优先级 |
 |------|--------|
 | ascend_value=high 且 patch_conflict=true | P0 |
@@ -94,287 +100,31 @@
 | ascend_value=low | P3 |
 | ascend_value=none | skip |
 
-### 步骤 7：选择 migration_method
-- `cherry-pick`：公共路径，Ascend 无 patch 覆盖（patch_conflict=false）
-- `patch-sync`：Ascend 通过 patch 覆盖的路径（patch_conflict=true）
-- `idea-copy`：平台特化但思路通用，需用 Ascend 算子重写
-- `config-align`：配置默认值/新增参数/API 调整
-- `auto-inherit`：父类方法，未被 patch 覆盖（如 NPUModelRunner 继承 GPUModelRunner）
-- `skip`：CUDA/ROCm 专用，Ascend 无对应场景（ascend_value=none）
+### 步骤 8：选择 migration_method
+- `cherry-pick`：公共路径，Ascend 无 patch 覆盖。
+- `patch-sync`：Ascend 通过 patch 覆盖的路径。
+- `idea-copy`：平台特化但思路通用，需重写 Ascend 算子。
+- `config-align`：配置/接口对齐。
+- `auto-inherit`：父类方法，未被 patch 覆盖。
+- `skip`：无对应场景。
 
-### 步骤 8：生成 migration_steps（method ≠ skip 时必填，≥1 项）
-每步必须可执行，包含具体文件/模块/验证方法。示例：
-- ✅ "确认 NPUModelRunner 未覆盖 gpu_model_runner.py 的 _load_model 方法"
-- ✅ "在 vllm_ascend/tests/ 添加 level-2 sleep/wake + LoRA 回归测试"
-- ❌ "检查相关代码"（过于模糊）
+### 步骤 9：生成 migration_steps（method ≠ skip 时必填，≥1 项）
+每步必须可执行，包含具体文件/模块/验证方法。
 
-### 步骤 9：生成 test_verification（priority ≤ P2 时必填，≥1 项）
-列出需验证的测试场景。示例：
-- "Ascend level-2 sleep/wake + LoRA 状态恢复验证"
-- "NPUModelRunner 多卡分布式 sleep/wake 回归"
+### 步骤 10：生成 test_verification（priority ≤ P2 时必填，≥1 项）
+列出需验证的测试场景。
 
-### 步骤 10：填写 ascend_impact_ref（如 analysis 数据存在）
-引用 analyze_commits 的 ascend_impact 判定：
-```json
-{
-  "ascend_affected": true/false,
-  "functionality": "<来自 analysis 的 functionality 字段>",
-  "source": "<analysis 文件日期，如 2026-08-06>"
-}
-```
+### 步骤 11：填写 ascend_impact_ref
+引用 analyze_commits 的判定。若无则填 null。
 
 ---
 
-## 文本约束
-
-### R1：语言规范
-- `optimization_point`、`ascend_value_reason`、`priority_reason`、`migration_steps`、`test_verification`：中文
-- `title`、`category`、`change_type`、`migration_method`、`priority`、`status` 等枚举：英文
-- `review_notes`、`confidence_reason`：中文
-
-### R2：文本长度
-- `optimization_point` ≤100 字，格式：动词+对象+效果（如"修复 sleep/wake 与 LoRA 的状态一致性"）
-- `ascend_value_reason` ≤80 字，必须引用架构上下文（如"gpu_model_runner.py 是 NPUModelRunner 父类"）
-- `priority_reason` ≤60 字
-
-### R3：禁止模糊词
-严禁使用"可能""也许""不确定""大概""也许会"。不确定时设 low_confidence=true 并填写 confidence_reason。
-
-### R4：skip 规则
-- migration_method=skip 时，ascend_value_reason 必须给出跳过理由
-- 跳过理由类型：CUDA 专用 / ROCm 专用 / 无对应场景 / 平台特化代码
-
-### R5：patch_conflict_detail
-- patch_conflict=true 时必填，列出命中的 patch 路径
-- 示例："命中 vllm.v1.worker.gpu_model_runner → vllm_ascend.patch.worker.block_table_patch"
-
----
-
-## 边界情况处理
-
-### B1：Merge commit
-- 含 "Merge" 前缀的 commit：跳过分析，migration_method=skip, ascend_value=none
-- ascend_value_reason 填 "Merge commit，无实质代码变更"
-
-### B2：无 affected_files
-- affected_files 填 `["<unknown>"]`
-- low_confidence=true
-- confidence_reason 填 "commit 无文件变更信息"
-
-### B3：跨模块 commit（affected_files 跨多个 category）
-- category 取影响最大的模块
-- ascend_value 取最高值
-- patch_conflict 只要任一文件命中即为 true
-
-### B4：文档/CI commit（误入）
-- 若 affected_files 全为 *.md, docs/, .buildkite/, *.yml
-- migration_method=skip, ascend_value=none
-- ascend_value_reason 填 "纯文档/CI 变更，无代码影响"
-
-### B5：vllm-ascend 仓库的 commit
-- repo=vllm-project/vllm-ascend 时，ascend_value 固定为 high
-- migration_method 固定为 auto-inherit 或 cherry-pick
-
-### B6：重复 commit
-- 同一 full_sha 只输出一条记录
-- 同一 PR 的多个 commit：合并为一条，affected_files 取并集
-
----
-
-## Few-shot 示例
-
-### 示例 1：cherry-pick（公共路径，无 patch 冲突）
-```json
-{
-  "sha": "b50fdebc",
-  "full_sha": "b50fdebcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "date": "2026-08-06",
-  "repo": "vllm-project/vllm",
-  "title": "[Bugfix] Fix level-2 sleep/wake with enable_lora=True",
-  "pr_number": "39935",
-  "pr_url": "https://github.com/vllm-project/vllm/pull/39935",
-  "commit_url": "https://github.com/vllm-project/vllm/commit/b50fdebcxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "upstream_status": "merged",
-  "merged_at": "2026-08-06T10:00:00Z",
-  "author": { "name": "John Doe", "email": "john@example.com" },
-  "labels": ["bug", "lora"],
-  "category": "core-engine",
-  "change_type": "bugfix",
-  "optimization_point": "修复 level-2 sleep/wake 与 LoRA 的状态一致性",
-  "affected_files": ["vllm/v1/worker/gpu_model_runner.py"],
-  "ascend_value": "high",
-  "ascend_value_reason": "gpu_model_runner.py 是 NPUModelRunner 父类，修改自动传递",
-  "ascend_impact_ref": { "ascend_affected": true, "functionality": "影响 sleep/wake 状态管理", "source": "2026-08-06" },
-  "migration_method": "cherry-pick",
-  "migration_steps": [
-    "确认 NPUModelRunner 未覆盖被修改的 sleep/wake 方法",
-    "验证 SleepWakeupManager 与 LoRA 协同",
-    "添加 sleep/wake + LoRA 回归测试"
-  ],
-  "patch_conflict": false,
-  "patch_conflict_detail": "",
-  "patch_matched_keys": [],
-  "priority": "P0",
-  "priority_reason": "ascend_value=high 且 change_type=bugfix",
-  "effort_estimate": "M",
-  "risk_level": "high-risk",
-  "test_verification": ["Ascend level-2 sleep/wake + LoRA 验证"],
-  "status": "pending",
-  "assignee": "",
-  "key_files": "vllm/v1/worker/gpu_model_runner.py",
-  "related_prs": [],
-  "blocking_issues": [],
-  "review_notes": null,
-  "low_confidence": false,
-  "confidence_reason": null
-}
-```
-
-### 示例 2：patch-sync（命中 patch_impact_map）
-```json
-{
-  "sha": "a1b2c3d4",
-  "full_sha": "a1b2c3d4xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "date": "2026-08-05",
-  "repo": "vllm-project/vllm",
-  "title": "[Performance] Optimize distributed all-reduce for large tensors",
-  "pr_number": "39900",
-  "pr_url": "https://github.com/vllm-project/vllm/pull/39900",
-  "commit_url": "https://github.com/vllm-project/vllm/commit/a1b2c3d4xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "upstream_status": "merged",
-  "merged_at": "2026-08-05T14:00:00Z",
-  "author": { "name": "Jane Smith", "email": "jane@example.com" },
-  "labels": ["perf", "distributed"],
-  "category": "distributed",
-  "change_type": "performance",
-  "optimization_point": "优化大张量 all-reduce 通信效率",
-  "affected_files": ["vllm/distributed/parallel_state.py"],
-  "ascend_value": "high",
-  "ascend_value_reason": "命中 patch_impact_map: vllm.distributed.parallel_state",
-  "ascend_impact_ref": { "ascend_affected": true, "functionality": "影响分布式通信", "source": "2026-08-05" },
-  "migration_method": "patch-sync",
-  "migration_steps": [
-    "对比 distributed_parallel_state_patch 与上游变更差异",
-    "将优化逻辑移植到 Ascend 的 HCCL all-reduce 实现",
-    "在 Ascend 多卡环境验证大张量通信性能"
-  ],
-  "patch_conflict": true,
-  "patch_conflict_detail": "命中 vllm.distributed.parallel_state → vllm_ascend.patch.platform.distributed_parallel_state_patch",
-  "patch_matched_keys": ["vllm.distributed.parallel_state"],
-  "priority": "P0",
-  "priority_reason": "ascend_value=high 且 patch_conflict=true",
-  "effort_estimate": "L",
-  "risk_level": "high-risk",
-  "test_verification": ["Ascend 8卡 all-reduce 性能基准测试"],
-  "status": "pending",
-  "assignee": "",
-  "key_files": "vllm/distributed/parallel_state.py",
-  "related_prs": [],
-  "blocking_issues": ["依赖 HCCL 算子支持大张量分片"],
-  "review_notes": null,
-  "low_confidence": false,
-  "confidence_reason": null
-}
-```
-
-### 示例 3：skip（CUDA 专用）
-```json
-{
-  "sha": "e5f6g7h8",
-  "full_sha": "e5f6g7h8xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "date": "2026-08-04",
-  "repo": "vllm-project/vllm",
-  "title": "[Feature] Add FlashInfer attention backend",
-  "pr_number": "39850",
-  "pr_url": "https://github.com/vllm-project/vllm/pull/39850",
-  "commit_url": "https://github.com/vllm-project/vllm/commit/e5f6g7h8xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-  "upstream_status": "merged",
-  "merged_at": "2026-08-04T09:00:00Z",
-  "author": { "name": "Bob Lee", "email": "bob@example.com" },
-  "labels": ["feature", "attention"],
-  "category": "attention-kv-cache",
-  "change_type": "feature",
-  "optimization_point": "新增 FlashInfer attention 后端支持",
-  "affected_files": ["vllm/v1/attention/backends/flashinfer.py"],
-  "ascend_value": "none",
-  "ascend_value_reason": "FlashInfer 为 CUDA 专用库，Ascend 无对应实现",
-  "ascend_impact_ref": null,
-  "migration_method": "skip",
-  "migration_steps": [],
-  "patch_conflict": false,
-  "patch_conflict_detail": "",
-  "patch_matched_keys": [],
-  "priority": "skip",
-  "priority_reason": "ascend_value=none",
-  "effort_estimate": "S",
-  "risk_level": "low-risk",
-  "test_verification": [],
-  "status": "skipped",
-  "assignee": "",
-  "key_files": "vllm/v1/attention/backends/flashinfer.py",
-  "related_prs": [],
-  "blocking_issues": [],
-  "review_notes": null,
-  "low_confidence": false,
-  "confidence_reason": null
-}
-```
-
----
+## 文本约束与边界情况
+- **禁止模糊词**：严禁使用"可能""也许"。不确定时设 low_confidence=true 并填写 confidence_reason。
+- **Merge commit**：跳过，ascend_value=none。
+- **无 affected_files**：设为 `<unknown>` 且 low_confidence=true。
+- **文档/CI**：跳过，ascend_value=none。
+- **语言**：描述性字段使用中文，枚举字段使用英文。
 
 ## 输出格式
-
-严格输出以下 JSON，不要输出任何其他内容（无注释、无 markdown 代码块标记、无前后缀文本）：
-```json
-{{
-  "period": "{period}",
-  "generated_at": "{generated_at}",
-  "total_commits": {total_count},
-  "analyzed_commits": <实际分析数>,
-  "skipped_commits": <skip的数量>,
-  "summary": {{
-    "P0": <数量>, "P1": <数量>, "P2": <数量>, "P3": <数量>, "skip": <数量>
-  }},
-  "records": [
-    {{
-      "sha": "<8位>",
-      "full_sha": "<40位>",
-      "date": "YYYY-MM-DD",
-      "repo": "{repo}",
-      "title": "<首行message>",
-      "pr_number": "<PR号或null>",
-      "pr_url": "<PR链接或null>",
-      "commit_url": "https://github.com/{repo}/commit/<full_sha>",
-      "upstream_status": "merged",
-      "merged_at": "<ISO8601或null>",
-      "author": {{ "name": "<作者>", "email": "<邮箱>" }},
-      "labels": ["<标签>"],
-      "category": "<枚举值>",
-      "change_type": "<bugfix|performance|feature|refactor>",
-      "optimization_point": "<≤100字中文>",
-      "affected_files": ["<path1>"],
-      "ascend_value": "<high|medium|low|none>",
-      "ascend_value_reason": "<≤80字中文，基于架构上下文>",
-      "ascend_impact_ref": {{ "ascend_affected": <bool>, "functionality": "<描述>", "source": "<日期>" }},
-      "migration_method": "<枚举值>",
-      "migration_steps": ["<可执行步骤>"],
-      "patch_conflict": <true|false>,
-      "patch_conflict_detail": "<冲突详情或空>",
-      "patch_matched_keys": ["<命中的key>"],
-      "priority": "<P0|P1|P2|P3|skip>",
-      "priority_reason": "<≤60字中文>",
-      "effort_estimate": "<S|M|L>",
-      "risk_level": "<high-risk|medium-risk|low-risk>",
-      "test_verification": ["<验证场景>"],
-      "status": "pending",
-      "assignee": "",
-      "key_files": "<逗号分隔关键文件>",
-      "related_prs": [],
-      "blocking_issues": [],
-      "review_notes": null,
-      "low_confidence": <false>,
-      "confidence_reason": null
-    }}
-  ]
-}}
-```
+严格输出完整 JSON，禁止附加 Markdown 解释。
